@@ -1,0 +1,5 @@
+# Python modules for speedup web development
+Werkzeug
+django-extensions
+ipdb
+ipython

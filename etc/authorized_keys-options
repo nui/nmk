@@ -1,0 +1,2 @@
+# dash, bash, and zsh
+command="_T=$SSH_ORIGINAL_COMMAND;if test -n \"$_T\";then eval \"$_T\";elif test -d ~/.nmk;then . ~/.nmk/ssh-command.sh;else exec -l $(getent passwd $(id -nu)|cut -d: -f 7);fi"

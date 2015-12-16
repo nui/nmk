@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Change to $NMK_DIR
+cd $(dirname "$(readlink -f "$0")")
+
+mkdir local
+mkdir log
+mkdir vim/bundle
+mkdir zsh/zshrc.extra.d

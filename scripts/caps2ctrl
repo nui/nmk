@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Make CapsLock an additional Control key for virtual console
+
+set -e
+
+TIMESTAMP_FORMAT='%Y-%m-%dT%H%M%S'
+
+print_config() {
+    dumpkeys | head -1
+    echo 'keycode 58 = Control'
+}
+
+backup_original_config() {
+    local tag
+    local ts
+    ts=$(date +${TIMESTAMP_FORMAT})
+    outfile="/tmp/dumpkeys-${ts}"
+    echo "backup original configuration at ${outfile}"
+    dumpkeys > ${outfile}
+}
+
+_uid=$(id -u)
+if [ "$_uid" != 0 ]; then
+    >&2 echo 'This script need to run as root'
+    exit 1
+fi
+
+backup_original_config
+print_config | loadkeys

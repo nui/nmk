@@ -1,0 +1,77 @@
+#!/usr/bin/python
+
+from subprocess import check_output
+import re
+
+version_matcher = re.compile('linux-image-(\d+[\d.-]+\d+).*')
+
+
+def get_kernel_version(package):
+    m = version_matcher.match(package)
+    if m:
+        version = m.groups()[0]
+    else:
+        version = None
+    return version
+
+
+def init():
+    cmd = 'dpkg --get-selections | grep "\sinstall" | grep "^linux" | cut -f 1'
+    packages = check_output(cmd, shell=True).splitlines()
+    kernel_versions = set()
+    for p in packages:
+        v = get_kernel_version(p)
+        if v:
+            kernel_versions.add(v)
+    kernel_packages = set()
+    for p in packages:
+        for v in kernel_versions:
+            if v in p:
+                kernel_packages.add(p)
+    return frozenset(kernel_versions), frozenset(kernel_packages)
+
+
+KERNEL_VERSIONS, KERNEL_PACKAGES = init()
+
+
+def select_version(version_set):
+    d = {k: v for k, v in enumerate(sorted(list(version_set), reverse=True), start=1)}
+    for i, v in d.iteritems():
+        print "({}) {}".format(i, v)
+    ch = raw_input('Select version to keep by number[1]: ') or '1'
+    return d.get(int(ch))
+
+
+def get_keep_remove_list(version, packages):
+    keep = set()
+    remove = set()
+    for p in packages:
+        if version in p:
+            keep.add(p)
+        else:
+            remove.add(p)
+    return keep, remove
+
+
+def print_command(keep, remove):
+    print 'Keep these packages:'
+    for p in keep:
+        print '  ', p
+    print 'Remove these packages:'
+    for p in remove:
+        print '  ', p
+    print '\nGenerated command'
+    print 'sudo apt-get -y remove {}'.format(' '.join(remove))
+
+
+def main():
+    if len(KERNEL_VERSIONS) == 1:
+        print 'You have only one kernel version'
+        exit(1)
+    selected_version = select_version(KERNEL_VERSIONS)
+    keep, remove = get_keep_remove_list(selected_version, KERNEL_PACKAGES)
+    print_command(keep, remove)
+
+
+if __name__ == '__main__':
+    main()

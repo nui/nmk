@@ -1,0 +1,107 @@
+# tmux {{ version }} configuration
+{# For tmux >= 1.8 #}
+
+{% set has_custom_keytable = version >= 2.1 %}
+{% set function_keys = range(1, 1 + 12) %}
+
+{# ---- FUNCTION KEYS BINDING ---- #}
+bind-key -n F1 select-pane -t :.+ \; display-panes
+bind-key -n F2 last-window
+bind-key -n F3 previous-window
+bind-key -n F4 next-window
+bind-key -n F5 resize-pane -Z
+
+{% if has_custom_keytable %}
+bind-key -n F11 switch-client -T fxtable
+bind-key -T fxtable -r Space next-layout
+bind-key -T fxtable 1 select-layout even-horizontal
+bind-key -T fxtable 2 select-layout even-vertical
+bind-key -T fxtable 3 select-layout main-horizontal
+bind-key -T fxtable 4 select-layout main-vertical
+bind-key -T fxtable 5 select-layout tiled
+{% endif %}
+
+bind-key -n F12 detach-client
+
+{# -- Use Shift-Fx or <prefix> Fx to send Fx key -- #}
+{% for i in function_keys %}
+bind-key    F{{i}}   send-keys F{{i}}
+bind-key -n S-F{{i}} send-keys F{{i}}
+{% endfor %}
+
+unbind-key  C-b
+bind-key -r C-b send-prefix
+bind-key -r b   select-pane -t :.+ \; display-panes
+bind-key    C-c command-prompt
+
+{# -- Override tmux default -- #}
+set-option -g default-shell "$NMK_TMUX_DEFAULT_SHELL"
+set-option -g default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
+set-option -g detach-on-destroy "$NMK_TMUX_DETACH_ON_DESTROY"
+set-option -g display-time 1200
+set-option -g history-limit 4000
+set-option -g status-keys emacs
+set-option -g status-right-length 60
+set-window-option -g mode-keys vi
+
+{# -- Copy to system clipboard using copy-pipe -- #}
+if-shell 'xclip -o > /dev/null 2>&1' 'bind-key -t vi-copy y copy-pipe "xclip -selection clipboard"'
+
+{# -- Status format argument changed on tmux 1.9 -- #}
+{% if version >= 1.9 %}
+set-option -g status-right "#{?client_prefix,PREFIX ,}'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d"
+{% else %}
+set-option -g status-right "#{?client_prefix,PREFIX ,}'#[fg=colour51]#40T#[default]' %H:%M %Z %a, %d"
+{% endif %}
+
+{# -- Keep new-window and split-window with current/working directory behavior same as 1.8 -- #}
+{% if version >= 1.9 %}
+unbind-key '"'; bind-key '"' split-window -c "#{pane_current_path}"
+unbind-key %; bind-key % split-window -h -c "#{pane_current_path}"
+unbind-key c; bind-key c new-window -c "#{pane_current_path}"
+{% endif %}
+
+{# -- Reset terminal state and clear pane history -- #}
+{% if version >= 2.0 %} {# 'if-shell' command understands formats via -F in tmux 2.0 #}
+{# No effect if alternate screen is on #}
+bind-key C-l if-shell -F "#{alternate_on}" "send-keys C-l" "send-keys -R C-l; clear-history"
+{% else %}
+bind-key C-l send-keys -R C-l\; clear-history
+{% endif %}
+
+{# ---- COPY-MODE BINDING ---- #}
+{# -- C-u to enter copy-mode -- #}
+bind-key    C-u copy-mode -u
+
+{# -- halfpage-up and halfpage-down -- #}
+unbind-key -t vi-copy PageUp
+bind-key -t vi-copy PageUp halfpage-up
+unbind-key -t vi-copy PageDown
+bind-key -t vi-copy PageDown halfpage-down
+
+{# -- Fix mouse scrolling in 2.1 and later -- #}
+{# Credit https://github.com/tmux/tmux/issues/145 #}
+{% if version >= 2.1 %}
+bind-key -T root WheelUpPane if-shell -Ft= "#{mouse_any_flag}" "send-keys -M" "if-shell -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
+{% endif %}
+
+{# -- Enter copy mode by PageUp key during zsh prompt -- #}
+{# Credit https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/ #}
+{% if version >= 2.2 %} {# #{s:...} added in tmux 2.2 #}
+bind-key -T root PageUp if-shell -F "#{s/zsh//:pane_current_command}#{pane_in_mode}" "send-keys PageUp" "copy-mode -eu"
+{% elif version == 2.1 %} {# Multiple key tabels added in tmux 2.1 #}
+bind-key -T root PageUp if-shell -F "#{alternate_on}" "send-keys PageUp" "copy-mode -eu"
+{% endif %}
+
+{# -- Don't send PageDown key while on zsh prompt -- #}
+{% if version >= 2.2 %} {# #{s:...} added in tmux 2.2 #}
+bind-key -T root PageDown if-shell -F "#{s/zsh//:pane_current_command}#{pane_in_mode}" "send-keys PageDown"
+{% endif %}
+
+{# -- Colors -- #}
+if-shell 'zsh -c "[[ $NMK_TMUX_256_COLOR == 1 ]]"' 'source-file $NMK_DIR/tmux/256color.conf' 'source-file $NMK_DIR/tmux/8color.conf'
+
+{# -- Unset temporary environment variables that were used during tmux initialization -- #}
+{% for env in tmux_tmp_envs %}
+set-environment -gr {{ env }}
+{% endfor %}

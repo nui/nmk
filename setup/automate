@@ -1,0 +1,43 @@
+#!/usr/bin/env zsh
+
+set -e
+
+# parse options {{{
+usage() {
+    cat <<- 'EOU'
+		Usage: automate [options] [base directory]
+
+		Options
+		  -r REPO     -- clone from REPO
+		  -h          -- print this help message
+	EOU
+}
+
+if ! _TEMP=$(getopt -o hr: -- "$@"); then
+    # exit if error
+    usage
+    exit 1
+fi
+
+eval set -- $_TEMP
+
+_GITHUB_REPO='https://github.com/nuimk/nmk.git'
+_REPO=$_GITHUB_REPO
+
+while true; do
+    case $1 in
+        -r ) _REPO=$2; shift 2 ;;
+        -h ) usage; exit 0 ;;
+        -- ) shift; break ;;
+    esac
+done
+# }}}
+
+_NMK_DIR=${${1:-$HOME/.nmk}:A}
+
+git clone --quiet --recursive $_REPO $_NMK_DIR
+cd $_NMK_DIR
+git remote set-url origin $_GITHUB_REPO
+./post-clone
+NMK_DIR=$_NMK_DIR ./vim/update-plugins
+
