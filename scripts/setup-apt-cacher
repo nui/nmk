@@ -1,0 +1,20 @@
+#!/usr/bin/env zsh
+
+set -e
+
+DATA_NAME="apt-cacher-data"
+DOCKER_HOST="0.0.0.0"
+IMAGE="clue/apt-cacher"
+NAME="apt-cacher"
+
+# sudo if user is not member of docker group
+[[ ${$(id -Gn)[(r)docker]} == docker ]] && _DOCKER=docker || _DOCKER=(sudo docker)
+
+$_DOCKER rm -f $NAME || true
+# data container exist
+if $_DOCKER inspect $DATA_NAME &> /dev/null; then
+    $_DOCKER run -d --volumes-from=$DATA_NAME --restart=always -p $DOCKER_HOST:3142:3142 --name $NAME $IMAGE
+else
+    $_DOCKER run -d --restart=always -p $DOCKER_HOST:3142:3142 --name $NAME $IMAGE
+    $_DOCKER run --volumes-from=$NAME --name $DATA_NAME tianon/true
+fi

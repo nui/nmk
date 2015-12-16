@@ -1,0 +1,97 @@
+#!/usr/bin/env zsh
+set -e
+
+setopt pushdsilent
+zmodload zsh/datetime
+
+# fix $HOME
+() {
+    if [[ $NMK_AUTO_CORRECT_HOME != false ]]; then
+        local user_id=$(id -u)
+        local expected_home=$(eval print -- "~$(id -un)")
+        # if HOME is set and it is directory
+        if [[ -d $HOME ]]; then
+            local home_owner_id=$(stat -c '%u' $HOME)
+            if ((user_id!=home_owner_id)); then
+                export HOME=$expected_home
+            fi
+        else # $HOME is unset
+            export HOME=$expected_home
+        fi
+    fi
+}
+
+# default nmk directory
+export NMK_DIR=${NMK_DIR:-"$HOME/.nmk"}
+# this variable will be modified by setup script
+_ARCHIVE=
+
+is_installed() {
+    [[ -d $HOME && -d $NMK_DIR ]]
+}
+
+is_online() {
+    if type -p wget &>/dev/null; then
+        wget -q --tries=2 --timeout=3 --spider http://google.com
+    else
+        git ls-remote --exit-code 'https://github.com/nuimk/nmk.git' &>/dev/null
+    fi
+}
+
+fix_submodule() {
+    local -a submodules
+    submodules=(
+        zsh/plugins/docker-zsh-completion
+        zsh/plugins/zsh-completions
+        zsh/plugins/zsh-syntax-highlighting
+    )
+    for submodule in $submodules; do
+        sed -i "s#worktree = /tmp/tmp\.[[:alnum:]]\+#worktree = ../../../../..#g" .git/modules/$submodule/config
+        rm -rf $submodule
+    done
+    git submodule update --init --recursive --force
+}
+
+need_submodule_fix() {
+    grep -q 'VERSION_ID="12.04"' /etc/os-release
+}
+
+should_update() {
+    integer last_update_epoch
+    integer seconds_since_last_update
+    local timestamp_file="$NMK_DIR/.last-update-epoch-seconds"
+    if [[ -e $timestamp_file ]]; then
+        last_update_epoch=$(<$timestamp_file)
+        seconds_since_last_update=$((EPOCHSECONDS - last_update_epoch))
+    fi
+    [[ ! -e $timestamp_file ]] || (( seconds_since_last_update > (3 * 24 * 60 * 60) ))
+}
+
+install() {
+    mkdir -p $NMK_DIR
+    tar --directory $NMK_DIR -xf $_ARCHIVE
+    if need_submodule_fix; then
+        (cd $NMK_DIR && fix_submodule)
+    fi
+    print -- "Installed NMK to $NMK_DIR"
+}
+
+try_update() {
+    if should_update && is_online; then
+        $NMK_DIR/scripts/automatic-update --prune-reflog
+    fi
+}
+
+if ! is_installed; then
+    install
+fi
+
+try_update
+
+# launch real nmk
+if type -p python2 &>/dev/null; then
+    exec "$NMK_DIR/bin/nmk" "$@"
+else
+    print -- 'Python2 not found, fallback to nmk.zsh'
+    exec "$NMK_DIR/bin/nmk.zsh" "$@"
+fi

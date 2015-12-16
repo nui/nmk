@@ -1,0 +1,23 @@
+# FORMAT
+# plugin_folder_name remote_repository
+
+ag.vim  https://github.com/rking/ag.vim.git
+ctrlp.vim  https://github.com/kien/ctrlp.vim.git
+dockerfile.vim  https://github.com/ekalinin/Dockerfile.vim.git
+jellybeans.vim  https://github.com/nanotech/jellybeans.vim.git
+nerdtree  https://github.com/scrooloose/nerdtree.git
+python-syntax  https://github.com/hdima/python-syntax.git
+syntastic  https://github.com/scrooloose/syntastic.git
+tagbar  https://github.com/majutsushi/tagbar.git
+tcomment_vim  https://github.com/tomtom/tcomment_vim.git
+vim-airline  https://github.com/bling/vim-airline.git
+vim-airline-themes https://github.com/vim-airline/vim-airline-themes.git
+vim-colors-solarized  https://github.com/altercation/vim-colors-solarized.git
+vim-dispatch  https://github.com/tpope/vim-dispatch.git
+vim-fugitive  https://github.com/tpope/vim-fugitive.git
+vim-go  https://github.com/fatih/vim-go.git
+vim-jinja  https://github.com/lepture/vim-jinja.git
+vim-multiple-cursors  https://github.com/terryma/vim-multiple-cursors.git
+vim-repeat  https://github.com/tpope/vim-repeat.git
+vim-surround  https://github.com/tpope/vim-surround.git
+vim-tomorrow-theme  https://github.com/chriskempson/vim-tomorrow-theme.git

@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "devDependencies": {
+    "async": "^1.5.2",
+    "babel-core": "^6.5.2",
+    "babel-preset-es2015": "^6.5.0",
+    "bluebird": "^3.3.1",
+    "chokidar": "^1.4.2",
+    "nunjucks": "^2.3.0",
+    "request-promise": "^2.0.0"
+  },
+  "scripts": {
+    "start": "babel-node tools/run watch",
+    "update": "babel-node tools/run update",
+    "watch": "babel-node tools/run watch"
+  }
+}

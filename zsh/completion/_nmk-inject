@@ -1,0 +1,32 @@
+#compdef nmk-inject
+
+__nmk-inject_docker_images () {
+    local expl
+    declare -a images
+    images=(${${${${(f)"$(_call_program commands docker images)"}[2,-1]}/ ##/\\:}%% *})
+    images=(${${images%\\:<none>}#<none>} ${${${(f)"$(_call_program commands docker images)"}[2,-1]}/(#b)([^ ]##) ##([^ ]##) ##([^ ]##)*/${match[3]}:${(r:15:: :::)match[2]} in ${match[1]}})
+    _describe -t docker-images "images" images
+}
+
+_nmk-inject() {
+    local curcontext="$curcontext" state line
+    typeset -A opt_args
+
+    _arguments -C\
+        '(-d --distro)'{-d,--distro}'[linux distro]:distro:(debian fedora ubuntu)'\
+        '(-p --proxy)'{-p,--proxy}'[use docker apt proxy]'\
+        '--proxy-uri[specify custom proxy, imply --proxy (-p)]:proxy_uri'\
+        '(-u --update)'{-u,--update}'[update debian package index]'\
+        '--keep-index-files[do not cleanup package index files]'\
+        '(-U --upgrade)'{-U,--upgrade}'[upgrade apt packages, imply --update (-u)]'\
+        '(-i --ignore)'{-i,--ignore}'[ignore package update errors]'\
+        '(-): :->image' && return
+
+    case $state in
+        (image)
+            __nmk-inject_docker_images
+            ;;
+    esac
+}
+
+_nmk-inject "$@"

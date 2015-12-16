@@ -1,0 +1,38 @@
+#!/usr/bin/env zsh
+
+# This script depends on NMK_DIR environment variable
+if [[ -z $NMK_DIR ]]; then
+    >&2 print -- 'NMK_DIR is unset'
+    exit 1
+fi
+
+# function {{{
+is_git_repo() {
+    [[ -d $1/.git ]]
+}
+# }}}
+
+if [[ -d $NMK_DIR ]]; then
+    _BUNDLE_DIR=$NMK_DIR/vim/bundle
+    # for each plugin url line
+    while read line; do
+        # ignore comment
+        if [[ $line =~ '^[[:space:]]*#' ]]; then continue; fi
+        if [[ $line =~ '^([[:graph:]]+)[[:space:]]+([[:graph:]]+\.git)$' ]]; then
+            _PLUGIN=${match[1]}
+            _PLUGIN_DIR=$_BUNDLE_DIR/$_PLUGIN
+            # Update if it is git repo
+            if is_git_repo $_PLUGIN_DIR; then
+                print -n -- "$_PLUGIN: "
+                (cd $_PLUGIN_DIR && git remote update --prune && git reset --hard origin/HEAD)
+            # Otherwise, clone it
+            else
+                rm -rf $_PLUGIN_DIR
+                print -- ">> Cloning $_PLUGIN"
+                git clone -q ${match[2]} $_PLUGIN_DIR
+            fi
+        fi
+    done < $NMK_DIR/vim/plugins
+else
+    >&2 print -- '$NMK_DIR is not a directory'
+fi

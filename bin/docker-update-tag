@@ -1,0 +1,73 @@
+#!/usr/bin/env zsh
+
+set -e
+
+setopt extendedglob
+
+# parse option {{{
+usage() {
+    cat <<- 'EOU'
+	Usage: docker-update-tag IMAGE
+
+	  Options
+	     -i, --interactive  select tags to update using checklist
+	     -d                 select none
+	     -h, --help         print this help message
+EOU
+}
+
+if ! TEMP=$(getopt -q -o hdi --long help,interactive -- "$@"); then
+    usage
+    exit 1
+fi
+
+eval set -- $TEMP
+
+_DEFAULT_STATUS=on
+_INTERACTIVE=0
+while true; do
+    case $1 in
+        -h | --help ) usage; exit 0 ;;
+        -d ) _DEFAULT_STATUS=off; shift ;;
+        -i | --interactive) _INTERACTIVE=1; shift ;;
+        -- ) shift; break ;;
+    esac
+done
+# }}}
+
+if [[ -z "$1" ]]; then
+    >&2 echo "Image is missing"
+    exit 1
+fi
+
+# sudo if user is not member of docker group
+[[ ${$(id -Gn)[(r)docker]} == docker ]] && _DOCKER=docker || _DOCKER=(sudo docker)
+
+typeset -a -U _IMAGES
+_IMAGES=(${${${(f)"$($_DOCKER images | grep "^$1")"}/ ##/:}%% *})
+if (($_INTERACTIVE)) && ((${#_IMAGES} > 0)) ; then
+    if ! type -p dialog &>/dev/null; then
+        >&2 echo 'Command not found: dialog'
+        exit 1
+    fi
+    _CHECKLIST_PARAMS=('Select tag to upgrade' $((7 + ${#_IMAGES})) $((COLUMNS - 4)) ${#_IMAGES})
+    for image in $_IMAGES; do
+        _CHECKLIST_PARAMS+=($image '' $_DEFAULT_STATUS)
+    done
+    # filter tag by dialog command
+    exec 3>&1 # Save the place that stdout (1) points to.
+    _IMAGES=($(2>&1 1>&3 dialog --separate-output --keep-tite --title 'Docker images' --checklist "${(@)_CHECKLIST_PARAMS}"))
+    exec 3>&- # Close FD #3.
+fi
+
+RUN() {
+    echo ">> ${(q)@:q}"
+    "$@"
+}
+
+echo 'Pull following images'
+print -l $_IMAGES
+
+for image in $_IMAGES; do
+    RUN $_DOCKER pull $image
+done

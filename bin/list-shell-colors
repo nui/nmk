@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+
+set -e
+
+if [[ $1 -gt 0 ]]; then
+    _COL=$1
+else
+    _COL=8
+fi
+
+for i in {0..255} ; do
+    printf "\x1b[38;5;${i}mcolour%03d " ${i}
+    if [[ $(( $i % _COL )) == $((_COL-1)) ]]; then
+        printf "\n"
+    fi
+done

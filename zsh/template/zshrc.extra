@@ -1,0 +1,2 @@
+# disable git integration in zsh prompt 
+# horizontal_show_git=0

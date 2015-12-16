@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -n "$*" ]; then
+    _TITLE="|$*| $(hostname)"
+else
+    _TITLE=$(hostname)
+fi
+printf '\033]2;%s\033\\' "$_TITLE"

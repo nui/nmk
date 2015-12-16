@@ -1,0 +1,22 @@
+set _LOGIN_SHELL = `getent passwd $USER | cut -d: -f 7`
+
+if ( $?NMK_DIR ) then
+    set nmk_script = $NMK_DIR/bin/nmk
+else
+    set nmk_script = ~/.nmk/bin/nmk
+endif
+
+test -x "$_LOGIN_SHELL"
+if ( $status == 1) then
+    test -x /bin/bash
+    if ( $status == 0 ) then
+        set _LOGIN_SHELL = /bin/bash
+    else
+        set _LOGIN_SHELL = /bin/sh
+    endif
+    exec env BYOBU_DISABLE=1 "$_LOGIN_SHELL" -l -c "exec $nmk_script"
+else
+    exec env BYOBU_DISABLE=1 "$_LOGIN_SHELL" -c "exec $nmk_script"
+endif
+
+# vi: ft=tcsh

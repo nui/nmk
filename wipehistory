@@ -1,0 +1,18 @@
+#!/usr/bin/env zsh
+
+cd ${0:A:h}
+
+files=(
+    log/automatic-update.log
+    vim/shada/main.shada
+    vim/viminfo
+    zsh/.zcompdump
+    zsh/.zsh_history
+)
+
+for file in $files; do
+    if [[ -f $file ]]; then
+        shred -n 30 -u $file
+        print -- "removed ${file:A}"
+    fi
+done

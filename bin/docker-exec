@@ -1,0 +1,78 @@
+#!/usr/bin/env zsh
+
+# docker exec wrapper
+# this script wrap around docker exec to make tmux work properly
+set -e
+
+_PROG=${0:t}
+
+# Parse options {{{
+usage() {
+    cat <<- EOU
+		Usage: $_PROG [options] CONTAINER [command] [args..]
+
+		options:
+		  -a, --alternate  set NMK_DIR to /tmp/$USER/nmk
+		  -n, --nmk        run NMK rather than interactive shell
+		  -s, --ssh        print ssh command and exit
+		  -u, --user       username or UID
+	EOU
+}
+
+if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o ahnsu: --long alternate,help,nmk,ssh,user: -- "$@"); then
+    # exit if error
+    usage
+    exit 1
+fi
+
+eval set -- $_TEMP
+
+_ALTERNATE=false
+_SSH=false
+_NMK=false
+_USER=
+while true; do
+    case $1 in
+        -a | --alternate ) _ALTERNATE=true; shift ;;
+        -s | --ssh ) _SSH=true; shift ;;
+        -n | --nmk ) _NMK=true; shift ;;
+        -u | --user ) _USER=(-u $2); shift 2 ;;
+        -h | --help ) usage; exit 0 ;;
+        -- ) shift; break ;;
+    esac
+done
+# }}}
+
+EXEC() {
+    print -- "${@:q:q}"
+    exec "$@"
+}
+
+_CONTAINER=${1:?Missing CONTAINER}
+shift 1
+
+_COMMANDS=()
+if (( $# == 0 )); then
+    if [[ $_NMK == true ]]; then
+        if [[ $_ALTERNATE == true ]]; then
+            _COMMANDS=(-c 'exec env NMK_DIR=/tmp/nmk-$(id -u) nmk')
+        else
+            _COMMANDS=(-c 'exec nmk')
+        fi
+    fi
+    _COMMANDS=(-c 'exec /bin/bash')
+else
+    # join arguments into a string
+    _COMMANDS=(-c ${(j: :)@:q})
+fi
+
+# sudo if user is not member of docker group
+[[ ${$(id -Gn)[(r)docker]} == docker ]] && _DOCKER=docker || _DOCKER=(sudo docker)
+
+_PARAMS=($_DOCKER exec ${_USER} -it $_CONTAINER env TERM=xterm script -q "${(@)_COMMANDS}" /dev/null)
+
+if [[ $_SSH == true ]]; then
+    print -- ${${(j: :)_PARAMS:q}:q:q}
+else
+    EXEC "${(@)_PARAMS}"
+fi

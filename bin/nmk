@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+# Use python2 if available.
+# Check binary existence doesn't work because pyenv provide python2 shim.
+&>/dev/null python2 -V && nmk='nmk.py' || nmk='nmk.zsh'
+
+exec ${0:A:h}/$nmk "$@"

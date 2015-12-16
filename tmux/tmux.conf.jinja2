@@ -1,0 +1,71 @@
+# tmux {{ version }} configuration
+{# For tmux >= 1.8 #}
+
+bind-key -n F1 select-pane -t :.+ \; display-panes
+bind-key -n F2 last-window
+bind-key -n F3 previous-window
+bind-key -n F4 next-window
+bind-key -n F5 resize-pane -Z
+bind-key -n F6 detach-client
+
+{% for i in range(1, 1 + 6) %}
+bind-key -n S-F{{i}} send-keys F{{i}}
+bind-key    S-F{{i}} send-keys S-F{{i}}
+{% endfor %}
+
+unbind-key  C-b
+bind-key -r C-b send-prefix
+bind-key -r b   select-pane -t :.+ \; display-panes
+bind-key    C-c command-prompt
+bind-key    C-u copy-mode -u
+
+set-option -g default-shell "$NMK_TMUX_DEFAULT_SHELL"
+set-option -g default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
+set-option -g detach-on-destroy "$NMK_TMUX_DETACH_ON_DESTROY"
+set-option -g display-time 1200
+set-option -g history-limit 4000
+set-option -g status-keys emacs
+set-option -g status-right-length 60
+set-window-option -g mode-keys vi
+
+{# Copy to system clipboard using copy-pipe #}
+if-shell 'xclip -o > /dev/null 2>&1' 'bind-key -t vi-copy y copy-pipe "xclip -selection clipboard"'
+
+{# Status format argument changed on tmux 1.9 #}
+{% if version >= 1.9 %}
+set-option -g status-right "'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d"
+{% else %}
+set-option -g status-right "'#[fg=colour51]#40T#[default]' %H:%M %Z %a, %d"
+{% endif %}
+
+{# Keep new-window and split-window with current/working directory behavior #}
+{% if version >= 1.9 %}
+unbind-key '"'; bind-key '"' split-window -c "#{pane_current_path}"
+unbind-key %; bind-key % split-window -h -c "#{pane_current_path}"
+unbind-key c; bind-key c new-window -c "#{pane_current_path}"
+{% endif %}
+
+{# Reset terminal state and clear pane history #}
+{% if version >= 2.0 %}
+{# No effect if alternate screen is on #}
+bind-key C-l if-shell -F "#{alternate_on}" "send-keys C-l" "send-keys -R C-l; clear-history"
+{% else %}
+bind-key C-l send-keys -R C-l\; clear-history
+{% endif %}
+
+{% if version >= 2.1 %}
+{# Enter copy mode by PageUp key #}
+{# Credit https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/ #}
+bind-key -T root PPage if-shell -F "#{alternate_on}" "send-keys PPage" "copy-mode -e; send-keys PPage"
+bind-key -t vi-copy PPage page-up
+bind-key -t vi-copy NPage page-down
+
+{# Credit https://github.com/tmux/tmux/issues/145 #}
+bind-key -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
+{% endif %}
+
+source-file $NMK_TMUX_COLOR_PROFILE
+
+{# Unset temporary environment variables that were used during tmux initialization #}
+{% for env in tmux_tmp_envs %}set-environment -gr {{ env }}
+{% endfor %}
