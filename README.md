@@ -20,11 +20,6 @@
 ```
 
 
-## Docker demo
-
-    docker run -it --rm nuimk/nmk
-
-
 ## Terminal setup
 
 To use 256 colors, Set `TERM` environment variable to `xterm-256color`.
