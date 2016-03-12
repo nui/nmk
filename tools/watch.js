@@ -103,14 +103,15 @@ class Zsh {
     }
 }
 
+function onRenderSuccess(message) {
+    return function (err) {
+        if (err) throw err;
+        console.log(message);
+    };
+}
+
 export default function () {
     let tmux = new Tmux();
-    tmux.renderAndWatch((err) => {
-        if (err) throw err;
-        console.log('Rendered tmux configuration files.');
-    });
-    Zsh.renderAndWatch((err) => {
-        if (err) throw err;
-        console.log('Rendered .zshrc file');
-    });
+    tmux.renderAndWatch(onRenderSuccess('Rendered tmux configuration files.'));
+    Zsh.renderAndWatch(onRenderSuccess('Rendered .zshrc file'));
 }
