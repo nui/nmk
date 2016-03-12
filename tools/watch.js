@@ -12,7 +12,6 @@ function onRenderSuccess(message) {
 }
 
 export default function () {
-    let tmux = new Tmux();
-    tmux.renderAndWatch(onRenderSuccess('Rendered tmux configuration files.'));
+    Tmux.renderAndWatch(onRenderSuccess('Rendered tmux configuration files.'));
     Zsh.renderAndWatch(onRenderSuccess('Rendered .zshrc file'));
 }
