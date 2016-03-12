@@ -14,40 +14,40 @@ function concatFiles(files, callback) {
     });
 }
 
-class Zsh {
-    static listZshrcSourceFiles(callback) {
-        let zshrcSourceDir = path.join(zshConfig.zdotdir, 'zshrc.src');
-        fs.readdir(zshrcSourceDir, (err, files) => {
-            if (err) return callback(err);
-            let getFilePath = async.asyncify(path.join.bind(null, zshrcSourceDir));
-            async.map(files, getFilePath, callback);
-        });
-    }
-
-    static concatZshrc(callback) {
-        Zsh.listZshrcSourceFiles((err, files) => {
-            if (err) return callback(err);
-            concatFiles(files, callback);
-        });
-    }
-
-    static renderZshrc(callback) {
-        let zshrc = path.join(zshConfig.zdotdir, '.zshrc');
-        Zsh.concatZshrc((err, data) => {
-            if (err) return callback(err);
-            fs.writeFile(zshrc, data, callback);
-        });
-    }
-
-    static render(callback) {
-        Zsh.renderZshrc(callback);
-    }
-
-    static renderAndWatch(callback) {
-        let watcher = watch(zshConfig.zshrc.pattern, {awaitWriteFinish: true});
-        watcher.on('change', (event, path) => Zsh.render(callback));
-        Zsh.render(callback);
-    }
+function listZshrcSourceFiles(callback) {
+    const zshrcSourceDir = path.join(zshConfig.zdotdir, 'zshrc.src');
+    fs.readdir(zshrcSourceDir, (err, files) => {
+        if (err) return callback(err);
+        const getFilePath = async.asyncify(path.join.bind(null, zshrcSourceDir));
+        async.map(files, getFilePath, callback);
+    });
 }
 
-export default Zsh;
+function concatZshrc(callback) {
+    listZshrcSourceFiles((err, files) => {
+        if (err) return callback(err);
+        concatFiles(files, callback);
+    });
+}
+
+function renderZshrc(callback) {
+    const zshrc = path.join(zshConfig.zdotdir, '.zshrc');
+    concatZshrc((err, data) => {
+        if (err) return callback(err);
+        fs.writeFile(zshrc, data, callback);
+    });
+}
+
+function render(callback) {
+    renderZshrc(callback);
+}
+
+function renderAndWatch(callback) {
+    const watcher = watch(zshConfig.zshrc.pattern, {awaitWriteFinish: true});
+    watcher.on('change', (event, path) => render(callback));
+    render(callback);
+}
+
+export default {
+    renderAndWatch,
+};
