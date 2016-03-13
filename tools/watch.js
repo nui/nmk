@@ -1,10 +1,9 @@
-import console from 'console';
-
+/* @flow */
 import Tmux from './renderers/tmux';
 import Zsh from './renderers/zsh';
 
 
-function onRenderSuccess(message) {
+function onRenderSuccess(message: string) {
     return function (err) {
         if (err) throw err;
         console.log(message);

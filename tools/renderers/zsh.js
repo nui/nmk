@@ -1,3 +1,4 @@
+/* @flow */
 import fs from 'fs';
 import path from 'path';
 
@@ -6,15 +7,16 @@ import {watch} from 'chokidar';
 
 import zshConfig from '../../zsh/config';
 
+declare function concatFilesCallback(err: any, data?: Buffer | string): void;
 
-function concatFiles(files, callback) {
+function concatFiles(files: Array<string>, callback: concatFilesCallback) {
     async.map(files, fs.readFile, (err, arr) => {
         if (err) return callback(err);
         callback(null, arr.join(''));
     });
 }
 
-function listZshrcSourceFiles(callback) {
+function listZshrcSourceFiles(callback: Function) {
     const zshrcSourceDir = path.join(zshConfig.zdotdir, 'zshrc.src');
     fs.readdir(zshrcSourceDir, (err, files) => {
         if (err) return callback(err);
@@ -23,14 +25,14 @@ function listZshrcSourceFiles(callback) {
     });
 }
 
-function concatZshrc(callback) {
+function concatZshrc(callback: concatFilesCallback) {
     listZshrcSourceFiles((err, files) => {
         if (err) return callback(err);
         concatFiles(files, callback);
     });
 }
 
-function renderZshrc(callback) {
+function renderZshrc(callback: Function) {
     const zshrc = path.join(zshConfig.zdotdir, '.zshrc');
     concatZshrc((err, data) => {
         if (err) return callback(err);
@@ -42,7 +44,7 @@ function render(callback) {
     renderZshrc(callback);
 }
 
-function renderAndWatch(callback) {
+function renderAndWatch(callback: (err: any) => void) {
     const watcher = watch(zshConfig.zshrc.pattern, {awaitWriteFinish: true});
     watcher.on('change', (event, path) => render(callback));
     render(callback);

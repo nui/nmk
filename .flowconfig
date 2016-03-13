@@ -1,0 +1,9 @@
+[ignore]
+.*/*.json
+
+[include]
+
+[libs]
+etc/flow-interfaces/
+
+[options]
