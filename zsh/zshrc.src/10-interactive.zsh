@@ -67,6 +67,7 @@ type -p readlink &>/dev/null && {
 type -p git &>/dev/null && {
     alias gco=' git checkout'
     alias gd=' git diff'
+    alias gds=' git diff --staged'
     alias grh=' git reset --hard'
     alias gs=' git status'
     alias gsm=' git merge -s subtree --no-commit --squash'
