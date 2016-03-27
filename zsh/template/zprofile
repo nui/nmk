@@ -2,26 +2,24 @@ export NMK_DIR=$HOME/.nmk
 export ZDOTDIR=$NMK_DIR/zsh
 
 export EDITOR=nvim
-export GOPATH=$HOME/go
 export NMK_DEVELOPMENT=true
 export VIMINIT='source $NMK_DIR/vim/init.vim'
+# export GOPATH=$HOME/go
 
 path=(
     $NMK_DIR/bin
     $HOME/.pyenv/bin
     $HOME/.rbenv/bin
-    $GOPATH/bin
     $HOME/.opt/google-cloud-sdk/bin
-    $HOME/Android/Sdk/platform-tools
-    $HOME/.opt/bin
+    # $GOPATH/bin
+    # /usr/local/go/bin
     $path
 )
-# start gnupg-agent
-gpg-connect-agent /bye
+
 # gpg-agent as ssh-agent
+gpg-connect-agent /bye # start the agent if it is not running
 export SSH_AUTH_SOCK=$HOME/.gnupg/S.gpg-agent.ssh
 # Note for kubuntu
-#   comment out use-ssh-agent in /etc/X11/Xsession.options to disable
-#   default ssh-agent
+#   comment out use-ssh-agent in /etc/X11/Xsession.options to disable default ssh-agent
 
 # vi: ft=zsh
