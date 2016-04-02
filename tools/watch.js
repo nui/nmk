@@ -1,9 +1,9 @@
-/* @flow */
+// @flow
 import Tmux from './renderers/tmux';
 import Zsh from './renderers/zsh';
 
 
-function onRenderSuccess(message: string) {
+function logSuccess(message: string) {
     return function (err) {
         if (err) throw err;
         console.log(message);
@@ -11,6 +11,6 @@ function onRenderSuccess(message: string) {
 }
 
 export default function () {
-    Tmux.renderAndWatch(onRenderSuccess('Rendered tmux configuration files.'));
-    Zsh.renderAndWatch(onRenderSuccess('Rendered .zshrc file'));
+    Tmux.renderAndWatch(logSuccess('Rendered tmux configuration files.'));
+    Zsh.renderAndWatch(logSuccess('Rendered .zshrc file'));
 }

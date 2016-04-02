@@ -1,4 +1,4 @@
-/* @flow */
+// @flow
 import fs from 'fs';
 import path from 'path';
 
@@ -8,7 +8,7 @@ import {Environment, FileSystemLoader} from 'nunjucks';
 
 import tmuxConfig from '../../tmux/config';
 
-declare function renderCallback(err: any): any;
+declare function renderCallback(err: any): void;
 
 // private variables
 let _template;
