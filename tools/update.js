@@ -1,30 +1,25 @@
-import console from 'console';
-
+import fs from 'mz/fs';
 import Promise from 'bluebird';
-let fs = Promise.promisifyAll(require('fs'));
 import request from 'request-promise';
-
 import {pathogen} from '../settings';
 
 let isFileNotFoundError = (err) => err instanceof Error && err.code === 'ENOENT';
 
 function readLocalPathogen() {
-    return fs.readFileAsync(pathogen.target, 'utf8').catch(reason => {
+    return fs.readFile(pathogen.target, 'utf8').catch(reason => {
         return isFileNotFoundError(reason) ? null : Promise.reject(reason);
     });
 }
 
 function writePathogen(data) {
-    return fs.writeFileAsync(pathogen.target, data);
+    return fs.writeFile(pathogen.target, data);
 }
 
-function updateVimPathogen() {
-    let local_pathogen = readLocalPathogen();
-    let remote_pathogen = request(pathogen.src);
-    return Promise.all([local_pathogen, remote_pathogen])
-        .then(([local_data, data]) => {
-            if (local_data !== data) {
-                return writePathogen(data).then(() => {
+function updatePathogen() {
+    return Promise.all([readLocalPathogen(), request(pathogen.src)])
+        .then(([local, remote]) => {
+            if (local !== remote) {
+                return writePathogen(remote).then(() => {
                     console.log('Updated vim pathogen.');
                 });
             }
@@ -35,5 +30,5 @@ function updateVimPathogen() {
 }
 
 export default function() {
-    updateVimPathogen();
+    updatePathogen();
 };
