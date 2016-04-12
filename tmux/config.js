@@ -4,7 +4,7 @@ const tmuxDir = __dirname;
 const templateFile = 'tmux.conf.jinja2';
 
 export default {
-    versions: [1.8, 1.9, 2.0, 2.1, 2.2],
+    versions: [1.8, 1.9, 2.0, 2.1, 2.2, 2.3],
     dir: tmuxDir,
     template: {
         name: templateFile,
