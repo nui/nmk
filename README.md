@@ -5,9 +5,9 @@
 ```sh
 # SYSTEM DEPENDENCIES
 # server:
-    sudo apt-get install exuberant-ctags git tmux vim-nox zsh
+    sudo apt install exuberant-ctags git tmux vim-nox zsh
 # desktop:
-    sudo apt-get install exuberant-ctags git tmux vim-gtk xclip zsh
+    sudo apt install exuberant-ctags git tmux vim-gtk xclip zsh
 
 # NMK
 # by automated script
