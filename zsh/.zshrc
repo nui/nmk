@@ -157,9 +157,9 @@ alias fumount='fusermount -u'
 
 # Fix multimonitor on kubuntu 16.04
 if [[ $NMK_DEVELOPMENT == true ]]; then
-    alias mm1='xrandr --output DVI-I-1 --off; xrandr --output HDMI1 --off; xrandr --output eDP1 --primary --auto --pos 0x0 --rotate normal'
-    alias mm2='xrandr --output DVI-I-1 --off; xrandr --output HDMI1 --primary --auto --pos 0x0 --rotate normal; xrandr --output eDP1 --auto --pos 1920x0 --rotate normal'
-    alias mm3='xrandr --output DVI-I-1 --auto --pos 0x0 --rotate normal; xrandr --output HDMI1 --primary --auto --pos 1920x0 --rotate normal; xrandr --output eDP1 --auto --pos 3840x0 --rotate normal'
+    alias mm1='xrandr --output DVI-I-1 --off; xrandr --output HDMI1 --off; xrandr --output eDP1 --primary --auto --pos 0x0 --rotate normal; reset-plasma5-panel.py'
+    alias mm2='xrandr --output DVI-I-1 --off; xrandr --output HDMI1 --primary --auto --pos 0x0 --rotate normal; xrandr --output eDP1 --auto --pos 1920x0 --rotate normal; reset-plasma5-panel.py'
+    alias mm3='xrandr --output DVI-I-1 --auto --pos 0x0 --rotate normal; xrandr --output HDMI1 --primary --auto --pos 1920x0 --rotate normal; xrandr --output eDP1 --auto --pos 3840x0 --rotate normal; reset-plasma5-panel.py'
 fi
 
 # Disable terminal flow control, so that we can use '^S'
