@@ -150,6 +150,19 @@ def setup_prefer_editor(env):
                 break
 
 
+def add_local_library(env, nmk_dir):
+    local_lib_dir = os.path.join(nmk_dir, 'local', 'lib')
+    if os.path.isdir(local_lib_dir):
+        library_path = env.get('LD_LIBRARY_PATH', '')
+        if len(library_path) > 1:
+            library_paths = library_path.split(':')
+        else:
+            library_paths = []
+        library_paths.insert(0, local_lib_dir)
+        new_library_path = ':'.join(library_paths)
+        env['LD_LIBRARY_PATH'] = new_library_path
+
+
 def manage_path_env(env, nmk_dir):
     """
     Clean up PATH.
@@ -162,6 +175,7 @@ def manage_path_env(env, nmk_dir):
         return all((os.path.exists(p) for p in scripts))
     dirs = [d for d in env['PATH'].split(os.pathsep) if not is_virtualenv(d)]
     dirs.insert(0, os.path.join(nmk_dir, 'bin'))
+    dirs.insert(0, os.path.join(nmk_dir, 'local', 'bin'))
     unique = []
     for d in dirs:
         if d not in unique:
@@ -215,6 +229,7 @@ def main():
     setup_terminal(tmux_dir=tmux_dir, args=args, env=os.environ)
     setup_environment(nmk_dir=nmk_dir, args=args, env=os.environ)
     setup_prefer_editor(env=os.environ)
+    add_local_library(env=os.environ, nmk_dir=nmk_dir)
     manage_path_env(env=os.environ, nmk_dir=nmk_dir)
     exec_tmux(tmux_dir=tmux_dir, args=args, unknown=unknown)
 
