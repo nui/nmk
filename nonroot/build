@@ -1,0 +1,3 @@
+#!/bin/zsh
+cd ${0:A:h}
+docker build -t nonroot:centos7 centos7
