@@ -5,6 +5,7 @@
 .idea/
 .last-update-epoch-seconds
 .netrwhist
+local/
 log/
 node_modules/
 npm-debug.log
