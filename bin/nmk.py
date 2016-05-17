@@ -222,7 +222,7 @@ def exec_tmux(tmux_dir, args, unknown):
 
 
 def main():
-    check_dependencies()
+    # check_dependencies()
     (args, unknown) = build_parser().parse_known_args()
     nmk_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     tmux_dir = os.path.join(nmk_dir, 'tmux')
