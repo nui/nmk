@@ -3,6 +3,7 @@
 # Change to $NMK_DIR
 cd ${0:A:h}
 
+mkdir local
 mkdir log
 mkdir vim/bundle
 mkdir zsh/zshrc.extra.d
