@@ -226,11 +226,11 @@ def main():
     (args, unknown) = build_parser().parse_known_args()
     nmk_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     tmux_dir = os.path.join(nmk_dir, 'tmux')
+    manage_path_env(env=os.environ, nmk_dir=nmk_dir)
     setup_terminal(tmux_dir=tmux_dir, args=args, env=os.environ)
     setup_environment(nmk_dir=nmk_dir, args=args, env=os.environ)
     setup_prefer_editor(env=os.environ)
     add_local_library(env=os.environ, nmk_dir=nmk_dir)
-    manage_path_env(env=os.environ, nmk_dir=nmk_dir)
     exec_tmux(tmux_dir=tmux_dir, args=args, unknown=unknown)
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
-#!/usr/bin/env zsh
+#!/bin/bash
 
 # Use python2 if available.
 # Check binary existence doesn't work because pyenv provide python2 shim.
-&>/dev/null python2 -V && nmk='nmk.py' || nmk='nmk.zsh'
-
-exec ${0:A:h}/$nmk "$@"
+python2 -V > /dev/null 2>&1 && nmk='nmk.py' || nmk='nmk.zsh'
+script_dir=$(dirname -- "$(readlink -f -- "$0")")
+exec "$script_dir/$nmk" "$@"
