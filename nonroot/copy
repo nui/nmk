@@ -1,6 +1,0 @@
-#!/bin/zsh
-cd ${0:A:h}
-
-CID=$(docker run -d nonroot:centos7)
-docker cp $CID:/local.tar.gz .
-docker rm $CID
