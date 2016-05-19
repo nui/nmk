@@ -1,7 +1,12 @@
 #!/bin/bash
 
+script_dir=$(dirname -- "$(readlink -f -- "$0")")
 # Use python2 if available.
 # Check binary existence doesn't work because pyenv provide python2 shim.
-python2 -V > /dev/null 2>&1 && nmk='nmk.py' || nmk='nmk.zsh'
-script_dir=$(dirname -- "$(readlink -f -- "$0")")
-exec "$script_dir/$nmk" "$@"
+if python3 -V > /dev/null 2>&1; then
+    exec python3 "$script_dir/nmk.py" "$@"
+elif python2 -V > /dev/null 2>&1; then
+    exec python2 "$script_dir/nmk.py" "$@"
+else
+    exec "$script_dir/nmk.zsh" "$@"
+fi

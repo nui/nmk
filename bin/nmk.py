@@ -1,10 +1,9 @@
-#!/usr/bin/python2
+import six
 import argparse
 import logging
 import os
 import subprocess
 import sys
-from exceptions import IOError
 
 logging.basicConfig(format='%(levelname)s:%(message)s',
                     level=logging.DEBUG)
@@ -86,20 +85,13 @@ def parse_cgroup(cgroup_file):
 
 def is_inside_docker():
     cgroup_file = '/proc/1/cgroup'
-    try:
+    if os.path.exists(cgroup_file):
         control_groups = parse_cgroup(cgroup_file)
         in_docker = all((g != '/' for g in control_groups))
-    except IOError:
+    else:
         in_docker = False
         logging.error("Couldn't read {}".format(cgroup_file))
     return in_docker
-
-
-def check_dependencies():
-    for prog in ('tmux', 'zsh'):
-        if not which(prog):
-            logging.error('{} command not found'.format(prog))
-            sys.exit(1)
 
 
 def setup_terminal(tmux_dir, args, env):
@@ -183,8 +175,17 @@ def manage_path_env(env, nmk_dir):
     env['PATH'] = os.pathsep.join(unique)
 
 
+def check_dependencies():
+    for prog in ('tmux', 'zsh'):
+        if not which(prog):
+            logging.error(' {} not found'.format(prog))
+            sys.exit(1)
+
+
 def find_tmux_version():
     output = subprocess.check_output(('tmux', '-V')).strip()
+    if isinstance(output, six.binary_type):
+        output = output.decode()
     return output.split()[1]
 
 
@@ -222,11 +223,11 @@ def exec_tmux(tmux_dir, args, unknown):
 
 
 def main():
-    # check_dependencies()
     (args, unknown) = build_parser().parse_known_args()
     nmk_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     tmux_dir = os.path.join(nmk_dir, 'tmux')
     manage_path_env(env=os.environ, nmk_dir=nmk_dir)
+    check_dependencies()
     setup_terminal(tmux_dir=tmux_dir, args=args, env=os.environ)
     setup_environment(nmk_dir=nmk_dir, args=args, env=os.environ)
     setup_prefer_editor(env=os.environ)
