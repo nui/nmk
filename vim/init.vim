@@ -70,7 +70,7 @@ endif
 
 " Plugin settings --------------------------------------------------------- {{{
 let g:NERDTreeBookmarksFile = g:nmk_config_dir.'/NERDTreeBookmarks'
-let g:NERDTreeIgnore = ['\.egg$', '\.o$', '\.obj$', '\.pyc$', '\.pyo$', '\.so$', '^\.git$', '^\.idea$', '^bower_components$', '^node_modules$']
+let g:NERDTreeIgnore = ['\.egg$', '\.o$', '\.obj$', '\.pyc$', '\.pyo$', '\.so$', '^\.git$', '^\.idea$', '^bower_components$', '^node_modules$', '^__pycache__$']
 let g:NERDTreeShowBookmarks = 1
 let g:airline#extensions#tagbar#enabled = 0
 let g:airline#extensions#whitespace#enabled = 0
