@@ -14,6 +14,11 @@ bindkey '^S' history-incremental-pattern-search-forward
 
 bindkey '^X^E' edit-command-line
 
+# Fix Home, End, and Delete Key in build-from-source tmux
+bindkey ${terminfo[khome]} beginning-of-line
+bindkey ${terminfo[kend]}  end-of-line
+bindkey ${terminfo[kdch1]} delete-char
+
 HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=4000
 SAVEHIST=$HISTSIZE
