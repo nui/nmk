@@ -1,9 +1,15 @@
-import six
+"""
+Python 2.7 and later
+"""
+
 import argparse
 import logging
 import os
 import subprocess
 import sys
+from collections import OrderedDict
+
+import six
 
 logging.basicConfig(format='%(levelname)s:%(message)s',
                     level=logging.DEBUG)
@@ -16,6 +22,9 @@ def is_exec(path):
 
 
 def which(program):
+    """
+    :return: path to program or None
+    """
     head, _ = os.path.split(program)
     # if 'program' is absolute or relative path
     if head and is_exec(program):
@@ -95,13 +104,13 @@ def is_inside_docker():
 
 
 def setup_terminal(tmux_dir, args, env):
-    use_256color = any((
+    support_256color = any((
         args.force256color,
-        args.autofix and is_inside_docker(),
         env.get('TERM') in ('gnome-256color', 'putty', 'screen-256color', 'xterm-256color'),
         env.get('COLORTERM') in ('gnome-terminal', 'rxvt-xpm', 'xfce4-terminal'),
-        ))
-    if use_256color:
+        args.autofix and is_inside_docker(),
+    ))
+    if support_256color:
         color_profile = '256color.conf'
         terminal = 'screen-256color'
     else:
@@ -147,32 +156,31 @@ def add_local_library(env, nmk_dir):
     if os.path.isdir(local_lib_dir):
         library_path = env.get('LD_LIBRARY_PATH', '')
         if len(library_path) > 1:
-            library_paths = library_path.split(':')
+            library_paths = library_path.split(os.pathsep)
         else:
             library_paths = []
         library_paths.insert(0, local_lib_dir)
-        new_library_path = ':'.join(library_paths)
+        new_library_path = os.pathsep.join(library_paths)
         env['LD_LIBRARY_PATH'] = new_library_path
 
 
-def manage_path_env(env, nmk_dir):
+def is_virtualenv_bin(path):
+    virtualenv_files = (os.path.join(path, name) for name in ('activate', 'python'))
+    return all((os.path.exists(p) for p in virtualenv_files))
+
+
+def setup_path(env, nmk_dir):
     """
-    Clean up PATH.
-      - <virtualenv>/bin is removed
-      - prepend NMK_DIR
-      - remove duplicate directory
+    Setup PATH environment.
+      - get rid of <virtualenv>/bin
+      - prepend NMK_DIR/bin and NMK_DIR/local/bin
+      - remove duplicate paths
     """
-    def is_virtualenv(dir):
-        scripts = (os.path.join(dir, f) for f in ('activate', 'python'))
-        return all((os.path.exists(p) for p in scripts))
-    dirs = [d for d in env['PATH'].split(os.pathsep) if not is_virtualenv(d)]
-    dirs.insert(0, os.path.join(nmk_dir, 'bin'))
-    dirs.insert(0, os.path.join(nmk_dir, 'local', 'bin'))
-    unique = []
-    for d in dirs:
-        if d not in unique:
-            unique.append(d)
-    env['PATH'] = os.pathsep.join(unique)
+    paths = [d for d in env['PATH'].split(os.pathsep) if not is_virtualenv_bin(d)]
+    paths.insert(0, os.path.join(nmk_dir, 'local', 'bin'))
+    paths.insert(0, os.path.join(nmk_dir, 'bin'))
+    unique_paths = OrderedDict.fromkeys(paths).keys()
+    env['PATH'] = os.pathsep.join(unique_paths)
 
 
 def check_dependencies():
@@ -196,15 +204,20 @@ def is_socket_exist(socket):
                                 stderr=devnull)
 
 
-def exec_tmux(tmux_dir, args, unknown):
+def get_tmux_conf(tmux_dir):
     version = find_tmux_version()
     conf = os.path.join(tmux_dir, '{}.conf'.format(version))
     if not os.path.exists(conf):
         logging.error('tmux {} is unsupported'.format(version))
         sys.exit(1)
+    return conf
 
-    cmd = 'tmux'
-    params = (cmd,)
+
+def exec_tmux(tmux_dir, args, unknown):
+    tmux_bin = which('tmux')
+    conf = get_tmux_conf(tmux_dir)
+
+    params = (tmux_bin,)
     # Use default socket unless socket name is specified.
     socket = args.socket
     params += ('-L', socket)
@@ -219,20 +232,21 @@ def exec_tmux(tmux_dir, args, unknown):
         # start tmux server
         params += ('-f', conf) + tuple(unknown)
     sys.stdout.flush()
-    os.execv(which(cmd), params)
+    os.execv(tmux_bin, params)
 
 
 def main():
     (args, unknown) = build_parser().parse_known_args()
     nmk_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     tmux_dir = os.path.join(nmk_dir, 'tmux')
-    manage_path_env(env=os.environ, nmk_dir=nmk_dir)
+    setup_path(env=os.environ, nmk_dir=nmk_dir)
     check_dependencies()
     setup_terminal(tmux_dir=tmux_dir, args=args, env=os.environ)
     setup_environment(nmk_dir=nmk_dir, args=args, env=os.environ)
     setup_prefer_editor(env=os.environ)
     add_local_library(env=os.environ, nmk_dir=nmk_dir)
     exec_tmux(tmux_dir=tmux_dir, args=args, unknown=unknown)
+
 
 if __name__ == '__main__':
     main()
