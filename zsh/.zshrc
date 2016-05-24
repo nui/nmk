@@ -104,7 +104,9 @@ alias help=run-help
 }
 
 type -p readlink &>/dev/null && {
-    if xclip -o &> /dev/null; then
+    # rf is shortcut to readlink -f
+    # if xclip is present, pipe output to xclip
+    if xclip -h &> /dev/null; then
         rf() {
             local fullpath
             fullpath=$(readlink -f $@)
