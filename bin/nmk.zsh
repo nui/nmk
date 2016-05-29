@@ -1,3 +1,5 @@
+# This file is no longer maintain
+# Keep it for zsh boilerplate template
 #!/usr/bin/env zsh
 
 # Constant

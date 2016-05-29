@@ -1,13 +1,15 @@
 #!/bin/bash
-script_dir=$(dirname -- "$(readlink -f -- "$0")")
+nmk_dir=$(dirname "$(dirname "$(readlink -f "$0")")")
 
-# Check binary existence doesn't work because pyenv provide python2 shim.
 if [[ -x $NMK_PYTHON ]]; then
-    exec $NMK_PYTHON "$script_dir/nmk.py" "$@"
-elif python3 --version > /dev/null 2>&1; then
-    exec python3 "$script_dir/nmk.py" "$@"
-elif python2 --version > /dev/null 2>&1; then
-    exec python2 "$script_dir/nmk.py" "$@"
+    exec $NMK_PYTHON "$nmk_dir/bin/nmk.py" "$@"
 else
-    exec "$script_dir/nmk.zsh" "$@"
+    for python_bin in python python3 python2; do
+        # Call binary to determine python existence
+        # Check binary existence doesn't work because pyenv provide python shims.
+        $python_bin --version > /dev/null 2>&1 && exec $python_bin "$nmk_dir/bin/nmk.py" "$@"
+    done
 fi
+
+echo "Error: Python not found"
+exit 1
