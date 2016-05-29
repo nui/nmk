@@ -31,3 +31,4 @@ EOF
 
 # use fakeroot to prevent including user information in tar archive
 fakeroot tar caf ../nmk.tar.gz --transform 's#^.#.nmk#' .
+rm -f bundle.sh
