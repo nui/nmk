@@ -1,7 +1,7 @@
-#!/usr/bin/env zsh
+#!/bin/bash
 
 # Change to $NMK_DIR
-cd ${0:A:h}
+cd $(dirname "$(readlink -f "$0")")
 
 mkdir local
 mkdir log
