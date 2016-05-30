@@ -169,6 +169,9 @@ if [[ $NMK_DEVELOPMENT == true ]]; then
     alias mm3='xrandr --output DVI-I-1 --auto --pos 0x0 --rotate normal; xrandr --output HDMI1 --primary --auto --pos 1920x0 --rotate normal; xrandr --output eDP1 --auto --pos 3840x0 --rotate normal; reset-plasma5-panel.py'
 fi
 
+# apply tmux session environment to running shell
+alias ssenv=' eval $(tmux show-environment -s)'
+
 # Disable terminal flow control, so that we can use '^S'
 # for history-search-forward.
 stty -ixon
