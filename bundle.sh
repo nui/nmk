@@ -20,13 +20,16 @@ echo $VERSION > VERSION
 find . ! -type d -print0 | sort --reverse --zero-terminated > files.lst
 # remove the write permission to prevent accidentally editing
 <files.lst xargs --null chmod u-w
-find . -type d -print0 | sort --reverse --zero-terminated > dirs.lst
+find . -mindepth 1 -type d -print0 | sort --reverse --zero-terminated > dirs.lst
 
 cat > remove.sh << 'EOF'
 #!/bin/sh
+set -e
+find . -name '*.pyc' -delete
+find . -name __pycache__ -delete
 <files.lst xargs --null rm
-<dirs.lst xargs --null rmdir
-exec rm files.lst dirs.lst remove.sh
+<dirs.lst xargs --null rmdir --ignore-fail-on-non-empty
+exec rm dirs.lst remove.sh
 EOF
 
 # use fakeroot to prevent including user information in tar archive
