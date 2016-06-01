@@ -83,6 +83,8 @@ cnoremap w!! w !sudo tee % >/dev/null
 nnoremap <leader>R :e!<CR>
 " Trim all trailing whitespace from a file
 nnoremap <leader>T :%s/\s\+$//<CR>:let @/ = ""<CR>
+" Transform non printable ascii characters into space
+vnoremap <leader>T :s/[^\d32-\d126]/ /g<CR>
 " Prevent accidentally press Ex-mode, use alternate gQ instead
 nnoremap Q <nop>
 " Map <Ctrl+Space> for omni completion
