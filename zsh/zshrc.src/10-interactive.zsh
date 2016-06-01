@@ -74,10 +74,11 @@ type -p git &>/dev/null && {
     alias gs=' git status'
     alias gsm=' git merge -s subtree --no-commit --squash'
     # Use alternate screen in git log
-    alias lol=" GIT_PAGER='less -+F -+X -c' git log --oneline --decorate --graph --color=auto"
+    alias lol=" git log --oneline --decorate --graph --color=auto"
     alias gfr=' git-fetch-rebase'
     alias grrr=' git-reset-to-remote-branch'
 }
+export GIT_PAGER='less -+F -+X -c'
 
 type -p docker &>/dev/null && {
     alias dkcc=' docker-clear-containers'
