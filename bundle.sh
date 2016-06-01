@@ -1,7 +1,7 @@
 #!/bin/sh
 set -x
 
-VERSION=${1:-v$(date --iso)}
+VERSION=${1:-$(date --iso)}
 
 if ! [ -e bin/nmk -a -e bundle.sh ]; then
     >&2 echo "This script need to run from inside NMK directory"
