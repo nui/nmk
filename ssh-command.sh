@@ -9,11 +9,6 @@ if [ ! -x "$_LOGIN_SHELL" ]; then
     fi
 fi
 
-_SSH_LAUNCHER_EXTRA="${NMK_DIR:-$HOME/.nmk}/ssh-launcher-extra"
-if [ -f $_SSH_LAUNCHER_EXTRA ]; then
-    . $_SSH_LAUNCHER_EXTRA
-fi
-
 # Make sure that byobu doesn't take over our login shell
 exec env BYOBU_DISABLE=1 $_LOGIN_SHELL -l -c 'exec ${NMK_DIR:-~/.nmk}/bin/nmk'
 # vi: ft=sh

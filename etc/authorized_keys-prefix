@@ -1,4 +1,0 @@
-# dash, bash, and zsh
-command="_T=$SSH_ORIGINAL_COMMAND;if test -n \"$_T\";then eval \"$_T\";elif test -d ~/.nmk;then . ~/.nmk/ssh-launcher-sh;else exec -l $(getent passwd $(id -nu)|cut -d: -f 7);fi"
-# tcsh, csh
-command="test $?SSH_ORIGINAL_COMMAND -eq 1 && eval $SSH_ORIGINAL_COMMAND || test -d ~/.nmk && source ~/.nmk/ssh-launcher-csh || exec `getent passwd $USER|cut -d: -f 7`"
