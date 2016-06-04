@@ -9,29 +9,31 @@ if ! [ -e bin/nmk -a -e bundle.sh ]; then
 fi
 
 # don't run this on working environment
-if [ -e zsh/.zcompdump -o -e zsh/.zsh_history ]; then
+if [ -e zsh/.zcompdump -o -e zsh/.zsh_history -o -d node_modules ]; then
     >&2 echo "Aborted"
     exit 1
 fi
 
+# remove this script
+rm -f bundle.sh
 # remove all .git directories
 find . -type d -name .git -exec rm -rf {} +
 echo $VERSION > VERSION
-find . ! -type d -print0 | sort --reverse --zero-terminated > files.lst
+find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files
 # remove the write permission to prevent accidentally editing
-<files.lst xargs --null chmod u-w
-find . -mindepth 1 -type d -print0 | sort --reverse --zero-terminated > dirs.lst
+<.bundle-files xargs --null chmod u-w
+find . -mindepth 1 -type d -print0 | sort --reverse --zero-terminated > .bundle-dirs
 
 cat > remove.sh << 'EOF'
 #!/bin/sh
 set -e
+find . -name __pycache__ -exec rm -rf {} +
 find . -name '*.pyc' -delete
-find . -name __pycache__ -delete
-<files.lst xargs --null rm
-<dirs.lst xargs --null rmdir --ignore-fail-on-non-empty
-exec rm dirs.lst remove.sh
+<.bundle-files xargs --null rm
+<.bundle-dirs xargs --null rmdir --ignore-fail-on-non-empty
+exec rm .bundle-dirs remove.sh
 EOF
 
 # use fakeroot to prevent including user information in tar archive
 fakeroot tar caf ../nmk.tar.gz --transform 's#^.#.nmk#' .
-rm -f bundle.sh
+
