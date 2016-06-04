@@ -8,7 +8,10 @@ bind-key -n F4 next-window
 bind-key -n F5 resize-pane -Z
 bind-key -n F6 detach-client
 
+# Use Shift-Fx or <prefix> Fx to send Fx key
+# To send Shift-Fx key, press <prefix> key first
 {% for i in range(1, 1 + 6) %}
+bind-key    F{{i}}   send-keys F{{i}}
 bind-key -n S-F{{i}} send-keys F{{i}}
 bind-key    S-F{{i}} send-keys S-F{{i}}
 {% endfor %}
