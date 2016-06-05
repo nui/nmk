@@ -35,9 +35,8 @@ done
 
 _NMK_DIR=${${1:-$HOME/.nmk}:A}
 
-git clone --quiet $_REPO $_NMK_DIR
+git clone --quiet --recursive $_REPO $_NMK_DIR
 cd $_NMK_DIR
-git submodule update --quiet --force --init --recursive
 git remote set-url origin $_GITHUB_REPO
 # fix zsh insecure directories
 find zsh -type d -exec chmod g-w {} \+
