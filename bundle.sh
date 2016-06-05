@@ -16,24 +16,26 @@ fi
 
 # remove this script
 rm -f bundle.sh
-# remove all .git directories
-find . -type d -name .git -exec rm -rf {} +
+# top commit and version
+git --no-pager log -1 --pretty=oneline --color=never > HEAD
 echo $VERSION > VERSION
-find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files
-# remove the write permission to prevent accidentally editing
-<.bundle-files xargs --null chmod u-w
-find . -mindepth 1 -type d -print0 | sort --reverse --zero-terminated > .bundle-dirs
-
-cat > remove.sh << 'EOF'
+# add uninstall script
+cat > uninstall.sh << 'EOF'
 #!/bin/sh
 set -e
-find . -name __pycache__ -exec rm -rf {} +
-find . -name '*.pyc' -delete
+find . -name '*.pyc' -exec rm -f {} +
 <.bundle-files xargs --null rm
 <.bundle-dirs xargs --null rmdir --ignore-fail-on-non-empty
-exec rm .bundle-dirs remove.sh
+exec rm -f .bundle-dirs
 EOF
+# remove all .git directories
+find . -type d -name .git -exec rm -rf {} +
 
-# use fakeroot to prevent including user information in tar archive
-fakeroot tar caf ../nmk.tar.gz --transform 's#^.#.nmk#' .
+find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files
+find . -mindepth 1 -type d -print0 | sort --reverse --zero-terminated > .bundle-dirs
+
+# unset write permission to get warning message on accidentally editing
+find . -type f -exec chmod ugo-w {} +
+
+tar caf ../nmk.tar.gz --owner=root --group=root --transform 's#^.#.nmk#' .
 
