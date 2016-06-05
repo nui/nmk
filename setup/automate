@@ -43,5 +43,3 @@ find zsh -type d -exec chmod g-w {} \+
 ./post-clone
 NMK_DIR=$_NMK_DIR ./vim/update-plugins
 
-# set last update time to now
-date +%s > $_NMK_DIR/.last-update-epoch-seconds

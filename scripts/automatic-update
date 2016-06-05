@@ -48,9 +48,7 @@ self_update() {
     fi
     # checkout submodules
     git submodule update --force --init --recursive
-    # save update timestamp
-    date +%s > $NMK_DIR/.last-update-epoch-seconds
-    # and update vim plugins
+    # update vim plugins
     ./vim/update-plugins
     # remove untracked files
     git clean -f

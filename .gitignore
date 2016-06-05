@@ -5,7 +5,6 @@
 
 .cache/
 .idea/
-.last-update-epoch-seconds
 .netrwhist
 local/
 log/
