@@ -38,8 +38,6 @@ _NMK_DIR=${${1:-$HOME/.nmk}:A}
 git clone --quiet --recursive $_REPO $_NMK_DIR
 cd $_NMK_DIR
 git remote set-url origin $_GITHUB_REPO
-# fix zsh insecure directories
-find zsh -type d -exec chmod g-w {} \+
 ./post-clone
 NMK_DIR=$_NMK_DIR ./vim/update-plugins
 
