@@ -13,8 +13,8 @@ generate_cron_config() {
     # print current configuration if exist
     crontab -l 2>/dev/null || true
     # update twice a day
-    cat <<- EOCRON
-		0 */12 * * * "\$HOME/.nmk/scripts/automatic-update --prune-reflog --log"
+    cat <<- 'EOCRON'
+		0 */12 * * * $HOME/.nmk/scripts/automatic-update --prune-reflog --log
 	EOCRON
 }
 
