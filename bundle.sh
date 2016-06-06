@@ -34,8 +34,8 @@ find . -type d -name .git -exec rm -rf {} +
 find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files
 find . -mindepth 1 -type d -print0 | sort --reverse --zero-terminated > .bundle-dirs
 
-# unset write permission to get warning message on accidentally editing
+# unset write permission to get warning message on update file
 find . -type f -exec chmod ugo-w {} +
 
-tar caf ../nmk.tar.gz --owner=root --group=root --transform 's#^.#.nmk#' .
+tar caf ../nmk.tar.gz --owner=0 --group=0 --transform 's#^.#.nmk#' .
 
