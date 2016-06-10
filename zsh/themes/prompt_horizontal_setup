@@ -4,8 +4,8 @@
 # Naming convension
 # functions
 #    - snake case
-#    - use _horizontal_FUNCNAME style
-#    - store result in _horizontal_FUNCNAME_result variable
+#    - prefix function name with _horizontal_
+#    - store function result in FUNCNAME_result variable
 
 
 # Set a plaintext of $1 without formatting
@@ -88,15 +88,16 @@ _horizontal_exec_seconds() {
 }
 
 _horizontal_git_dirty() {
-    local umode
-    # check if it's dirty
-    ((${horizontal_git_untracked_dirty:-1})) && umode='-unormal' || umode='-uno'
-    [[ -n $(command git status --porcelain --ignore-submodules ${umode}) ]]
+    if ((${horizontal_untracked_dirty:-1})); then
+        test -z "$(command git status --porcelain --ignore-submodules -unormal)"
+    else
+        command git diff --no-ext-diff --quiet --exit-code
+    fi
 
     if (($? == 0)); then
-        typeset -g _horizontal_git_dirty_result='*'
-    else
         typeset -g _horizontal_git_dirty_result=
+    else
+        typeset -g _horizontal_git_dirty_result='*'
     fi
 }
 
@@ -135,10 +136,10 @@ prompt_horizontal_precmd() {
         local git_info
         local timestamp
 
-        ((${horizontal_show_git:-1})) && vcs_info
+        ((${horizontal_git_status:-1})) && vcs_info
 
         # git branch and dirty status
-        ((${horizontal_show_git:-1})) && [[ -n $vcs_info_msg_0_ ]] && {
+        ((${horizontal_git_status:-1})) && [[ -n $vcs_info_msg_0_ ]] && {
             ((${horizontal_git_check_dirty:-1})) && _horizontal_git_dirty
             git_info="${vcs_info_msg_0_}${_horizontal_git_dirty_result}"
             [[ -n $git_info ]] && prompt_status+=$git_info
@@ -150,7 +151,7 @@ prompt_horizontal_precmd() {
         }
 
         # python virtual environment
-        ((${horizontal_show_pythonenv:-1})) && [[ -n $VIRTUAL_ENV ]] && {
+        ((${horizontal_show_virtualenv:-1})) && [[ -n $VIRTUAL_ENV ]] && {
             prompt_status+="(${VIRTUAL_ENV:t}%)"
         }
 
@@ -214,18 +215,18 @@ prompt_horizontal_setup() {
         # horizontal_fill_space=1
         # horizontal_git_branch_symbol=''
         # horizontal_git_check_dirty=1
-        # horizontal_git_untracked_dirty=1
+        # horizontal_git_status=1
         # horizontal_hostname=
         # horizontal_no_color=0
         # horizontal_show_exec_time=1
-        # horizontal_show_git=1
         # horizontal_show_pyenv_python_version=1
-        # horizontal_show_pythonenv=1
         # horizontal_show_status=1
         # horizontal_show_timestamp=1
         # horizontal_show_userhost=1
+        # horizontal_show_virtualenv=1
         # horizontal_status_separator="%F{cyan} | %f"
         # horizontal_timestamp_threshold_seconds=180
+        # horizontal_untracked_dirty=1
 
     # prevent percentage showing up
     # if output doesn't end with a newline
