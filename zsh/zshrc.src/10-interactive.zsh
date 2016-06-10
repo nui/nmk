@@ -87,7 +87,10 @@ type -p docker &>/dev/null && {
 }
 
 # Vim without my plugins
-type -p vi &>/dev/null && alias vi='env -u VIMINIT vi'
+type -p vi &>/dev/null && vi() {
+    local VIMINIT=
+    command vi "$@"
+}
 
 # Prefer nvim
 type -p nvim &>/dev/null && {
