@@ -248,8 +248,13 @@ prompt_horizontal_setup() {
         git_branch_symbol=''
     fi
     zstyle ':vcs_info:*' enable git
-    zstyle ':vcs_info:git*' formats "$git_branch_symbol%b"
-    zstyle ':vcs_info:git*' actionformats "$git_branch_symbol%b|%a"
+    zstyle ':vcs_info:*' use-simple true
+    # only export two msg variables from vcs_info
+    zstyle ':vcs_info:*' max-exports 2
+    # vcs_info_msg_0_ = ' %b' (for branch)
+    # vcs_info_msg_1_ = 'x%R' git top level (%R), x-prefix prevents creation of a named path (AUTO_NAME_DIRS)
+    zstyle ':vcs_info:git*' formats "$git_branch_symbol%b" 'x%R'
+    zstyle ':vcs_info:git*' actionformats "$git_branch_symbol%b|%a" 'x%R'
 
     # disable auto updating PS1 by virtualenv
     VIRTUAL_ENV_DISABLE_PROMPT=1
