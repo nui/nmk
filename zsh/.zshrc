@@ -179,15 +179,15 @@ alias ssenv=' eval $(tmux show-environment -s)'
 # Disable terminal flow control, so that we can use '^S'
 # for history-search-forward.
 stty -ixon
-# Hide user and host in prompt if NMK_DEVELOPMENT is true by default,
-# this is not apply to zsh in ssh session
-[[ $NMK_DEVELOPMENT == true && -z $SSH_TTY ]] \
-    && horizontal_show_userhost=${horizontal_show_userhost:-0}
-
 # Don't display git branch symbol if terminal does not support 256 colors
-type -p tput &>/dev/null && (( $(command tput colors) < 256 )) && horizontal_git_branch_symbol=
+type -p tput &>/dev/null && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
 
 prompt horizontal
+
+# Hide user and host in prompt if NMK_DEVELOPMENT is true by default,
+# this is not apply to zsh in ssh session
+[[ $NMK_DEVELOPMENT == true && -z $SSH_TTY ]] && horizontal[userhost]=0
+
 # Autoload tools
 () {
     local nvm_hook_file="$HOME/.nvm/nvm.sh"
