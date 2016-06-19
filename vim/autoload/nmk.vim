@@ -70,7 +70,6 @@ endfunction
 " Back to normal mode
 noremap  <leader>. <esc>
 inoremap <leader>. <esc>
-cnoremap <leader>. <esc>
 
 " Enter command mode
 nnoremap <C-c> :
