@@ -37,5 +37,5 @@ find . -mindepth 1 -type d -print0 | sort --reverse --zero-terminated > .bundle-
 # unset write permission to get warning message on update file
 find . -type f -exec chmod ugo-w {} +
 
-tar caf ../nmk.tar.gz --owner=0 --group=0 --mtime='' --transform 's#^.#.nmk#' .
+tar caf ../nmk.tar.xz --owner=0 --group=0 --mtime='' --transform 's#^.#.nmk#' .
 
