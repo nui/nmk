@@ -86,11 +86,16 @@ type -p docker &>/dev/null && {
     alias dkex=' docker-exec'
 }
 
-# Vim without my plugins
-type -p vi &>/dev/null && vi() {
+# vi = Vim without my plugins
+#   The use of function keyword in function declaration
+#   is to prevent vi get expanded to vim on some system
+#   that alias vi=vim
+type -p vi &>/dev/null && function vi() {
     local VIMINIT=
     command vi "$@"
 }
+# unalias vi, because it can override previous vi function
+type -w vi | grep -q alias && unalias vi
 
 # Prefer nvim
 type -p nvim &>/dev/null && {
