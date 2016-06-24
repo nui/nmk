@@ -95,7 +95,7 @@ type -p vi &>/dev/null && function vi() {
     command vi "$@"
 }
 # unalias vi, because it can override previous vi function
-type -w vi | grep -q alias && unalias vi
+[[ $(type -w vi) =~ 'alias$' ]] && unalias vi
 
 # Prefer nvim
 type -p nvim &>/dev/null && {
