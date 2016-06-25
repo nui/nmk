@@ -16,5 +16,5 @@ if $_DOCKER inspect $DATA_NAME &> /dev/null; then
     $_DOCKER run -d --volumes-from=$DATA_NAME --restart=always -p $DOCKER_HOST:3142:3142 --name $NAME $IMAGE
 else
     $_DOCKER run -d --restart=always -p $DOCKER_HOST:3142:3142 --name $NAME $IMAGE
-    $_DOCKER run --volumes-from=$NAME --name $DATA_NAME tianon/true
+    $_DOCKER run --volumes-from=$NAME --name $DATA_NAME busybox /bin/true
 fi
