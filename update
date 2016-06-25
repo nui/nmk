@@ -2,7 +2,7 @@
 set -e
 
 usage() {
-    print "./update URL or file path"
+    print "./update URL or FILE"
 }
 
 if [[ -z $1 ]]; then
@@ -10,18 +10,16 @@ if [[ -z $1 ]]; then
     exit 1
 fi
 
-# cd to NMK_DIR
-cd ${0:A:h}
-
+BUNDLE_NAME=$(basename $1)
 if [[ -e $1 ]]; then
-    cp $1 .
+    cp $1 $NMK_DIR
 else
-    curl -O -J -L $1
+    curl -o $NMK_DIR/$BUNDLE_NAME -L $1
 fi
-BUNDLE_FILE=$(basename $1)
 
+cd $NMK_DIR
 sh uninstall.sh
-tar -x -f $BUNDLE_FILE --strip-components=1
-rm $BUNDLE_FILE
+tar -x -f $BUNDLE_NAME --strip-components=1
+rm $BUNDLE_NAME
 print "Updated nmk, Top commit is $(cat HEAD)"
 
