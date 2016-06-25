@@ -46,10 +46,10 @@ fi
 typeset -a -U _IMAGES
 _IMAGES=(${${${(f)"$($_DOCKER images | grep "^$1")"}/ ##/:}%% *})
 if (($_INTERACTIVE)) && ((${#_IMAGES} > 0)) ; then
-    if ! type -p dialog &>/dev/null; then
+    (( ${+commands[dialog]} )) || {
         >&2 echo 'Command not found: dialog'
         exit 1
-    fi
+    }
     _CHECKLIST_PARAMS=('Select tag to upgrade' $((7 + ${#_IMAGES})) $((COLUMNS - 4)) ${#_IMAGES})
     for image in $_IMAGES; do
         _CHECKLIST_PARAMS+=($image '' $_DEFAULT_STATUS)

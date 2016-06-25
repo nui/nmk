@@ -17,9 +17,11 @@ path=(
 )
 
 # gpg-agent as ssh-agent
-gpg-connect-agent /bye # start the agent if it is not running
-export SSH_AUTH_SOCK=/run/user/$UID/gnupg/S.gpg-agent.ssh
-# export SSH_AUTH_SOCK=$HOME/.gnupg/S.gpg-agent.ssh # gpg <= 2.1.12
+(( ${+commands[gpg-connect-agent]} )) && {
+    gpg-connect-agent /bye # start the agent if it is not running
+    export SSH_AUTH_SOCK=/run/user/$UID/gnupg/S.gpg-agent.ssh
+    # export SSH_AUTH_SOCK=$HOME/.gnupg/S.gpg-agent.ssh # gpg <= 2.1.12
+}
 # Note for kubuntu
 #   comment out use-ssh-agent in /etc/X11/Xsession.options to disable default ssh-agent
 

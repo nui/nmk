@@ -1,5 +1,5 @@
 # Don't display git branch symbol if terminal does not support 256 colors
-type -p tput &>/dev/null && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
+(( ${+commands[tput]} )) && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
 
 prompt horizontal
 

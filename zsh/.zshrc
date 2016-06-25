@@ -30,7 +30,7 @@ zstyle ':completion:*' completer _expand _complete _correct _approximate
 zstyle ':completion:*' format 'Completing %d'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' menu select=2
-type -p dircolors &>/dev/null && {
+(( ${+commands[dircolors]} )) && {
     eval "$(dircolors -b)"
     zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 }
@@ -103,13 +103,13 @@ alias help=run-help
     alias ls="ls $color_auto"
 }
 
-type -p readlink &>/dev/null && {
+(( ${+commands[readlink]} )) && {
     # rf is shortcut to readlink -f
     # if xclip is present, pipe output to xclip
-    if xclip -h &> /dev/null; then
-        rf() {
+    if (( ${+commands[xclip]} )); then
+        function rf() {
             local fullpath
-            fullpath=$(readlink -f $@)
+            fullpath=$(readlink -f "$@")
             (( $? == 0 )) && {
                 print -- $fullpath | tee >(xclip)
                 print -- 'Path is copied to clipboard'
@@ -121,7 +121,7 @@ type -p readlink &>/dev/null && {
 }
 
 # Productive Git aliases
-type -p git &>/dev/null && {
+(( ${+commands[git]} )) && {
     alias gco=' git checkout'
     alias gd=' git diff'
     alias gds=' git diff --staged'
@@ -135,7 +135,7 @@ type -p git &>/dev/null && {
 }
 export GIT_PAGER='less -+F -+X -c'
 
-type -p docker &>/dev/null && {
+(( ${+commands[docker]} )) && {
     alias dkcc=' docker-clear-containers'
     alias dkci=' docker-clear-images'
     alias dkex=' docker-exec'
@@ -145,18 +145,18 @@ type -p docker &>/dev/null && {
 #   The use of function keyword in function declaration
 #   is to prevent vi get expanded to vim on some system
 #   that alias vi=vim
-type -p vi &>/dev/null && function vi() {
+(( ${+commands[vi]} )) && function vi() {
     local VIMINIT=
     command vi "$@"
 }
 # unalias vi, because it can override previous vi function
-[[ $(type -w vi) =~ 'alias$' ]] && unalias vi
+(( ${+aliases[vi]} )) && unalias vi
 
 # Prefer nvim
-type -p nvim &>/dev/null && {
-    nvim() {
+(( ${+commands[nvim]} )) && {
+    function nvim() {
         # Deactivate python virtual environment before start nvim
-        if [[ $(type deactivate) =~ 'shell function$' && -n $VIRTUAL_ENV ]]; then
+        if (( ${+functions[deactivate]} )) && [[ -n $VIRTUAL_ENV ]]; then
             (deactivate && command nvim "$@")
         else
             command nvim "$@"
@@ -167,7 +167,7 @@ type -p nvim &>/dev/null && {
 
 # Running from command line makes Pycharm inherite all environment variables
 # This makes tools installed by npm using nvm work.
-type -p pycharm &>/dev/null && alias pycharm=' nohup pycharm &> /dev/null &!'
+(( ${+commands[pycharm]} )) && alias pycharm=' nohup pycharm &> /dev/null &!'
 
 alias fumount='fusermount -u'
 
@@ -185,7 +185,7 @@ alias ssenv=' eval $(tmux show-environment -s)'
 # for history-search-forward.
 stty -ixon
 # Don't display git branch symbol if terminal does not support 256 colors
-type -p tput &>/dev/null && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
+(( ${+commands[tput]} )) && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
 
 prompt horizontal
 
