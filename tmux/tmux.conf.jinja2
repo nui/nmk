@@ -6,11 +6,12 @@ bind-key -n F2 last-window
 bind-key -n F3 previous-window
 bind-key -n F4 next-window
 bind-key -n F5 resize-pane -Z
-bind-key -n F6 detach-client
+
+bind-key -n F12 detach-client
 
 # Use Shift-Fx or <prefix> Fx to send Fx key
 # To send Shift-Fx key, press <prefix> key first
-{% for i in range(1, 1 + 6) %}
+{% for i in [1, 2, 3, 4, 5, 12] %}
 bind-key    F{{i}}   send-keys F{{i}}
 bind-key -n S-F{{i}} send-keys F{{i}}
 bind-key    S-F{{i}} send-keys S-F{{i}}
