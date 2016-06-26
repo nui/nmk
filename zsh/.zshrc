@@ -196,7 +196,7 @@ prompt horizontal
 # Detect & load version managers
 () {
     local nvm_hook_file="$HOME/.nvm/nvm.sh"
-    typeset -a managers=()
+    typeset -a managers
     [[ -e $HOME/.nvm/nvm.sh ]] && {
         managers+=(nvm)
         function use-nvm() {
