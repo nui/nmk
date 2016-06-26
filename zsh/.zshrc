@@ -193,6 +193,7 @@ prompt horizontal
 # this is not apply to zsh in ssh session
 [[ $NMK_DEVELOPMENT == true && -z $SSH_TTY ]] && horizontal[userhost]=0
 
+[[ -e /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
 # Detect & load version managers
 () {
     typeset -a managers
@@ -234,7 +235,6 @@ prompt horizontal
         done
     fi
 }
-[[ -e /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # auto change directory to somewhere if set
 if [[ -n $NMK_RESPAWN_PANE_DIR ]]; then
