@@ -37,9 +37,9 @@ if-shell 'xclip -o > /dev/null 2>&1' 'bind-key -t vi-copy y copy-pipe "xclip -se
 
 {# Status format argument changed on tmux 1.9 #}
 {% if version >= 1.9 %}
-set-option -g status-right "'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d"
+set-option -g status-right "#{?client_prefix,Prefix ,}'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d"
 {% else %}
-set-option -g status-right "'#[fg=colour51]#40T#[default]' %H:%M %Z %a, %d"
+set-option -g status-right "#{?client_prefix,Prefix ,}'#[fg=colour51]#40T#[default]' %H:%M %Z %a, %d"
 {% endif %}
 
 {# Keep new-window and split-window with current/working directory behavior #}
