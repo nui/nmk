@@ -43,7 +43,7 @@ zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,cmd'
 # see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
-nmk-fancy-ctrl-z () {
+function nmk-fancy-ctrl-z () {
     if [[ ${#BUFFER} -eq 0 ]]; then
         bg
         zle redisplay
