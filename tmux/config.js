@@ -11,7 +11,7 @@ export default {
         path: path.join(tmuxDir, templateFile)
     },
     tmpEnvs: [
-        'NMK_TMUX_COLOR_PROFILE',
+        'NMK_TMUX_256_COLOR',
         'NMK_TMUX_DEFAULT_SHELL',
         'NMK_TMUX_DEFAULT_TERMINAL',
         'NMK_TMUX_DETACH_ON_DESTROY',

@@ -165,13 +165,11 @@ def setup_terminal(env, args, tmux_dir):
         args.autofix and is_inside_docker(),
     ))
     if support_256color:
-        color_profile = '256color.conf'
         terminal = 'screen-256color'
     else:
-        color_profile = '8color.conf'
         terminal = 'screen'
-    env['NMK_TMUX_COLOR_PROFILE'] = os.path.join(tmux_dir, color_profile)
     env['NMK_TMUX_DEFAULT_TERMINAL'] = terminal
+    env['NMK_TMUX_256_COLOR'] = "1" if support_256color else "0"
 
 
 def setup_environment(env, args, nmk_dir):

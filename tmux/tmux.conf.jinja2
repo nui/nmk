@@ -41,6 +41,7 @@ set-option -g status-right "#{?client_prefix,Prefix ,}'#[fg=colour51]#{=40:pane_
 {% else %}
 set-option -g status-right "#{?client_prefix,Prefix ,}'#[fg=colour51]#40T#[default]' %H:%M %Z %a, %d"
 {% endif %}
+if-shell 'zsh -c "[[ $NMK_TMUX_256_COLOR != 1 ]]"' 'source-file $NMK_DIR/tmux/8color.conf'
 
 {# Keep new-window and split-window with current/working directory behavior #}
 {% if version >= 1.9 %}
@@ -68,7 +69,7 @@ bind-key -t vi-copy NPage page-down
 bind-key -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
 {% endif %}
 
-source-file $NMK_TMUX_COLOR_PROFILE
+if-shell 'zsh -c "[[ $NMK_TMUX_256_COLOR == 1 ]]"' 'source-file $NMK_DIR/tmux/256color.conf'
 
 {# Unset temporary environment variables that were used during tmux initialization #}
 {% for env in tmux_tmp_envs %}set-environment -gr {{ env }}
