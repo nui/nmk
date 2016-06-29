@@ -160,7 +160,7 @@ def is_inside_docker():
 def setup_terminal(env, args, tmux_dir):
     support_256color = any((
         args.force256color,
-        env.get('TERM') in ('gnome-256color', 'putty', 'screen-256color', 'xterm-256color'),
+        env.get('TERM') in ('cygwin', 'gnome-256color', 'putty', 'screen-256color', 'xterm-256color'),
         env.get('COLORTERM') in ('gnome-terminal', 'rxvt-xpm', 'xfce4-terminal'),
         args.autofix and is_inside_docker(),
     ))
