@@ -1,7 +1,7 @@
 # tmux {{ version }} configuration
 {# For tmux >= 1.8 #}
 
-{% set binded_function = [1, 2, 3, 4, 5, 11, 12] %}
+{% set function_keys = range(1, 1 + 12) %}
 
 bind-key -n F1 select-pane -t :.+ \; display-panes
 bind-key -n F2 last-window
@@ -11,7 +11,7 @@ bind-key -n F5 resize-pane -Z
 
 {% if version >= 2.1 %}
 bind-key -n F11 switch-client -T fxtable
-{% for i in binded_function %}
+{% for i in function_keys %}
 bind-key -T fxtable F{{i}} send-keys F{{i}}
 {% endfor %}
 bind-key -T fxtable -r Space next-layout
@@ -26,7 +26,7 @@ bind-key -n F12 detach-client
 
 # Use Shift-Fx or <prefix> Fx to send Fx key
 # To send Shift-Fx key, press <prefix> key first
-{% for i in binded_function %}
+{% for i in function_keys %}
 bind-key    F{{i}}   send-keys F{{i}}
 bind-key -n S-F{{i}} send-keys F{{i}}
 bind-key    S-F{{i}} send-keys S-F{{i}}
