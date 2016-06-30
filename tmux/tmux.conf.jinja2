@@ -25,11 +25,10 @@ bind-key -T fxtable 5 select-layout tiled
 bind-key -n F12 detach-client
 
 # Use Shift-Fx or <prefix> Fx to send Fx key
-# To send Shift-Fx key, press <prefix> key first
 {% for i in function_keys %}
 bind-key    F{{i}}   send-keys F{{i}}
 bind-key -n S-F{{i}} send-keys F{{i}}
-bind-key    S-F{{i}} send-keys S-F{{i}}
+{# bind-key    S-F{{i}} send-keys S-F{{i}} #}
 {% endfor %}
 
 unbind-key  C-b
