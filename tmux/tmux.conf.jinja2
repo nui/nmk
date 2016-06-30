@@ -1,6 +1,8 @@
 # tmux {{ version }} configuration
 {# For tmux >= 1.8 #}
 
+{% set has_custom_keytable = version >= 2.1 %}
+
 {% set function_keys = range(1, 1 + 12) %}
 
 bind-key -n F1 select-pane -t :.+ \; display-panes
@@ -9,7 +11,7 @@ bind-key -n F3 previous-window
 bind-key -n F4 next-window
 bind-key -n F5 resize-pane -Z
 
-{% if version >= 2.1 %}
+{% if has_custom_keytable %}
 bind-key -n F11 switch-client -T fxtable
 {% for i in function_keys %}
 bind-key -T fxtable F{{i}} send-keys F{{i}}
@@ -65,6 +67,7 @@ unbind-key c; bind-key c new-window -c "#{pane_current_path}"
 {% endif %}
 
 {# Reset terminal state and clear pane history #}
+{# 'if-shell' command understands formats via -F in tmux 2.0 #}
 {% if version >= 2.0 %}
 {# No effect if alternate screen is on #}
 bind-key C-l if-shell -F "#{alternate_on}" "send-keys C-l" "send-keys -R C-l; clear-history"
@@ -72,12 +75,14 @@ bind-key C-l if-shell -F "#{alternate_on}" "send-keys C-l" "send-keys -R C-l; cl
 bind-key C-l send-keys -R C-l\; clear-history
 {% endif %}
 
+bind-key -t vi-copy PPage page-up
+bind-key -t vi-copy NPage page-down
+
+{# copy-mode learned '-e' in tmux 2.1 #}
 {% if version >= 2.1 %}
 {# Enter copy mode by PageUp key #}
 {# Credit https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/ #}
 bind-key -T root PPage if-shell -F "#{alternate_on}" "send-keys PPage" "copy-mode -e; send-keys PPage"
-bind-key -t vi-copy PPage page-up
-bind-key -t vi-copy NPage page-down
 
 {# Credit https://github.com/tmux/tmux/issues/145 #}
 bind-key -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
