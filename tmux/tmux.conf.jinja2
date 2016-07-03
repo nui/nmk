@@ -75,8 +75,8 @@ bind-key C-l if-shell -F "#{alternate_on}" "send-keys C-l" "send-keys -R C-l; cl
 bind-key C-l send-keys -R C-l\; clear-history
 {% endif %}
 
-bind-key -t vi-copy PPage page-up
-bind-key -t vi-copy NPage page-down
+bind-key -t vi-copy PageUp page-up
+bind-key -t vi-copy PageDown page-down
 
 {# copy-mode learned '-e' in tmux 2.1 #}
 {% if version >= 2.1 %}
