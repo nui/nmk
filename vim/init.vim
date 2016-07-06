@@ -72,7 +72,6 @@ endif
 let g:NERDTreeBookmarksFile = g:nmk_config_dir.'/NERDTreeBookmarks'
 let g:NERDTreeIgnore = ['\.egg$', '\.o$', '\.obj$', '\.pyc$', '\.pyo$', '\.so$', '^\.git$', '^\.idea$', '^bower_components$', '^node_modules$', '^__pycache__$']
 let g:NERDTreeShowBookmarks = 1
-let g:airline#extensions#tagbar#enabled = 0
 let g:airline#extensions#whitespace#enabled = 0
 let g:airline_powerline_fonts = exists('g:nmk_256color')
 let g:ctrlp_cache_dir = s:cache_dir."/ctrlp"
@@ -82,12 +81,9 @@ let g:jellybeans_use_term_background_color = 1
 let g:multi_cursor_quit_key = '<C-c>'
 let g:solarized_italic = 0
 let g:syntastic_quiet_messages = {'!level':  'errors'}
-let g:tagbar_autoclose = 1
-let g:tagbar_autofocus = 1
 let g:tcommentGuessFileType_jinja = 1
 
 nnoremap <leader>ag :Ag<Space>
-nnoremap <leader>h  :TagbarToggle<CR>
 
 nnoremap <leader>nc :NERDTreeClose<CR>
 nnoremap <leader>nf :NERDTreeFind<CR>
