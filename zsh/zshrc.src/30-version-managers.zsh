@@ -1,17 +1,17 @@
 # Detect & load version managers
-() {
+function {
     typeset -a managers
     # Detect nvm
     [[ -e $HOME/.nvm/nvm.sh ]] && {
         managers+=(nvm)
-        function use-nvm() {
+        function use-nvm {
             source $HOME/.nvm/nvm.sh
         }
     }
     # Detect pyenv
     (( ${+commands[pyenv]} )) && {
         managers+=(pyenv)
-        function use-pyenv() {
+        function use-pyenv {
             eval "$(pyenv init -)"
             [[ ${$(pyenv commands)[(r)virtualenvwrapper]} == virtualenvwrapper ]] \
                 && pyenv virtualenvwrapper
@@ -20,7 +20,7 @@
     # Detect rbenv
     (( ${+commands[rbenv]} )) && {
         managers+=(rbenv)
-        function use-rbenv() {
+        function use-rbenv {
             eval "$(rbenv init -)"
         }
     }

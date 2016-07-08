@@ -43,7 +43,7 @@ zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,cmd'
 # see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
-function nmk-fancy-ctrl-z () {
+function nmk-fancy-ctrl-z {
     if [[ ${#BUFFER} -eq 0 ]]; then
         bg
         zle redisplay
@@ -54,7 +54,7 @@ function nmk-fancy-ctrl-z () {
 zle -N nmk-fancy-ctrl-z
 bindkey '^Z' nmk-fancy-ctrl-z
 # Aliases and interactive shell configuration
-cdd() {
+function cdd {
     # Change pwd to directory in which $1 is located
     if [[ ! -e $1 ]]; then
         >&2 print -- '$1 does not exist'
@@ -63,7 +63,7 @@ cdd() {
     cd ${1:A:h}
 }
 
-cde() {
+function cde {
     # Change current working directory to directory in which $1 is located,
     # and execute the command.
     if [[ ! -x $1 ]]; then
@@ -82,7 +82,7 @@ alias cd=' cd'
 alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
 alias help=run-help
-() {
+function {
     local -a option
     # Test if --group-directories-first option is available
     ls --group-directories-first --version &> /dev/null && {
@@ -107,7 +107,7 @@ alias help=run-help
     # rf is shortcut to readlink -f
     # if xclip is present, pipe output to xclip
     if (( ${+commands[xclip]} )); then
-        function rf() {
+        function rf {
             local fullpath
             fullpath=$(readlink -f "$@")
             (( $? == 0 )) && {
@@ -145,7 +145,7 @@ export GIT_PAGER='less -+F -+X -c'
 #   The use of function keyword in function declaration
 #   is to prevent vi get expanded to vim on some system
 #   that alias vi=vim
-(( ${+commands[vi]} )) && function vi() {
+(( ${+commands[vi]} )) && function vi {
     local VIMINIT=
     command vi "$@"
 }
@@ -154,7 +154,7 @@ export GIT_PAGER='less -+F -+X -c'
 
 # Prefer nvim
 (( ${+commands[nvim]} )) && {
-    function nvim() {
+    function nvim {
         # Deactivate python virtual environment before start nvim
         if (( ${+functions[deactivate]} )) && [[ -n $VIRTUAL_ENV ]]; then
             (deactivate && command nvim "$@")
@@ -195,19 +195,19 @@ prompt horizontal
 
 [[ -e /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
 # Detect & load version managers
-() {
+function {
     typeset -a managers
     # Detect nvm
     [[ -e $HOME/.nvm/nvm.sh ]] && {
         managers+=(nvm)
-        function use-nvm() {
+        function use-nvm {
             source $HOME/.nvm/nvm.sh
         }
     }
     # Detect pyenv
     (( ${+commands[pyenv]} )) && {
         managers+=(pyenv)
-        function use-pyenv() {
+        function use-pyenv {
             eval "$(pyenv init -)"
             [[ ${$(pyenv commands)[(r)virtualenvwrapper]} == virtualenvwrapper ]] \
                 && pyenv virtualenvwrapper
@@ -216,7 +216,7 @@ prompt horizontal
     # Detect rbenv
     (( ${+commands[rbenv]} )) && {
         managers+=(rbenv)
-        function use-rbenv() {
+        function use-rbenv {
             eval "$(rbenv init -)"
         }
     }

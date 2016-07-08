@@ -1,5 +1,5 @@
 # Aliases and interactive shell configuration
-cdd() {
+function cdd {
     # Change pwd to directory in which $1 is located
     if [[ ! -e $1 ]]; then
         >&2 print -- '$1 does not exist'
@@ -8,7 +8,7 @@ cdd() {
     cd ${1:A:h}
 }
 
-cde() {
+function cde {
     # Change current working directory to directory in which $1 is located,
     # and execute the command.
     if [[ ! -x $1 ]]; then
@@ -27,7 +27,7 @@ alias cd=' cd'
 alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
 alias help=run-help
-() {
+function {
     local -a option
     # Test if --group-directories-first option is available
     ls --group-directories-first --version &> /dev/null && {
@@ -52,7 +52,7 @@ alias help=run-help
     # rf is shortcut to readlink -f
     # if xclip is present, pipe output to xclip
     if (( ${+commands[xclip]} )); then
-        function rf() {
+        function rf {
             local fullpath
             fullpath=$(readlink -f "$@")
             (( $? == 0 )) && {
@@ -90,7 +90,7 @@ export GIT_PAGER='less -+F -+X -c'
 #   The use of function keyword in function declaration
 #   is to prevent vi get expanded to vim on some system
 #   that alias vi=vim
-(( ${+commands[vi]} )) && function vi() {
+(( ${+commands[vi]} )) && function vi {
     local VIMINIT=
     command vi "$@"
 }
@@ -99,7 +99,7 @@ export GIT_PAGER='less -+F -+X -c'
 
 # Prefer nvim
 (( ${+commands[nvim]} )) && {
-    function nvim() {
+    function nvim {
         # Deactivate python virtual environment before start nvim
         if (( ${+functions[deactivate]} )) && [[ -n $VIRTUAL_ENV ]]; then
             (deactivate && command nvim "$@")
