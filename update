@@ -21,5 +21,5 @@ cd $NMK_DIR
 sh uninstall.sh
 tar -x -f $BUNDLE_NAME --strip-components=1
 rm $BUNDLE_NAME
-print "Updated nmk, Top commit is $(cat HEAD)"
+print "Updated nmk"
 

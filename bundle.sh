@@ -1,8 +1,6 @@
 #!/bin/sh
 set -x
 
-VERSION=${1:-$(date --iso)}
-
 if ! [ -e bin/nmk -a -e bundle.sh ]; then
     >&2 echo "This script need to run from inside NMK directory"
     exit 1
@@ -14,11 +12,9 @@ if [ -e zsh/.zcompdump -o -e zsh/.zsh_history -o -d node_modules ]; then
     exit 1
 fi
 
-# remove this script
 rm -f bundle.sh
-# top commit and version
-git --no-pager log -1 --pretty=oneline --color=never > HEAD
-echo $VERSION > VERSION
+git --no-pager log -3 --oneline --color=never > LAST_COMMITS
+date --rfc-3339=seconds > BUILD_TIME
 # add uninstall script
 cat > uninstall.sh << 'EOF'
 #!/bin/sh
