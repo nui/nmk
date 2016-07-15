@@ -35,10 +35,10 @@ KERNEL_VERSIONS, KERNEL_PACKAGES = init()
 
 
 def select_version(version_set):
-    d = {k: v for k, v in enumerate(sorted(list(version_set)), start=1)}
+    d = {k: v for k, v in enumerate(sorted(list(version_set), reverse=True), start=1)}
     for i, v in d.iteritems():
         print "({}) {}".format(i, v)
-    ch = raw_input('Select version to keep by number: ')
+    ch = raw_input('Select version to keep by number[1]: ') or '1'
     return d.get(int(ch))
 
 
