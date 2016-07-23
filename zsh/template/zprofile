@@ -3,6 +3,7 @@ export ZDOTDIR=$NMK_DIR/zsh
 
 export EDITOR=nvim
 export NMK_DEVELOPMENT=true
+# export NMK_PYTHON=~/.pyenv/versions/3.5.2/bin/python
 export VIMINIT='source $NMK_DIR/vim/init.vim'
 # export GOPATH=~/go
 
