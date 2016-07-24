@@ -147,7 +147,8 @@ function prompt_horizontal_precmd {
 
         # pyenv python version
         ((${horizontal[pyenv]})) && [[ -n $PYENV_VERSION ]] && {
-            prompt_status+="PyEnv $PYENV_VERSION"
+            # show python major and minor version
+            prompt_status+="Py ${(j|.|)${(s|.|)PYENV_VERSION}[1,2]}"
         }
 
         # python virtual environment
