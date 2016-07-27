@@ -5,6 +5,4 @@
 # sudo if user is not member of docker group
 [[ ${$(id -Gn)[(r)docker]} == docker ]] && _DOCKER=docker || _DOCKER=(sudo docker)
 
-for id in ${$($_DOCKER images --filter dangling=true | awk '{print $3}')[2,-1]}; do
-    $_DOCKER rmi $id
-done
+exec $_DOCKER rmi $($_DOCKER images -q -f dangling=true)
