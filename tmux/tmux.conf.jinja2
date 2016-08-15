@@ -75,17 +75,29 @@ bind-key C-l if-shell -F "#{alternate_on}" "send-keys C-l" "send-keys -R C-l; cl
 bind-key C-l send-keys -R C-l\; clear-history
 {% endif %}
 
-bind-key -t vi-copy PageUp page-up
-bind-key -t vi-copy PageDown page-down
+unbind-key -t vi-copy PageUp
+bind-key -t vi-copy PageUp halfpage-up
+unbind-key -t vi-copy PageDown
+bind-key -t vi-copy PageDown halfpage-down
 
 {# copy-mode learned '-e' in tmux 2.1 #}
 {% if version >= 2.1 %}
-{# Enter copy mode by PageUp key #}
-{# Credit https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/ #}
-bind-key -T root PPage if-shell -F "#{alternate_on}" "send-keys PPage" "copy-mode -e; send-keys PPage"
-
 {# Credit https://github.com/tmux/tmux/issues/145 #}
 bind-key -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
+{% endif %}
+
+{# Enter copy mode by PageUp key #}
+{% if version == 2.1 %}
+{# Multiple key tabels introduced in tmux 2.1 #}
+{# Credit https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/ #}
+bind-key -T root PageUp if-shell -F "#{alternate_on}" "send-keys PageUp" "copy-mode -eu"
+{% endif %}
+{% if version >= 2.2 %}
+{# #{s:...} added in tmux 2.2 #}
+{# PageUp key to enter copy mode while on zsh prompt #}
+bind-key -T root PageUp   if-shell -F "#{s/zsh//:pane_current_command}#{pane_in_mode}" "send-keys PageUp" "copy-mode -eu"
+{# Don't send PageDown key while on zsh prompt #}
+bind-key -T root PageDown if-shell -F "#{s/zsh//:pane_current_command}#{pane_in_mode}" "send-keys PageDown"
 {% endif %}
 
 if-shell 'zsh -c "[[ $NMK_TMUX_256_COLOR == 1 ]]"' 'source-file $NMK_DIR/tmux/256color.conf'
