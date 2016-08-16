@@ -64,7 +64,7 @@ Log out and log back in.
 
 All tags in this repository are signed with my public key, run below command to get it.
 
-`gpg --recv-keys 0x04A496963F768246376420B8D6F342D866939600`
+`gpg --recv-keys 0xD6F342D866939600`
 
 
 
