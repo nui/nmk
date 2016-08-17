@@ -90,10 +90,10 @@ bind-key -T root WheelUpPane if-shell -Ft= "#{mouse_any_flag}" "send-keys -M" "i
 
 {# -- Enter copy mode by PageUp key during zsh prompt -- #}
 {# Credit https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/ #}
-{% if version == 2.1 %} {# Multiple key tabels introduced in tmux 2.1 #}
-bind-key -T root PageUp if-shell -F "#{alternate_on}" "send-keys PageUp" "copy-mode -eu"
-{% elif version >= 2.2 %} {# #{s:...} added in tmux 2.2 #}
+{% if version >= 2.2 %} {# #{s:...} added in tmux 2.2 #}
 bind-key -T root PageUp if-shell -F "#{s/zsh//:pane_current_command}#{pane_in_mode}" "send-keys PageUp" "copy-mode -eu"
+{% elif version == 2.1 %} {# Multiple key tabels added in tmux 2.1 #}
+bind-key -T root PageUp if-shell -F "#{alternate_on}" "send-keys PageUp" "copy-mode -eu"
 {% endif %}
 
 {# -- Don't send PageDown key while on zsh prompt -- #}
