@@ -26,12 +26,16 @@ function writeConfig (version, data, callback) {
     fs.writeFile(configFile, data, callback);
 }
 
+function removeBlankLines(data) {
+    return data.replace(/^\s*[\r\n]/gm, '');
+}
+
 function render (callback: renderCallback) {
     _template = loadTemplate();
     function iteratee (version, iterateeCallback) {
         renderConfig(version, (err, data) => {
             if (err) return iterateeCallback(err);
-            writeConfig(version, data, iterateeCallback);
+            writeConfig(version, removeBlankLines(data), iterateeCallback);
         });
     }
     async.each(tmuxConfig.versions, iteratee, callback);

@@ -13,9 +13,6 @@ bind-key -n F5 resize-pane -Z
 
 {% if has_custom_keytable %}
 bind-key -n F11 switch-client -T fxtable
-{% for i in function_keys %}
-bind-key -T fxtable F{{i}} send-keys F{{i}}
-{% endfor %}
 bind-key -T fxtable -r Space next-layout
 bind-key -T fxtable 1 select-layout even-horizontal
 bind-key -T fxtable 2 select-layout even-vertical
@@ -105,5 +102,6 @@ bind-key -T root PageDown if-shell -F "#{s/zsh//:pane_current_command}#{pane_in_
 if-shell 'zsh -c "[[ $NMK_TMUX_256_COLOR == 1 ]]"' 'source-file $NMK_DIR/tmux/256color.conf' 'source-file $NMK_DIR/tmux/8color.conf'
 
 {# -- Unset temporary environment variables that were used during tmux initialization -- #}
-{% for env in tmux_tmp_envs %}set-environment -gr {{ env }}
+{% for env in tmux_tmp_envs %}
+set-environment -gr {{ env }}
 {% endfor %}
