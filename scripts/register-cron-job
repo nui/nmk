@@ -1,4 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(dirname -- "$(readlink -f -- "$0")")"
+NMK_DIR="$(dirname "$SCRIPT_DIR")"
+NMK=$NMK_DIR/bin/nmk
 
 delete_old_job() {
     local copy="$(crontab -l 2>/dev/null)"
@@ -13,8 +17,8 @@ generate_cron_config() {
     # print current configuration if exist
     crontab -l 2>/dev/null || true
     # update twice a day
-    cat <<- 'EOCRON'
-		0 */12 * * * $HOME/.nmk/scripts/automatic-update --prune-reflog --log
+    cat <<- EOCRON
+		0 */12 * * * $NMK -L self-update -- -c '\$HOME/.nmk/scripts/automatic-update --prune-reflog --log'
 	EOCRON
 }
 
