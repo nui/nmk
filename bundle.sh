@@ -24,8 +24,12 @@ find . -name '*.pyc' -exec rm -f {} +
 <.bundle-dirs xargs --null rmdir --ignore-fail-on-non-empty
 exec rm -f .bundle-dirs
 EOF
-# remove all .git directories
-find . -type d -name .git -exec rm -rf {} +
+
+TMPTAR=$(mktemp --suffix=.tar.gz)
+TMPDIR=$(mktemp -d)
+OUTTAR="$(dirname -- "$(dirname -- "$(readlink -f -- "$0")")")/nmk.tar.xz"
+tar -caf $TMPTAR --exclude-vcs --exclude-from=bundle.exclude .
+cd $TMPDIR && tar -xf $TMPTAR
 
 find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files
 find . -mindepth 1 -type d -print0 | sort --reverse --zero-terminated > .bundle-dirs
@@ -33,5 +37,6 @@ find . -mindepth 1 -type d -print0 | sort --reverse --zero-terminated > .bundle-
 # unset write permission to get warning message on update file
 find . -type f -exec chmod ugo-w {} +
 
-tar caf ../nmk.tar.xz --owner=0 --group=0 --mtime='' --transform 's#^\./#.nmk/#' .
+tar -caf "$OUTTAR" --owner=0 --group=0 --mtime='' --transform 's#^\./#.nmk/#' .
+rm -rf $TMPTAR $TMPDIR
 
