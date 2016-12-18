@@ -1,6 +1,5 @@
-// @flow
-import Tmux from './renderers/tmux';
-import Zsh from './renderers/zsh';
+import Tmux from "./renderers/tmux";
+import Zsh from "./renderers/zsh";
 
 
 function logSuccess(message: string) {

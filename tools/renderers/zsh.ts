@@ -1,15 +1,10 @@
-// @flow
-import fs from 'fs';
-import path from 'path';
+import * as fs from "fs";
+import * as path from "path";
+import * as async from "async";
+import {watch} from "chokidar";
+import zshConfig from "../../zsh/config";
 
-import async from 'async';
-import {watch} from 'chokidar';
-
-import zshConfig from '../../zsh/config';
-
-declare function concatFilesCallback(err: any, data?: Buffer | string): void;
-
-function concatFiles(files: Array<string>, callback: concatFilesCallback) {
+function concatFiles(files: Array<string>, callback) {
     async.map(files, fs.readFile, (err, arr) => {
         if (err) return callback(err);
         callback(null, arr.join(''));
@@ -25,7 +20,7 @@ function listZshrcSourceFiles(callback: Function) {
     });
 }
 
-function concatZshrc(callback: concatFilesCallback) {
+function concatZshrc(callback) {
     listZshrcSourceFiles((err, files) => {
         if (err) return callback(err);
         concatFiles(files, callback);

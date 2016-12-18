@@ -1,4 +1,4 @@
-import path from 'path';
+import * as path from "path";
 
 const tmuxDir = __dirname;
 const templateFile = 'tmux.conf.jinja2';
