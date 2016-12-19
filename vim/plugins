@@ -9,6 +9,7 @@ nerdtree  https://github.com/scrooloose/nerdtree.git
 python-syntax  https://github.com/hdima/python-syntax.git
 syntastic  https://github.com/scrooloose/syntastic.git
 tcomment_vim  https://github.com/tomtom/tcomment_vim.git
+typescript-vim https://github.com/leafgarland/typescript-vim.git
 vim-airline  https://github.com/bling/vim-airline.git
 vim-airline-themes https://github.com/vim-airline/vim-airline-themes.git
 vim-colors-solarized  https://github.com/altercation/vim-colors-solarized.git
