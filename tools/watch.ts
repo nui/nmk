@@ -1,5 +1,5 @@
-import Tmux from "./renderers/tmux";
-import Zsh from "./renderers/zsh";
+import {Tmux} from "./renderers/tmux";
+import {Zsh} from "./renderers/zsh";
 
 
 function logSuccess(message: string) {
@@ -10,6 +10,6 @@ function logSuccess(message: string) {
 }
 
 export default function () {
-    Tmux.renderAndWatch(logSuccess('Rendered tmux configuration files.'));
-    Zsh.renderAndWatch(logSuccess('Rendered .zshrc file'));
+    new Tmux().renderAndWatch(logSuccess('Rendered tmux configuration files.'));
+    new Zsh().renderAndWatch(logSuccess('Rendered .zshrc file'));
 }

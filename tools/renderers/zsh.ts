@@ -3,6 +3,7 @@ import * as path from "path";
 import * as async from "async";
 import {watch} from "chokidar";
 import zshConfig from "../../zsh/config";
+import {Renderer} from './renderer';
 
 function concatFiles(files: Array<string>, callback) {
     async.map(files, fs.readFile, (err, arr) => {
@@ -39,12 +40,10 @@ function render(callback) {
     renderZshrc(callback);
 }
 
-function renderAndWatch(callback: (err: any) => void) {
-    const watcher = watch(zshConfig.zshrc.pattern, {awaitWriteFinish: true});
-    watcher.on('change', (event, path) => render(callback));
-    render(callback);
+export class Zsh implements Renderer {
+    renderAndWatch(callback?: Function) {
+        const watcher = watch(zshConfig.zshrc.pattern, {awaitWriteFinish: true});
+        watcher.on('change', (event, path) => render(callback));
+        render(callback);
+    }
 }
-
-export default {
-    renderAndWatch,
-};

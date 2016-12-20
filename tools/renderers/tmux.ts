@@ -4,6 +4,7 @@ import * as async from "async";
 import {watch} from "chokidar";
 import {Environment, FileSystemLoader} from "nunjucks";
 import tmuxConfig from "../../tmux/config";
+import {Renderer} from "./renderer";
 
 // private variables
 let _template;
@@ -45,12 +46,10 @@ function renderConfig(version, callback) {
     _template.render(context, callback);
 }
 
-function renderAndWatch(callback?) {
-    _watcher = watch(tmuxConfig.template.path, {awaitWriteFinish: true});
-    _watcher.on('change', (event, path) => render(callback));
-    render(callback);
+export class Tmux implements Renderer {
+    renderAndWatch(callback?) {
+        _watcher = watch(tmuxConfig.template.path, {awaitWriteFinish: true});
+        _watcher.on('change', (event, path) => render(callback));
+        render(callback);
+    }
 }
-
-export default {
-    renderAndWatch,
-};
