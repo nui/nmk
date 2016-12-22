@@ -2,10 +2,10 @@ import * as path from "path";
 
 const zdotdir = __dirname;
 
-export default {
+export const config = {
     zdotdir,
     zshrc: {
-        dir: path.join(zdotdir, 'zshrc.src'),
-        pattern: `${zdotdir}/zshrc.src/*.zsh`,
+        sourceDir: path.join(zdotdir, 'zshrc.src'),
+        sourcePattern: `${zdotdir}/zshrc.src/*.zsh`,
     }
 };

@@ -1,49 +1,51 @@
+import * as async from "async";
 import * as fs from "fs";
 import * as path from "path";
-import * as async from "async";
+import {config} from "../../zsh/config";
 import {watch} from "chokidar";
-import zshConfig from "../../zsh/config";
-import {Renderer} from './renderer';
-
-function concatFiles(files: Array<string>, callback) {
-    async.map(files, fs.readFile, (err, arr) => {
-        if (err) return callback(err);
-        callback(null, arr.join(''));
-    });
-}
-
-function listZshrcSourceFiles(callback: Function) {
-    const zshrcSourceDir = path.join(zshConfig.zdotdir, 'zshrc.src');
-    fs.readdir(zshrcSourceDir, (err, files) => {
-        if (err) return callback(err);
-        const getFilePath = async.asyncify(path.join.bind(null, zshrcSourceDir));
-        async.map(files, getFilePath, callback);
-    });
-}
-
-function concatZshrc(callback) {
-    listZshrcSourceFiles((err, files) => {
-        if (err) return callback(err);
-        concatFiles(files, callback);
-    });
-}
-
-function renderZshrc(callback: Function) {
-    const zshrc = path.join(zshConfig.zdotdir, '.zshrc');
-    concatZshrc((err, data) => {
-        if (err) return callback(err);
-        fs.writeFile(zshrc, data, callback);
-    });
-}
-
-function render(callback) {
-    renderZshrc(callback);
-}
+import {Renderer} from "./renderer";
 
 export class Zsh implements Renderer {
+    private watcher;
+
+    static concatFiles(files: Array<string>, callback) {
+        async.map(files, fs.readFile, (err, arr) => {
+            if (err) return callback(err);
+            callback(null, arr.join(''));
+        });
+    }
+
+    static listZshrcSourceFiles(callback: Function) {
+        const zshrcSourceDir = config.zshrc.sourceDir;
+        fs.readdir(zshrcSourceDir, (err, files) => {
+            if (err) return callback(err);
+            const getFilePath = async.asyncify(path.join.bind(null, zshrcSourceDir));
+            async.map(files, getFilePath, callback);
+        });
+    }
+
+    static concatZshrc(callback) {
+        Zsh.listZshrcSourceFiles((err, files) => {
+            if (err) return callback(err);
+            Zsh.concatFiles(files, callback);
+        });
+    }
+
+    static renderZshrc(callback: Function) {
+        const zshrc = path.join(config.zdotdir, '.zshrc');
+        Zsh.concatZshrc((err, data) => {
+            if (err) return callback(err);
+            fs.writeFile(zshrc, data, callback);
+        });
+    }
+
+    static render(callback) {
+        Zsh.renderZshrc(callback);
+    }
+
     renderAndWatch(callback?: Function) {
-        const watcher = watch(zshConfig.zshrc.pattern, {awaitWriteFinish: true});
-        watcher.on('change', (event, path) => render(callback));
-        render(callback);
+        Zsh.render(callback);
+        this.watcher = watch(config.zshrc.sourcePattern, {awaitWriteFinish: true});
+        this.watcher.on('change', (event, path) => Zsh.render(callback));
     }
 }
