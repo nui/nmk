@@ -3,21 +3,27 @@ import * as fs from "fs";
 import * as path from "path";
 import {watch} from "chokidar";
 
-import {config} from "./config";
 import {Renderer} from "../ts/renderer";
+import {Settings} from "./interfaces";
+
 
 export class Zsh implements Renderer {
     private watcher;
+    private settings: Settings;
 
-    static concatFiles(files: Array<string>, callback) {
+    constructor(settings: Settings) {
+        this.settings = settings;
+    }
+
+    private concatFiles(files: Array<string>, callback) {
         async.map(files, fs.readFile, (err, arr) => {
             if (err) return callback(err);
             callback(null, arr.join(''));
         });
     }
 
-    static listZshrcSourceFiles(callback: Function) {
-        const zshrcSourceDir = config.zshrc.sourceDir;
+    private listZshrcSourceFiles(callback: Function) {
+        const zshrcSourceDir = this.settings.zshrc.sourceDir;
         fs.readdir(zshrcSourceDir, (err, files) => {
             if (err) return callback(err);
             const getFilePath = async.asyncify(path.join.bind(null, zshrcSourceDir));
@@ -25,28 +31,28 @@ export class Zsh implements Renderer {
         });
     }
 
-    static concatZshrc(callback) {
-        Zsh.listZshrcSourceFiles((err, files) => {
+    private concatZshrc(callback) {
+        this.listZshrcSourceFiles((err, files) => {
             if (err) return callback(err);
-            Zsh.concatFiles(files, callback);
+            this.concatFiles(files, callback);
         });
     }
 
-    static renderZshrc(callback: Function) {
-        const zshrc = path.join(config.zdotdir, '.zshrc');
-        Zsh.concatZshrc((err, data) => {
+    private renderZshrc(callback: Function) {
+        const zshrc = path.join(this.settings.zdotdir, '.zshrc');
+        this.concatZshrc((err, data) => {
             if (err) return callback(err);
             fs.writeFile(zshrc, data, callback);
         });
     }
 
-    static render(callback) {
-        Zsh.renderZshrc(callback);
+    private render(callback) {
+        this.renderZshrc(callback);
     }
 
     renderAndWatch(callback?: Function) {
-        Zsh.render(callback);
-        this.watcher = watch(config.zshrc.sourcePattern, {awaitWriteFinish: true});
-        this.watcher.on('change', (event, path) => Zsh.render(callback));
+        this.render(callback);
+        this.watcher = watch(this.settings.zshrc.sourcePattern, {awaitWriteFinish: true});
+        this.watcher.on('change', (event, path) => this.render(callback));
     }
 }
