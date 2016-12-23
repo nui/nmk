@@ -3,8 +3,9 @@ import * as path from "path";
 import * as async from "async";
 import {watch} from "chokidar";
 import {Environment, FileSystemLoader} from "nunjucks";
-import tmuxConfig from "../../tmux/config";
-import {Renderer} from "./renderer";
+
+import tmuxConfig from "./config";
+import {Renderer} from "../ts/renderer";
 
 // private variables
 let _template;

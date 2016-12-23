@@ -1,9 +1,10 @@
 import * as async from "async";
 import * as fs from "fs";
 import * as path from "path";
-import {config} from "../../zsh/config";
 import {watch} from "chokidar";
-import {Renderer} from "./renderer";
+
+import {config} from "./config";
+import {Renderer} from "../ts/renderer";
 
 export class Zsh implements Renderer {
     private watcher;

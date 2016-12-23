@@ -1,5 +1,5 @@
-import {Tmux} from "./renderers/tmux";
-import {Zsh} from "./renderers/zsh";
+import {Tmux} from "../tmux/renderer";
+import {Zsh} from "../zsh/renderer";
 
 
 function logSuccess(message: string) {
