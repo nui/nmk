@@ -1,6 +1,6 @@
 import * as path from "path";
 import {Settings} from "./interfaces";
-import {Renderer} from "../ts/renderer";
+import {Renderer} from "../ts/interfaces";
 import {Zsh} from "./renderer";
 
 const zdotdir = __dirname;

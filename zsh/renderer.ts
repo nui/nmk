@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {watch} from "chokidar";
 
-import {Renderer} from "../ts/renderer";
+import {Renderer} from "../ts/interfaces";
 import {Settings} from "./interfaces";
 
 

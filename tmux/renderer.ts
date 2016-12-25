@@ -5,7 +5,7 @@ import {watch} from "chokidar";
 import {Environment, FileSystemLoader} from "nunjucks";
 
 import tmuxConfig from "./config";
-import {Renderer} from "../ts/renderer";
+import {Renderer} from "../ts/interfaces";
 
 // private variables
 let _template;
