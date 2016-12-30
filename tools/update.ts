@@ -2,10 +2,11 @@ import * as fs from "fs";
 import * as Promise from "bluebird";
 import * as request from "request-promise";
 import {pathogen} from "../settings";
+import {ENOENT} from "constants";
 import ErrnoException = NodeJS.ErrnoException;
 
 
-let isFileNotFoundError = (err: ErrnoException) => err.code === 'ENOENT';
+let isFileNotFoundError = (err: ErrnoException) => err.errno === ENOENT;
 
 function readLocalPathogen() {
     return new Promise((resolve, reject) => {
