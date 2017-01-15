@@ -1,9 +1,8 @@
-function loadTool(name: string) {
-    let path = `./${name}`;
-    return require(path).default;
-}
+import watch from './watch';
+import update from './update';
 
-if (process.mainModule.children.length === 0 && process.argv.length > 2) {
-    const args = process.argv.slice(3);
-    loadTool(process.argv[2]).apply(null, args);
+if (process.argv.length > 2) {
+    const [tool, ...args] = process.argv.slice(2);
+    let tools = { watch, update };
+    tools[tool].apply(null, args);
 }
