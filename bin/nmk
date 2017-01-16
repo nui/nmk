@@ -2,7 +2,7 @@
 nmk_dir=$(dirname "$(dirname "$(readlink -f "$0")")")
 
 if [[ -x $NMK_PYTHON ]]; then
-    exec $NMK_PYTHON "$nmk_dir/bin/nmk.py" "$@"
+    exec env -u NMK_PYTHON $NMK_PYTHON "$nmk_dir/bin/nmk.py" "$@"
 else
     for python_bin in python python3 python2; do
         # Call binary to determine python existence
