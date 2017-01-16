@@ -211,7 +211,9 @@ function {
         managers+=(pyenv)
         function use-pyenv {
             eval "$(pyenv init -)"
-            [[ ${$(pyenv commands)[(r)virtualenvwrapper]} == virtualenvwrapper ]] \
+            # Initialise virtualenvwrapper, skip if using system version
+            [[ $(pyenv version-name) != system* ]] \
+                && [[ ${$(pyenv commands)[(r)virtualenvwrapper]} == virtualenvwrapper ]] \
                 && pyenv virtualenvwrapper
         }
     }
