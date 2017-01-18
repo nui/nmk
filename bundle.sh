@@ -24,7 +24,7 @@ find . -name '*.pyc' -exec rm -f {} +
 EOF
 rm -f bundle.sh
 
-OUT_TAR=$ORIG_PWD/nmk.tar.xz
+OUT_TAR=$ORIG_PWD/nmk.tar.gz
 TMP_DIR=$(mktemp -d)
 
 tar -c --exclude-vcs --exclude-from=bundle.exclude . | tar -x -C "$TMP_DIR"
