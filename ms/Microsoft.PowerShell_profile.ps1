@@ -1,0 +1,1 @@
+﻿New-Alias grrr git-reset-to-remote-branch.ps1
