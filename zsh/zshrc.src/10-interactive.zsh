@@ -75,7 +75,7 @@ function {
     alias gsm=' git merge -s subtree --no-commit --squash'
     # Use alternate screen in git log
     alias lol=" git log --oneline --decorate --graph --color=auto"
-    alias gfr=' git-fetch-rebase'
+    alias gpr=' git pull --rebase'
     alias grrr=' git-reset-to-remote-branch'
 }
 export GIT_PAGER='less -+F -+X -c'
