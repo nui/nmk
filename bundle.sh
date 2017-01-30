@@ -27,7 +27,7 @@ rm -f bundle.sh
 OUT_TAR=$ORIG_PWD/nmk.tar.gz
 TMP_DIR=$(mktemp -d)
 
-tar -c --exclude-vcs --exclude-from=bundle.exclude . | tar -x -C "$TMP_DIR"
+tar -c --exclude-vcs --exclude-from=.nmkignore . | tar -x -C "$TMP_DIR"
 cd $TMP_DIR
 # create a list of files
 find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files

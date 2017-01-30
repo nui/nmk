@@ -1,3 +1,4 @@
+# exclude following files from nmk bundle
 vim/bundle/dockerfile.vim/vim-dockerfile-example.png
 vim/bundle/syntastic/_assets
 vim/bundle/typescript-vim/vimshot01.png
