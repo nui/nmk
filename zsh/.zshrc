@@ -136,9 +136,17 @@ function {
 export GIT_PAGER='less -+F -+X -c'
 
 (( ${+commands[docker]} )) && {
+    local semver_str=$(docker version --format '{{.Client.Version}}' 2>/dev/null)
+    local -a semver
+    semver=(${(@s/./)semver_str})
+    local major=${semver[1]}
+    local minor=${semver[2]}
+    if (( major >= 1 && minor >= 13)); then
+        alias dkci=' docker system prune'
+    else
+        alias dkci=' docker-clear-images'
+    fi
     alias dkcc=' docker-clear-containers'
-    alias dkci=' docker-clear-images'
-    alias dkex=' docker-exec'
 }
 
 # vi = Vim without my plugins
