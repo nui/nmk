@@ -120,8 +120,12 @@ function {
     fi
 }
 
-# Productive Git aliases
+# Productive Git aliases and functions
 (( ${+commands[git]} )) && {
+    function git-reset-to-remote-branch {
+        git remote update --prune
+        git reset --hard $(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+    }
     alias gco=' git checkout'
     alias gd=' git diff'
     alias gds=' git diff --staged'
