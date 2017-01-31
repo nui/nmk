@@ -56,8 +56,7 @@ function {
             local fullpath
             fullpath=$(readlink -f "$@")
             (( $? == 0 )) && {
-                print -- $fullpath | tee >(xclip)
-                print -- 'Path is copied to clipboard'
+                print -- $fullpath | tee >(xclip) >(xclip -selection clipboard)
             }
         }
     else
