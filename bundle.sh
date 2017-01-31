@@ -15,7 +15,7 @@ fi
 ORIG_PWD=$PWD
 
 date --rfc-3339=seconds > BUILD_TIME
-git log -n 10 --no-color --oneline --decorate --graph > RECENT_COMMITS
+git log -n 10 --no-color --oneline --decorate --graph > LAST_10_COMMITS
 # add uninstall script
 cat > uninstall.sh << 'EOF'
 #!/bin/sh
