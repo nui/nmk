@@ -34,6 +34,8 @@ cd $TMP_DIR
 find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files
 # unset write permission to get warning message on update read-only files
 find . -type f -exec chmod ugo-w {} +
+# set update script execute mode
+chmod +x bin/nmk-update.py
 tar -caf "$OUT_TAR" --owner=0 --group=0 --mtime='' --transform 's#^\./#.nmk/#' .
 
 rm -rf $TMP_DIR
