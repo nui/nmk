@@ -8,10 +8,10 @@ import subprocess
 from tempfile import NamedTemporaryFile
 from six.moves.urllib import request
 
-logging.basicConfig(format='{0}: %(message)s'.format(__file__), level=logging.INFO)
+logging.basicConfig(format='nmk-update.py: %(message)s', level=logging.INFO)
 
 NMK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RELEASE_JSON_PATH = path.join(NMK_DIR, '.nmk-release-json')
+RELEASE_JSON_PATH = path.join(NMK_DIR, '.release.json')
 
 
 def get_latest_release():
