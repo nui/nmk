@@ -125,6 +125,10 @@ function {
         git remote update --prune
         git reset --hard $(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
     }
+    function grst {
+        git tag -d $(git tag)
+        git-reset-to-remote-branch
+    }
     alias gco=' git checkout'
     alias gd=' git diff'
     alias gds=' git diff --staged'
