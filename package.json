@@ -6,7 +6,7 @@
     "watch": "ts-node tools/run watch"
   },
   "devDependencies": {
-    "@types/node": "^7.0.4",
+    "@types/node": "^7.0.5",
     "async": "^2.1.4",
     "bluebird": "^3.4.7",
     "chokidar": "^1.6.1",
