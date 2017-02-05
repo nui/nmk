@@ -48,19 +48,14 @@ function {
     alias ls="ls $color_auto"
 }
 
-(( ${+commands[readlink]} )) && {
-    # rf is shortcut to readlink -f
+function rf {
+    local abspath
+    abspath=${1:A}
     # if xclip is present, pipe output to xclip
     if (( ${+commands[xclip]} )); then
-        function rf {
-            local fullpath
-            fullpath=$(readlink -f "$@")
-            (( $? == 0 )) && {
-                print -- $fullpath | tee >(xclip) >(xclip -selection clipboard)
-            }
-        }
+        print -- $abspath | tee >(xclip) >(xclip -selection clipboard)
     else
-        alias rf=' readlink -f'
+        print -- $abspath
     fi
 }
 
