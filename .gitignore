@@ -20,7 +20,6 @@ vim/viminfo
 zsh/.antigen/
 zsh/.zcompdump
 zsh/.zsh_history
-zsh/plugins
 zsh/zprofile
 zsh/zshenv.extra
 zsh/zshrc.extra
