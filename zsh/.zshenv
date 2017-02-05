@@ -12,7 +12,6 @@ fpath=(
     $ZDOTDIR/themes
     # Plugin completion
     $ZDOTDIR/plugins/zsh-completions/src
-    $ZDOTDIR/plugins/docker-zsh-completion
 
     $fpath
 )
