@@ -53,9 +53,9 @@ function rf {
     abspath=${1:A}
     # if xclip is present, pipe output to xclip
     if (( ${+commands[xclip]} )); then
-        print -- $abspath | tee >(xclip) >(xclip -selection clipboard)
+        print -n -- $abspath | tee >(xclip) >(xclip -selection clipboard) >(tmux load-buffer -)
     else
-        print -- $abspath
+        print -n -- $abspath | tmux load-buffer -
     fi
 }
 
