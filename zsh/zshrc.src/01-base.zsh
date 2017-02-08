@@ -5,6 +5,7 @@ setopt extendedglob
 setopt histignorealldups
 setopt histignorespace
 setopt sharehistory
+setopt dvorak
 
 # force emacs keybindings
 bindkey -e
