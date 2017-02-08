@@ -21,6 +21,11 @@ def build_parser():
                         action='store_true',
                         default=False,
                         help='force 256 colors terminal')
+    parser.add_argument('-8',
+                        dest='force8color',
+                        action='store_true',
+                        default=False,
+                        help='force 8 colors terminal')
     parser.add_argument('-L', '--socket',
                         dest='socket',
                         default='nmk',
@@ -160,16 +165,18 @@ def is_inside_docker():
 def setup_terminal(env, args, tmux_dir):
     support_256color = any((
         args.force256color,
-        env.get('TERM') in ('cygwin', 'gnome-256color', 'putty', 'screen-256color', 'xterm-256color'),
+        env.get('TERM') in ('cygwin', 'gnome-256color', 'linux', 'putty', 'screen-256color', 'xterm-256color'),
         env.get('COLORTERM') in ('gnome-terminal', 'rxvt-xpm', 'xfce4-terminal'),
         args.autofix and is_inside_docker(),
     ))
-    if support_256color:
+
+    use_256color = not args.force8color and support_256color
+    if use_256color:
         terminal = 'screen-256color'
     else:
         terminal = 'screen'
     env['NMK_TMUX_DEFAULT_TERMINAL'] = terminal
-    env['NMK_TMUX_256_COLOR'] = "1" if support_256color else "0"
+    env['NMK_TMUX_256_COLOR'] = "1" if use_256color else "0"
 
 
 def setup_environment(env, args, nmk_dir):
