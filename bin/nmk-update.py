@@ -1,15 +1,16 @@
 #!/usr/bin/env python
+from os import path
+from tempfile import NamedTemporaryFile
 import json
 import logging
 import os
-from os import path
 import subprocess
-from tempfile import NamedTemporaryFile
 
-import argparse
 from six.moves.urllib import request
+import argparse
 
-logging.basicConfig(format='{0}: %(message)s'.format(path.basename(__file__)), level=logging.INFO)
+logging.basicConfig(format='{0}: %(message)s'.format(path.basename(__file__)),
+                    level=logging.INFO)
 
 NMK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RELEASE_JSON_PATH = path.join(NMK_DIR, '.release.json')
@@ -19,7 +20,7 @@ def build_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('tag_name',
                         nargs=argparse.OPTIONAL,
-                        help='tag name')
+                        help='git tag')
     return parser
 
 
@@ -64,7 +65,7 @@ def is_up2date(release_info):
             return False
         saved_bundle_info = get_bundle_info(saved_release_info)
         # 2. check bundle file metadata
-        return all((saved_bundle_info[k] == bundle_info[k] for k in ['created_at', 'updated_at', 'size']))
+        return all((saved_bundle_info[k] == bundle_info[k] for k in ('created_at', 'updated_at', 'size')))
 
 
 def save_release_info(release_info):
