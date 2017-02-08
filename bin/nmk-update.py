@@ -4,8 +4,9 @@ import logging
 import os
 from os import path
 import subprocess
-
 from tempfile import NamedTemporaryFile
+
+import argparse
 from six.moves.urllib import request
 
 logging.basicConfig(format='{0}: %(message)s'.format(path.basename(__file__)), level=logging.INFO)
@@ -14,9 +15,23 @@ NMK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RELEASE_JSON_PATH = path.join(NMK_DIR, '.release.json')
 
 
+def build_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('tag_name',
+                        nargs=argparse.OPTIONAL,
+                        help='tag name')
+    return parser
+
+
 def get_latest_release():
     response = request.urlopen('https://api.github.com/repos/nuimk/nmk/releases/latest')
     return json.loads(response.read())
+
+
+def get_release(tag_name):
+    response = request.urlopen('https://api.github.com/repos/nuimk/nmk/releases')
+    releases = json.loads(response.read())
+    return next((x for x in releases if x['tag_name'] == tag_name))
 
 
 def get_bundle_info(release_info):
@@ -60,7 +75,11 @@ def save_release_info(release_info):
 
 
 def main():
-    release_info = get_latest_release()
+    args = build_parser().parse_args()
+
+    tag_name = args.tag_name
+    release_info = get_release(tag_name) if tag_name else get_latest_release()
+
     logging.info('Founded tag ' + release_info['tag_name'])
     if is_up2date(release_info):
         logging.info('Already up to date :)')
