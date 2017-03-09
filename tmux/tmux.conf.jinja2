@@ -88,15 +88,16 @@ bind-key -T root WheelUpPane if-shell -Ft= "#{mouse_any_flag}" "send-keys -M" "i
 {# -- Enter copy mode by PageUp key during zsh prompt -- #}
 {# Credit https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/ #}
 {% if version >= 2.2 %} {# #{s:...} added in tmux 2.2 #}
-bind-key -T root PageUp if-shell -F "#{s/zsh//:pane_current_command}#{pane_in_mode}" "send-keys PageUp" "copy-mode -eu"
+bind-key -T root PageUp if-shell "[ #{pane_in_mode} -eq 1 -o #{alternate_on} -eq 1 ] || should-not-override-pg-updown #{pane_title}" "send-keys PageUp" "copy-mode -eu"
 {% elif version == 2.1 %} {# Multiple key tabels added in tmux 2.1 #}
 bind-key -T root PageUp if-shell -F "#{alternate_on}" "send-keys PageUp" "copy-mode -eu"
 {% endif %}
 
 {# -- Don't send PageDown key while on zsh prompt -- #}
 {% if version >= 2.2 %} {# #{s:...} added in tmux 2.2 #}
-bind-key -T root PageDown if-shell -F "#{s/zsh//:pane_current_command}#{pane_in_mode}" "send-keys PageDown"
+bind-key -T root PageDown if-shell "[ #{pane_in_mode} -eq 1 -o #{alternate_on} -eq 1 ] || should-not-override-pg-updown #{pane_title}" "send-keys PageDown"
 {% endif %}
+
 
 {# -- Colors -- #}
 if-shell 'zsh -c "[[ $NMK_TMUX_256_COLOR == 1 ]]"' 'source-file $NMK_DIR/tmux/256color.conf' 'source-file $NMK_DIR/tmux/8color.conf'
