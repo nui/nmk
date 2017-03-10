@@ -6,12 +6,12 @@
     "watch": "ts-node tools/run watch"
   },
   "devDependencies": {
-    "@types/node": "^7.0.5",
+    "@types/node": "^7.0.8",
     "async": "^2.1.5",
-    "bluebird": "^3.4.7",
+    "bluebird": "^3.5.0",
     "chokidar": "^1.6.1",
     "nunjucks": "^3.0.0",
-    "request": "^2.79.0",
+    "request": "^2.81.0",
     "request-promise": "^4.1.1",
     "ts-node": "^2.1.0",
     "typescript": "^2.2.1"
