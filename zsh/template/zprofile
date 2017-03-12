@@ -20,7 +20,7 @@ path=(
 )
 
 # gpg-agent as ssh-agent
-(( ${+commands[gpg-connect-agent]} )) && {
+(( ${+commands[gpg-connect-agent]} )) && [[ -n $DISPLAY ]] && {
     gpg-connect-agent /bye # start the agent if it is not running
     # export SSH_AUTH_SOCK=~/.gnupg/S.gpg-agent.ssh # gpg <= 2.1.12
     export SSH_AUTH_SOCK=/run/user/$UID/gnupg/S.gpg-agent.ssh # gpg > 2.1.12
