@@ -35,8 +35,10 @@ done
 
 _NMK_DIR=${${1:-$HOME/.nmk}:A}
 
-git clone --quiet --recursive $_REPO $_NMK_DIR
+git clone --quiet $_REPO $_NMK_DIR
 cd $_NMK_DIR
+git submodule init
+git submodule --quiet update --recursive
 git remote set-url origin $_GITHUB_REPO
 ./post-clone
 NMK_DIR=$_NMK_DIR ./vim/update-plugins
