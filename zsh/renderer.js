@@ -1,28 +1,23 @@
-import * as async from "async";
-import * as fs from "fs";
-import * as path from "path";
-import {watch} from "chokidar";
+const fs = require('fs');
+const path = require('path');
+const async = require('async');
 
-import {Renderer} from "../ts/interfaces";
-import {Settings} from "./interfaces";
+const {watch} = require('chokidar');
 
 
-export class Zsh implements Renderer {
-    private watcher;
-    private settings: Settings;
-
-    constructor(settings: Settings) {
+class Zsh {
+    constructor(settings) {
         this.settings = settings;
     }
 
-    private concatFiles(files: Array<string>, callback) {
+    concatFiles(files, callback) {
         async.map(files, fs.readFile, (err, arr) => {
             if (err) return callback(err);
             callback(null, arr.join(''));
         });
     }
 
-    private listZshrcSourceFiles(callback: Function) {
+    listZshrcSourceFiles(callback) {
         const zshrcSourceDir = this.settings.zshrc.sourceDir;
         fs.readdir(zshrcSourceDir, (err, files) => {
             if (err) return callback(err);
@@ -31,14 +26,14 @@ export class Zsh implements Renderer {
         });
     }
 
-    private concatZshrc(callback) {
+    concatZshrc(callback) {
         this.listZshrcSourceFiles((err, files) => {
             if (err) return callback(err);
             this.concatFiles(files, callback);
         });
     }
 
-    private renderZshrc(callback: Function) {
+    renderZshrc(callback) {
         const zshrc = path.join(this.settings.zdotdir, '.zshrc');
         this.concatZshrc((err, data) => {
             if (err) return callback(err);
@@ -46,13 +41,17 @@ export class Zsh implements Renderer {
         });
     }
 
-    private render(callback) {
+    render(callback) {
         this.renderZshrc(callback);
     }
 
-    renderAndWatch(callback?: Function) {
+    renderAndWatch(callback) {
         this.render(callback);
         this.watcher = watch(this.settings.zshrc.sourcePattern, {awaitWriteFinish: true});
         this.watcher.on('change', (event, path) => this.render(callback));
     }
 }
+
+module.exports = {
+    Zsh,
+};

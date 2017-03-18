@@ -1,19 +1,18 @@
 {
   "private": true,
+  "engines" : {
+    "node" : ">=6.10.0 <7.0.0"
+  },
   "scripts": {
-    "start": "ts-node tools/run watch",
-    "update": "ts-node tools/run update",
-    "watch": "ts-node tools/run watch"
+    "start": "node tools/run watch",
+    "update": "node tools/run update",
+    "watch": "node tools/run watch"
   },
   "devDependencies": {
-    "@types/node": "^7.0.8",
     "async": "^2.1.5",
-    "bluebird": "^3.5.0",
     "chokidar": "^1.6.1",
     "nunjucks": "^3.0.0",
     "request": "^2.81.0",
-    "request-promise": "^4.2.0",
-    "ts-node": "^2.1.0",
-    "typescript": "^2.2.1"
+    "request-promise": "^4.2.0"
   }
 }

@@ -1,12 +1,10 @@
-import * as path from "path";
-import {Settings} from "./interfaces";
-import {Renderer} from "../ts/interfaces";
-import {Zsh} from "./renderer";
+const path = require('path');
+const {Zsh} = require('./renderer');
 
 const zdotdir = __dirname;
 
-export function getRenderer(): Renderer {
-    const settings: Settings = {
+function getRenderer() {
+    const settings = {
         zdotdir,
         zshrc: {
             sourceDir: path.join(zdotdir, 'zshrc.src'),
@@ -15,3 +13,7 @@ export function getRenderer(): Renderer {
     };
     return new Zsh(settings);
 }
+
+module.exports = {
+    getRenderer,
+};

@@ -1,9 +1,9 @@
-import * as path from "path";
+const path = require('path');
 
 const tmuxDir = __dirname;
 const templateFile = 'tmux.conf.jinja2';
 
-export default {
+module.exports = {
     versions: [1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4],
     dir: tmuxDir,
     template: {

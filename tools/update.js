@@ -1,12 +1,9 @@
-import * as fs from "fs";
-import * as Promise from "bluebird";
-import * as request from "request-promise";
-import {pathogen} from "../settings";
-import {ENOENT} from "constants";
-import ErrnoException = NodeJS.ErrnoException;
+const fs = require('fs');
 
+const request = require('request-promise');
+const {pathogen} = require('../settings');
 
-let isFileNotFoundError = (err: ErrnoException) => err.errno === ENOENT;
+let isFileNotFoundError = (err) => err.code === 'ENOENT';
 
 function readLocalPathogen() {
     return new Promise((resolve, reject) => {
@@ -42,6 +39,6 @@ function updatePathogen() {
         });
 }
 
-export default function () {
+module.exports = function () {
     updatePathogen();
 };

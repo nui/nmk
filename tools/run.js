@@ -1,5 +1,5 @@
-import watch from './watch';
-import update from './update';
+const watch = require('./watch');
+const update = require('./update');
 
 if (process.argv.length > 2) {
     const [tool, ...args] = process.argv.slice(2);

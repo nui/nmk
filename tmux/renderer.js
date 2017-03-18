@@ -1,11 +1,11 @@
-import * as fs from "fs";
-import * as path from "path";
-import * as async from "async";
-import {watch} from "chokidar";
-import {Environment, FileSystemLoader} from "nunjucks";
+const fs = require('fs');
+const path = require('path');
+const async = require('async');
 
-import tmuxConfig from "./config";
-import {Renderer} from "../ts/interfaces";
+const {watch} = require('chokidar');
+const {Environment, FileSystemLoader} = require('nunjucks');
+
+const tmuxConfig = require('./config');
 
 // private variables
 let _template;
@@ -47,10 +47,14 @@ function renderConfig(version, callback) {
     _template.render(context, callback);
 }
 
-export class Tmux implements Renderer {
-    renderAndWatch(callback?) {
+class Tmux {
+    renderAndWatch(callback) {
         _watcher = watch(tmuxConfig.template.path, {awaitWriteFinish: true});
         _watcher.on('change', (event, path) => render(callback));
         render(callback);
     }
 }
+
+module.exports = {
+    Tmux,
+};
