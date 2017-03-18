@@ -17,8 +17,6 @@
     ~/.nmk/post-clone
     ~/.nmk/bin/nmk
     ~/.nmk/vim/update-plugins
-# or by download from
-    wget https://dl.dropboxusercontent.com/u/20621424/nmk/nmk.tar.xz
 ```
 
 
