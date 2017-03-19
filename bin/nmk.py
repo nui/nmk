@@ -251,10 +251,9 @@ def is_socket_exist(socket):
 
 
 def exec_tmux(tmux_dir, args):
-    tmux_bin = whence('tmux')
     conf = get_tmux_conf(tmux_dir)
 
-    params = (tmux_bin,)
+    params = ('tmux',)
     # Use default socket unless socket name is specified.
     socket = args.socket
     params += ('-L', socket)
@@ -272,9 +271,9 @@ def exec_tmux(tmux_dir, args):
     else:
         # start tmux server
         params += ('-f', conf) + tuple(tmux_args)
-    logging.debug('os.execv params: ' + str(params))
+    logging.debug('os.execvp params: ' + str(params))
     sys.stdout.flush()
-    os.execv(tmux_bin, params)
+    os.execvp('tmux', params)
 
 
 def main():
