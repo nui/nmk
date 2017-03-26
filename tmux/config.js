@@ -15,5 +15,6 @@ module.exports = {
         'NMK_TMUX_DEFAULT_SHELL',
         'NMK_TMUX_DEFAULT_TERMINAL',
         'NMK_TMUX_DETACH_ON_DESTROY',
+        'NMK_TMUX_HISTORY',
     ],
 };

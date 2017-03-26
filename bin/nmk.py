@@ -188,6 +188,7 @@ def setup_environment(env, args, nmk_dir):
     env['NMK_IGNORE_LOCAL'] = str(not args.local_config).lower()
     env['NMK_TMUX_DEFAULT_SHELL'] = whence('zsh')
     env['NMK_TMUX_DETACH_ON_DESTROY'] = args.detach_on_destroy
+    env['NMK_TMUX_HISTORY'] = os.path.join(nmk_dir, 'tmux', '.tmux_history')
     env['VIMINIT'] = 'source {0}'.format(initvim.replace(' ', r'\ '))
     env['ZDOTDIR'] = zdotdir
 
