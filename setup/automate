@@ -40,6 +40,5 @@ cd $_NMK_DIR
 git submodule init
 git submodule --quiet update --recursive
 git remote set-url origin $_GITHUB_REPO
-./post-clone
 NMK_DIR=$_NMK_DIR ./vim/update-plugins
 

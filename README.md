@@ -14,7 +14,6 @@
     wget -qO- https://github.com/nuimk/nmk/raw/master/setup/automate | zsh
 # or basic github checkout
     git clone --recursive https://github.com/nuimk/nmk.git ~/.nmk
-    ~/.nmk/post-clone
     ~/.nmk/bin/nmk
     ~/.nmk/vim/update-plugins
 ```
