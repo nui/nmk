@@ -3,14 +3,16 @@
 ## Installation
 
 ```sh
-# SYSTEM DEPENDENCIES
-# server:
-    sudo apt install git tmux vim-nox zsh
-# desktop:
-    sudo apt install git tmux vim-gtk xclip zsh
+# Debian system dependencies
+sudo apt install git tmux zsh
 
-# NMK
-# by automated script
+# Recommended packages
+# For desktop
+sudo apt install vim-gtk xclip
+# For server
+sudo apt install vim-nox
+
+# Then run setup script
     wget -qO- https://github.com/nuimk/nmk/raw/master/setup/automate | zsh
 # or basic github checkout
     git clone --recursive https://github.com/nuimk/nmk.git ~/.nmk
@@ -29,6 +31,19 @@ To use 256 colors, Set `TERM` environment variable to `xterm-256color`.
 - Change `TERM=xterm` to `TERM=xterm-256color`
 
 
+## Vim and zsh without tmux
+
+Overwrite `~/.zshenv` with
+```sh
+export ZDOTDIR=~/.nmk/zsh
+source $ZDOTDIR/.zshenv
+```
+
+Then run `cp ~/.nmk/zsh/{template/,}zprofile`
+
+Log out and log back in.
+
+
 ## Environment variables
 
 ```sh
@@ -43,21 +58,6 @@ NMK_DEVELOPMENT=[true|false]
 
 To make vim-airline display powerline symbols correctly, you need to install a patched font. Instructions can be found in the official powerline [documentation][1], or just download and install prepatched fonts from [powerline-font][2] repository.
 
-
-## Vim and zsh without tmux
-
-Append below lines to `~/.profile`
-
-```sh
-export NMK_DIR=${NMK_DIR:-$HOME/.nmk}
-export NMK_DEVELOPMENT=true
-
-export VIMINIT='source $NMK_DIR/vim/init.vim'
-export ZDOTDIR=${ZDOTDIR:-$NMK_DIR/zsh}
-PATH=$NMK_DIR/bin:$PATH
-```
-
-Log out and log back in.
 
 All tags in this repository are signed with my public key, run below command to get it.
 
