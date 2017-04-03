@@ -252,7 +252,6 @@ function {
         done
     fi
 }
-source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 typeset -U path
 if [[ $NMK_IGNORE_LOCAL != true ]]; then
     [[ -e $ZDOTDIR/zshrc.extra ]] && source $ZDOTDIR/zshrc.extra
@@ -262,3 +261,4 @@ if [[ $NMK_IGNORE_LOCAL != true ]]; then
         source $NMK_ZSHRC_EXTRA
     fi
 fi
+source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
