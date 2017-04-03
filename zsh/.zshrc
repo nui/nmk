@@ -120,6 +120,7 @@ function rf {
     function git-reset-to-remote-branch {
         git remote update --prune
         git reset --hard $(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+        git submodule update
     }
     function grst {
         git tag -d $(git tag)
