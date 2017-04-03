@@ -1,3 +1,0 @@
-#!/usr/bin/env zsh
-
-exec tmux respawn-pane -k "env NMK_RESPAWN_PANE_DIR=$(pwd) zsh"

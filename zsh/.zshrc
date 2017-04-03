@@ -253,11 +253,6 @@ function {
     fi
 }
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-# auto change directory to somewhere if set
-if [[ -n $NMK_RESPAWN_PANE_DIR ]]; then
-    cd $NMK_RESPAWN_PANE_DIR
-    unset NMK_RESPAWN_PANE_DIR
-fi
 typeset -U path
 if [[ $NMK_IGNORE_LOCAL != true ]]; then
     [[ -e $ZDOTDIR/zshrc.extra ]] && source $ZDOTDIR/zshrc.extra
