@@ -3,7 +3,6 @@
 cd ${0:A:h}
 
 files=(
-    log/automatic-update.log
     vim/shada/main.shada
     vim/viminfo
     zsh/.zcompdump
