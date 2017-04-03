@@ -70,7 +70,7 @@ def is_up2date(release_info):
 
 def save_release_info(release_info):
     with open(RELEASE_JSON_PATH, 'w') as f:
-        f.write(json.dumps(release_info))
+        f.write(json.dumps(release_info, sort_keys=True, indent=4))
         f.flush()
         logging.info('Saved release json to {0}'.format(RELEASE_JSON_PATH))
 
