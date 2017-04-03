@@ -11,12 +11,12 @@ syntastic  https://github.com/scrooloose/syntastic.git
 tcomment_vim  https://github.com/tomtom/tcomment_vim.git
 vim-airline  https://github.com/bling/vim-airline.git
 vim-airline-themes https://github.com/vim-airline/vim-airline-themes.git
-vim-colors-solarized  https://github.com/altercation/vim-colors-solarized.git
 vim-dispatch  https://github.com/tpope/vim-dispatch.git
 vim-fugitive  https://github.com/tpope/vim-fugitive.git
 vim-go  https://github.com/fatih/vim-go.git
 # vim-jinja  https://github.com/lepture/vim-jinja.git
 vim-multiple-cursors  https://github.com/terryma/vim-multiple-cursors.git
 vim-repeat  https://github.com/tpope/vim-repeat.git
+vim-solarized8  https://github.com/lifepillar/vim-solarized8.git
 vim-surround  https://github.com/tpope/vim-surround.git
 vim-tomorrow-theme  https://github.com/chriskempson/vim-tomorrow-theme.git

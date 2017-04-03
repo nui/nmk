@@ -141,7 +141,7 @@ if has('gui_running')
         let &guifont = 'Consolas:h11:cANSI'
     endif
     let s:background = 'light'
-    let s:colorscheme = 'solarized'
+    let s:colorscheme = 'solarized8_light'
 endif
 
 if get(g:, 'nmk_set_colorscheme', 1)
