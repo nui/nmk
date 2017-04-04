@@ -215,14 +215,14 @@ function {
     # Detect nvm
     [[ -e $HOME/.nvm/nvm.sh ]] && {
         managers+=(nvm)
-        function use-nvm {
+        function init-nvm {
             source $HOME/.nvm/nvm.sh
         }
     }
     # Detect pyenv
     (( ${+commands[pyenv]} )) && {
         managers+=(pyenv)
-        function use-pyenv {
+        function init-pyenv {
             eval "$(pyenv init -)"
             # Initialise virtualenvwrapper, skip if using system version
             [[ $(pyenv version-name) != system* ]] \
@@ -233,7 +233,7 @@ function {
     # Detect rbenv
     (( ${+commands[rbenv]} )) && {
         managers+=(rbenv)
-        function use-rbenv {
+        function init-rbenv {
             eval "$(rbenv init -)"
         }
     }
@@ -245,9 +245,9 @@ function {
         }
         for manager in $nmk_version_managers; do
             case $manager in
-                nvm ) use-nvm; unfunction use-nvm ;;
-                pyenv ) use-pyenv; unfunction use-pyenv ;;
-                rbenv ) use-rbenv; unfunction use-rbenv ;;
+                nvm ) init-nvm; unfunction init-nvm ;;
+                pyenv ) init-pyenv; unfunction init-pyenv ;;
+                rbenv ) init-rbenv; unfunction init-rbenv ;;
             esac
         done
     fi
