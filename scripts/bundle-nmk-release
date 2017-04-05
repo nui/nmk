@@ -1,0 +1,15 @@
+#!/bin/zsh
+set -e
+[[ -d $NMK_DIR ]]
+set -x
+
+tmp_dir=$(mktemp -d --suffix=.nmk)
+nmk_dir=$tmp_dir/nmk
+
+$NMK_DIR/setup/automate $nmk_dir
+(cd $nmk_dir && sh bundle.sh)
+mv -t $tmp_dir $nmk_dir/nmk.tar.gz
+rm -rf $nmk_dir
+print -- $tmp_dir
+(( ${+commands[dolphin]} )) && dolphin $tmp_dir
+
