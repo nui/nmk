@@ -95,8 +95,8 @@ If the condition is match
 bind-key -T root PageUp   if-shell -F "#{?pane_in_mode,1,}#{?alternate_on,1,}" "send-keys PageUp"   'if-shell "should-not-override-pg-updown #{pane_title}" "send-keys PageUp" "copy-mode -eu"'
 bind-key -T root PageDown if-shell -F "#{?pane_in_mode,1,}#{?alternate_on,1,}" "send-keys PageDown" 'if-shell "should-not-override-pg-updown #{pane_title}" "send-keys PageDown"'
 {% elif version == 2.1 %} {# Multiple key tabels added in tmux 2.1 #}
-bind-key -T root PageUp   if-shell -F "#{pane_in_mode}#{alternate_on}" "send-keys PageUp" "copy-mode -eu"
-bind-key -T root PageDown if-shell -F "#{pane_in_mode}#{alternate_on}" "send-keys PageDown"
+bind-key -T root PageUp   if-shell -F "#{alternate_on}" "send-keys PageUp" "copy-mode -eu"
+bind-key -T root PageDown if-shell -F "#{alternate_on}" "send-keys PageDown"
 {% endif %}
 
 {# -- Colors -- #}
