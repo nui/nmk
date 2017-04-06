@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 const async = require('async');
@@ -26,19 +28,17 @@ class Zsh {
         });
     }
 
-    concatZshrc(callback) {
-        this.listZshrcSourceFiles((err, files) => {
-            if (err) return callback(err);
-            this.concatFiles(files, callback);
-        });
+    writeZshRc(data, callback) {
+        const zshrc = path.join(this.settings.zdotdir, '.zshrc');
+        fs.writeFile(zshrc, data, callback);
     }
 
     renderZshrc(callback) {
-        const zshrc = path.join(this.settings.zdotdir, '.zshrc');
-        this.concatZshrc((err, data) => {
-            if (err) return callback(err);
-            fs.writeFile(zshrc, data, callback);
-        });
+        async.seq(
+            this.listZshrcSourceFiles,
+            this.concatFiles,
+            this.writeZshRc
+        ).bind(this)(callback);
     }
 
     render(callback) {
