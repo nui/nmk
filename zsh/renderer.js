@@ -38,7 +38,7 @@ class Zsh {
             this.listZshrcSourceFiles,
             this.concatFiles,
             this.writeZshRc
-        ).bind(this)(callback);
+        ).call(this, callback);
     }
 
     render(callback) {
