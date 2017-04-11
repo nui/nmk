@@ -1,5 +1,8 @@
-const {Tmux} = require('../tmux/renderer');
-const zsh = require('../zsh/zsh');
+const Tmux = require('../tmux/Tmux');
+const Zsh = require('../zsh/Zsh');
+
+const tmuxConfig = require('../tmux/tmux.config');
+const zshConfig = require('../zsh/zsh.config');
 
 
 function logSuccess(message) {
@@ -10,6 +13,6 @@ function logSuccess(message) {
 }
 
 module.exports = function () {
-    new Tmux().renderAndWatch(logSuccess('Rendered tmux configuration files.'));
-    zsh.getRenderer().renderAndWatch(logSuccess('Rendered .zshrc file'));
+    new Tmux(tmuxConfig).watch(logSuccess('Rendered tmux configuration files.'));
+    new Zsh(zshConfig).watch(logSuccess('Rendered .zshrc file'));
 };
