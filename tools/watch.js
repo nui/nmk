@@ -1,5 +1,5 @@
-const Tmux = require('../tmux/Tmux');
-const Zsh = require('../zsh/Zsh');
+const Tmux = require('../lib/Tmux');
+const Zsh = require('../lib/Zsh');
 
 const tmuxConfig = require('../tmux/tmux.config');
 const zshConfig = require('../zsh/zsh.config');
