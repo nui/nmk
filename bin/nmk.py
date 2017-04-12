@@ -119,6 +119,11 @@ def setup_logging(debug):
                         level=level)
 
 
+def python_info():
+    logging.debug('use python from ' + sys.executable)
+    logging.debug('python ' + sys.version)
+
+
 def is_virtualenv_bin(path):
     virtualenv_files = (os.path.join(path, name) for name in ('activate', 'python'))
     return all((os.path.exists(p) for p in virtualenv_files))
@@ -136,6 +141,9 @@ def setup_path(nmk_dir):
     paths.insert(0, os.path.join(nmk_dir, 'bin'))
     unique_paths = filter_duplicate_values(paths)
     ENV['PATH'] = os.pathsep.join(unique_paths)
+    logging.debug('PATH:' + ENV['PATH'])
+    for p in unique_paths:
+        logging.debug('PATH:' + p)
 
 
 def check_dependencies():
@@ -195,12 +203,15 @@ def setup_environment(args, nmk_dir):
 
     if 'VIRTUAL_ENV' in ENV:
         del ENV['VIRTUAL_ENV']
+        logging.debug('unset VIRTUAL_ENV')
 
     if args.unicode or (args.autofix and 'LANG' not in ENV):
         ENV['LANG'] = UNICODE_NAME
+        logging.debug('set LANG = ' + UNICODE_NAME)
 
     if args.force_unicode:
         ENV['LC_ALL'] = UNICODE_NAME
+        logging.debug('set LC_ALL = ' + UNICODE_NAME)
 
 
 def setup_prefer_editor():
@@ -209,6 +220,7 @@ def setup_prefer_editor():
         for prog in prefer_editors:
             if whence(prog):
                 ENV['EDITOR'] = prog
+                logging.debug('set EDITOR = ' + prog)
                 break
 
 
@@ -221,6 +233,7 @@ def add_local_library(nmk_dir):
         library_paths = library_path.split(os.pathsep) if library_path else []
         library_paths.insert(0, local_lib_dir)
         ENV[LD_LIBRARY_PATH] = os.pathsep.join(library_paths)
+        logging.debug('prepend ' + local_lib_dir + ' to ' + LD_LIBRARY_PATH)
         logging.debug(LD_LIBRARY_PATH + ' = ' + ENV[LD_LIBRARY_PATH])
 
 
@@ -279,6 +292,7 @@ def exec_tmux(args, tmux_dir):
 def main():
     args = build_parser().parse_args()
     setup_logging(debug=args.debug)
+    python_info()
     nmk_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     tmux_dir = os.path.join(nmk_dir, 'tmux')
     setup_path(nmk_dir=nmk_dir)
