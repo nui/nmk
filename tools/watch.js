@@ -13,6 +13,6 @@ function logSuccess(message) {
 }
 
 module.exports = function () {
-    new Tmux(tmuxConfig).watch(logSuccess('Rendered tmux configuration files.'));
-    new Zsh(zshConfig).watch(logSuccess('Rendered .zshrc file'));
+    new Tmux(tmuxConfig).watch(logSuccess('Regenerated tmux configuration'));
+    new Zsh(zshConfig).watch(logSuccess('Regenerated .zshrc'));
 };
