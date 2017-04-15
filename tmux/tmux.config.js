@@ -1,15 +1,19 @@
+'use strict';
+
 const path = require('path');
 
 const tmuxDir = __dirname;
-const templateName = 'tmux.conf.jinja2';
+const templateName = 'tmux.conf.njk';
 const templatePath = path.join(tmuxDir, templateName);
 
 module.exports = {
     versions: [1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4],
-    dir: tmuxDir,
+    output: {
+        dir: tmuxDir,
+    },
     template: {
+        dir: tmuxDir,
         name: templateName,
-        path: templatePath,
     },
     tmpEnvs: [
         'NMK_TMUX_256_COLOR',

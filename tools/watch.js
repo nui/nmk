@@ -1,7 +1,6 @@
-const Tmux = require('../lib/Tmux');
+const tmux = require('../lib/tmux');
 const Zsh = require('../lib/Zsh');
 
-const tmuxConfig = require('../tmux/tmux.config');
 const zshConfig = require('../zsh/zsh.config');
 
 
@@ -13,6 +12,6 @@ function logSuccess(message) {
 }
 
 module.exports = function () {
-    new Tmux(tmuxConfig).watch(logSuccess('Regenerated tmux configuration'));
+    new tmux(require('../tmux/tmux.config')).watch(logSuccess('Regenerated tmux configuration'));
     new Zsh(zshConfig).watch(logSuccess('Regenerated .zshrc'));
 };

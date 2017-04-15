@@ -1,8 +1,8 @@
 # tmux {{ version }} configuration
 {# For tmux >= 1.8 #}
 
-{% set has_custom_keytable = version >= 2.1 %}
-{% set function_keys = range(1, 1 + 12) %}
+{% set hasCustomKeytable = version >= 2.1 %}
+{% set functionKeys = range(1, 1 + 12) %}
 
 {# ---- FUNCTION KEYS BINDING ---- #}
 bind-key -n F1 select-pane -t :.+ \; display-panes
@@ -11,7 +11,7 @@ bind-key -n F3 previous-window
 bind-key -n F4 next-window
 bind-key -n F5 resize-pane -Z
 
-{% if has_custom_keytable %}
+{% if hasCustomKeytable %}
 bind-key -n F11 switch-client -T fxtable
 bind-key -T fxtable -r Space next-layout
 bind-key -T fxtable 1 select-layout even-horizontal
@@ -24,7 +24,7 @@ bind-key -T fxtable 5 select-layout tiled
 bind-key -n F12 detach-client
 
 {# -- Use Shift-Fx or <prefix> Fx to send Fx key -- #}
-{% for i in function_keys %}
+{% for i in functionKeys %}
 bind-key    F{{i}}   send-keys F{{i}}
 bind-key -n S-F{{i}} send-keys F{{i}}
 {% endfor %}
@@ -103,6 +103,6 @@ bind-key -T root PageDown if-shell -F "#{alternate_on}" "send-keys PageDown"
 if-shell 'zsh -c "[[ $NMK_TMUX_256_COLOR == 1 ]]"' 'source-file $NMK_DIR/tmux/256color.conf' 'source-file $NMK_DIR/tmux/8color.conf'
 
 {# -- Unset temporary environment variables that were used during tmux initialization -- #}
-{% for env in tmux_tmp_envs %}
+{% for env in tmpEnvs %}
 set-environment -gr {{ env }}
 {% endfor %}
