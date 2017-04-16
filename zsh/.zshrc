@@ -1,6 +1,7 @@
 if [[ $NMK_IGNORE_LOCAL != true && -e $ZDOTDIR/zshrc.pre ]]; then
     source $ZDOTDIR/zshrc.pre
 fi
+
 autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz promptinit && promptinit
 
@@ -26,6 +27,7 @@ bindkey ${terminfo[kdch1]} delete-char
 HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=4000
 SAVEHIST=$HISTSIZE
+
 autoload -Uz compinit && compinit
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
@@ -44,6 +46,7 @@ zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p
 zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,cmd'
+
 # see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
 function nmk-fancy-ctrl-z {
     if [[ ${#BUFFER} -eq 0 ]]; then
@@ -55,6 +58,7 @@ function nmk-fancy-ctrl-z {
 }
 zle -N nmk-fancy-ctrl-z
 bindkey '^Z' nmk-fancy-ctrl-z
+
 # Aliases and interactive shell configuration
 function cdd {
     # Change pwd to directory in which $1 is located
@@ -200,6 +204,7 @@ alias ssenv=' eval $(tmux show-environment -s)'
 # Disable terminal flow control, so that we can use '^S'
 # for history-search-forward.
 stty -ixon
+
 # Don't display git branch symbol if terminal does not support 256 colors
 (( ${+commands[tput]} )) && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
 
@@ -210,6 +215,7 @@ prompt horizontal
 [[ $NMK_DEVELOPMENT == true && -z $SSH_TTY ]] && horizontal[userhost]=0
 
 [[ -e /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
+
 # Detect & load version managers
 function {
     typeset -a managers
@@ -253,9 +259,12 @@ function {
         done
     fi
 }
+
 typeset -U path
+
 if [[ $NMK_IGNORE_LOCAL != true ]]; then
     [[ -e $ZDOTDIR/zshrc.extra ]] && source $ZDOTDIR/zshrc.extra
     for file ($ZDOTDIR/zshrc.extra.d/*.zsh(N)) {source $file}
 fi
+
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
