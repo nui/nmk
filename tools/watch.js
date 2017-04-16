@@ -12,6 +12,6 @@ function logSuccess(message) {
 }
 
 module.exports = function () {
-    new tmux(require('../tmux/tmux.config')).watch(logSuccess('Regenerated tmux configuration'));
+    tmux(require('../tmux/tmux.config')).watch(logSuccess('Regenerated tmux configuration'));
     new Zsh(zshConfig).watch(logSuccess('Regenerated .zshrc'));
 };
