@@ -57,11 +57,6 @@ def build_parser():
                         action='store_false',
                         default=True,
                         help='do not detect and load common development tools')
-    parser.add_argument('-I', '--ignore-local',
-                        dest='local_config',
-                        action='store_false',
-                        default=True,
-                        help='ignore local configuration')
     parser.add_argument('-d', '--debug',
                         dest='debug',
                         action='store_true',
@@ -194,7 +189,6 @@ def setup_environment(args, nmk_dir):
 
     ENV['NMK_AUTOLOAD'] = str(args.autoload).lower()
     ENV['NMK_DIR'] = nmk_dir
-    ENV['NMK_IGNORE_LOCAL'] = str(not args.local_config).lower()
     ENV['NMK_TMUX_DEFAULT_SHELL'] = whence('zsh')
     ENV['NMK_TMUX_DETACH_ON_DESTROY'] = args.detach_on_destroy
     ENV['NMK_TMUX_HISTORY'] = os.path.join(nmk_dir, 'tmux', '.tmux_history')

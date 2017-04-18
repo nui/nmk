@@ -16,6 +16,6 @@ fpath=(
     $fpath
 )
 
-if [[ $NMK_IGNORE_LOCAL != true && -e $ZDOTDIR/zshenv.extra ]]; then
+if [[ -e $ZDOTDIR/zshenv.extra ]]; then
     source $ZDOTDIR/zshenv.extra
 fi

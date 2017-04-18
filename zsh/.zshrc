@@ -1,4 +1,4 @@
-if [[ $NMK_IGNORE_LOCAL != true && -e $ZDOTDIR/zshrc.pre ]]; then
+if [[ -e $ZDOTDIR/zshrc.pre ]]; then
     source $ZDOTDIR/zshrc.pre
 fi
 
@@ -262,9 +262,7 @@ function {
 
 typeset -U path
 
-if [[ $NMK_IGNORE_LOCAL != true ]]; then
-    [[ -e $ZDOTDIR/zshrc.extra ]] && source $ZDOTDIR/zshrc.extra
-    for file ($ZDOTDIR/zshrc.extra.d/*.zsh(N)) {source $file}
-fi
+[[ -e $ZDOTDIR/zshrc.extra ]] && source $ZDOTDIR/zshrc.extra
+for file ($ZDOTDIR/zshrc.extra.d/*.zsh(N)) {source $file}
 
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

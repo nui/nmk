@@ -43,7 +43,6 @@ eval set -- $_TEMP
 
 # Variables
 NMK_AUTOLOAD=
-NMK_IGNORE_LOCAL=
 NMK_TMUX_DETACH_ON_DESTROY=off
 _256COLOR=false
 _AUTOFIX=true
@@ -58,7 +57,6 @@ while true; do
         --force-unicode ) export LC_ALL=$_UNICODE_NAME; shift ;;
         --no-autofix ) _AUTOFIX=false; shift ;;
         --no-autoload ) NMK_AUTOLOAD=false; shift ;;
-        -I | --ignore-local ) NMK_IGNORE_LOCAL=true; shift ;;
         -h | --help ) usage; exit 0 ;;
         -- ) shift; break ;;
     esac
@@ -150,8 +148,7 @@ NMK_DIR=${0:A:h:h}
     export ZDOTDIR="$NMK_DIR/zsh"
     # export if length is nonzero
     local -a envs
-    envs=(NMK_AUTOLOAD
-          NMK_IGNORE_LOCAL)
+    envs=(NMK_AUTOLOAD)
     for env in $envs; do
         [[ -n ${(P)env} ]] && export $env
     done
