@@ -16,6 +16,17 @@ fpath=(
     $fpath
 )
 
+() {
+    local -a local_completion
+    if [[ $NMK_IGNORE_LOCAL != true ]]; then
+        local_completion=($ZDOTDIR/local/completion/_*(N))
+        if ((${#local_completion} > 0)); then
+            # prepend to $fpath
+            fpath[1,0]=$ZDOTDIR/local/completion
+        fi
+    fi
+}
+
 if [[ $NMK_IGNORE_LOCAL != true && -e $ZDOTDIR/zshenv.extra ]]; then
     source $ZDOTDIR/zshenv.extra
 fi
