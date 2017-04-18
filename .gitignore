@@ -13,6 +13,7 @@
 /vim/viminfo
 /zsh/.zcompdump
 /zsh/.zsh_history
+/zsh/completion/
 /zsh/zprofile
 /zsh/zshenv.extra
 /zsh/zshrc.extra
