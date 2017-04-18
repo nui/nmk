@@ -1,13 +1,14 @@
 const path = require('path');
 
 const zdotdir = __dirname;
+const zshrcSourceDir = path.join(zdotdir, 'src', 'zshrc');
 
 module.exports = {
     watch: {
-        paths: `${zdotdir}/zshrc.src/*.zsh`,
+        paths: path.join(zshrcSourceDir, '*.zsh'),
     },
     zdotdir,
     zshrc: {
-        sourceDir: path.join(zdotdir, 'zshrc.src'),
+        sourceDir: zshrcSourceDir,
     }
 };
