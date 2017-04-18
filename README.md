@@ -31,7 +31,7 @@ To use 256 colors, Set `TERM` environment variable to `xterm-256color`.
 - Change `TERM=xterm` to `TERM=xterm-256color`
 
 
-## Vim and zsh without tmux
+## zsh without tmux
 
 Overwrite `~/.zshenv` with
 ```sh
