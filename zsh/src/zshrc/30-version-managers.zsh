@@ -11,12 +11,23 @@ function {
     # Detect pyenv
     (( ${+commands[pyenv]} )) && {
         managers+=(pyenv)
+        integer has_virtualenv
+        integer has_virtualenvwrapper
+        [[ ${$(pyenv commands)[(r)virtualenv]} == virtualenv ]]
+        (( has_virtualenv = $? == 0 ))
+        [[ ${$(pyenv commands)[(r)virtualenvwrapper]} == virtualenvwrapper ]]
+        (( has_virtualenvwrapper = $? == 0 ))
         function init-pyenv {
             eval "$(pyenv init -)"
-            # Initialise virtualenvwrapper, skip if using system version
-            [[ $(pyenv version-name) != system* ]] \
-                && [[ ${$(pyenv commands)[(r)virtualenvwrapper]} == virtualenvwrapper ]] \
-                && pyenv virtualenvwrapper
+            ((has_virtualenv)) && ((has_virtualenvwrapper)) && {
+                print -- "Detect both pyenv-virtualenv and pyenv-virtualenvwrapper"
+                print -- "pyenv-virtualenv will be used"
+            }
+            if ((has_virtualenv)); then
+                eval "$(pyenv virtualenv-init -)"
+            elif ((has_virtualenvwrapper)); then
+                [[ $(pyenv version-name) != system* ]] && pyenv virtualenvwrapper
+            fi
         }
     }
     # Detect rbenv
