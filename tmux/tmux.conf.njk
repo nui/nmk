@@ -48,7 +48,11 @@ set-option -g history-file "$NMK_TMUX_HISTORY"
 {% endif %}
 
 {# -- Copy to system clipboard using copy-pipe -- #}
+{% if version >= 2.4 %}
+if-shell 'xclip -o > /dev/null 2>&1' 'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection clipboard"'
+{% else %}
 if-shell 'xclip -o > /dev/null 2>&1' 'bind-key -t vi-copy y copy-pipe "xclip -selection clipboard"'
+{% endif %}
 
 {# -- Status format argument changed on tmux 1.9 -- #}
 {% if version >= 1.9 %}
@@ -77,10 +81,18 @@ bind-key C-l send-keys -R C-l\; clear-history
 bind-key    C-u copy-mode -u
 
 {# -- halfpage-up and halfpage-down -- #}
+{# -- Copy to system clipboard using copy-pipe -- #}
+{% if version >= 2.4 %}
+unbind-key -T copy-mode-vi PageUp
+bind-key -T copy-mode-vi PageUp send-keys -X halfpage-up
+unbind-key -T copy-mode-vi PageDown
+bind-key -T copy-mode-vi PageDown send-keys -X halfpage-down
+{% else %}
 unbind-key -t vi-copy PageUp
 bind-key -t vi-copy PageUp halfpage-up
 unbind-key -t vi-copy PageDown
 bind-key -t vi-copy PageDown halfpage-down
+{% endif %}
 
 {# -- Fix mouse scrolling in 2.1 and later -- #}
 {# Credit https://github.com/tmux/tmux/issues/145 #}
