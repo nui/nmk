@@ -11,4 +11,4 @@ $NMK_DIR/setup/automate $nmk_dir
 mv -t $tmp_dir $nmk_dir/nmk.tar.gz
 rm -rf $nmk_dir
 print -- $tmp_dir
-if (( ${+commands[dolphin]} )); then dolphin $tmp_dir; fi
+if (( ${+commands[dolphin]} )); then dolphin $tmp_dir && rm -rf $tmp_dir; fi
