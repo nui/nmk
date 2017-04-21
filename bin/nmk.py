@@ -249,7 +249,7 @@ def get_tmux_conf(tmux_dir):
 
 def is_socket_exist(socket):
     devnull = open(os.devnull, 'w')
-    exists = 0 == subprocess.call(('tmux', '-L', socket, 'server-info'),
+    exists = 0 == subprocess.call(('tmux', '-L', socket, 'list-sessions'),
                                   stdout=devnull,
                                   stderr=devnull)
     status = "does exists" if exists else "doesn't exists"
