@@ -82,7 +82,6 @@ def whence(program):
     else:
         # return absolute path to 'program'
         for d in os.environ["PATH"].split(os.pathsep):
-            d = d.strip('"')
             f = os.path.join(d, program)
             if is_exec(f):
                 return f
@@ -144,7 +143,7 @@ def setup_path(nmk_dir):
 def check_dependencies():
     for prog in ('tmux', 'zsh'):
         if not whence(prog):
-            logging.error(' {0} not found'.format(prog))
+            logging.error('{0} not found'.format(prog))
             sys.exit(1)
 
 
