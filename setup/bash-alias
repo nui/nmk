@@ -1,0 +1,12 @@
+#!/bin/bash
+
+append_alias() {
+cat << 'EOF'
+# nmk alias
+if [ -e ~/.nmk/bin/nmk ]; then alias nmk='exec ~/.nmk/bin/nmk'; fi
+EOF
+}
+
+if [ -e ~/.bashrc ]; then
+    grep -q -F "alias nmk" ~/.bashrc || append_alias >> ~/.bashrc
+fi
