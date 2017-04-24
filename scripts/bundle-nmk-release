@@ -1,14 +1,61 @@
 #!/bin/zsh
 set -e
+
+# Parse options {{{
+usage() {
+cat <<- EOU
+Usage: bundle-nmk-release [OPTIONS]
+
+Options
+    -s, --stable              create bundle for upload to github release
+    -h, --help                print this help message
+EOU
+}
+
+_OPTIONS=(
+    help
+    stable
+)
+
+if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o hs --long ${(j:,:)_OPTIONS} -- "$@"); then
+    # exit if error
+    usage
+    exit 1
+fi
+
+eval set -- $_TEMP
+
+# Variables
+_STABLE=
+
+while true; do
+    case $1 in
+        -s | --stable ) _STABLE=true; shift ;;
+        -h | --help ) usage; exit 0 ;;
+        -- ) shift; break ;;
+    esac
+done
+# }}}
+
 [[ -d $NMK_DIR ]]
 set -x
 
 tmp_dir=$(mktemp -d --suffix=.nmk)
 nmk_dir=$tmp_dir/nmk
+cloud_object=gs://nuimk-nmk/nmk.tar.gz
 
 $NMK_DIR/setup/automate $nmk_dir
 (cd $nmk_dir && sh bundle.sh)
 mv -t $tmp_dir $nmk_dir/nmk.tar.gz
 rm -rf $nmk_dir
-print -- $tmp_dir
-if (( ${+commands[dolphin]} )); then dolphin $tmp_dir && rm -rf $tmp_dir; fi
+
+gsutil cp -a public-read $tmp_dir/nmk.tar.gz $cloud_object
+gsutil setmeta -h "Cache-Control:private, max-age=0, no-transform" $cloud_object
+
+if [[ $_STABLE == true ]]; then
+    print -- $tmp_dir
+    if (( ${+commands[dolphin]} )); then
+        dolphin $tmp_dir
+    fi
+fi
+rm -rf $tmp_dir

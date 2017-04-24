@@ -18,6 +18,11 @@ RELEASE_JSON_PATH = path.join(NMK_DIR, '.release.json')
 
 def build_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--stable',
+                        dest='stable',
+                        action='store_true',
+                        default=False,
+                        help='Download stable release from github')
     parser.add_argument('tag_name',
                         nargs=argparse.OPTIONAL,
                         help='git tag')
@@ -68,25 +73,19 @@ def is_up2date(release_info):
         return all((saved_bundle_info[k] == bundle_info[k] for k in ('created_at', 'updated_at', 'size')))
 
 
-def save_release_info(release_info):
+def save_github_release_info(release_info):
     with open(RELEASE_JSON_PATH, 'w') as f:
         f.write(json.dumps(release_info, sort_keys=True, indent=4))
         f.flush()
         logging.info('Saved release json to {0}'.format(RELEASE_JSON_PATH))
 
 
-def main():
-    args = build_parser().parse_args()
+def remove_github_release_info():
+    if os.path.exists(RELEASE_JSON_PATH):
+        os.remove(RELEASE_JSON_PATH)
 
-    tag_name = args.tag_name
-    release_info = get_release(tag_name) if tag_name else get_latest_release()
 
-    logging.info('Founded tag ' + release_info['tag_name'])
-    if is_up2date(release_info):
-        logging.info('Already up to date :)')
-        exit(0)
-
-    bundle_url = get_bundle_url(release_info)
+def download_and_install(bundle_url):
     logging.info('Downloading ' + bundle_url)
     bundle_file = download_bundle(bundle_url)
 
@@ -97,8 +96,26 @@ def main():
     subprocess.call(['tar', '-xzf', bundle_file.name, '--strip-components=1'])
     bundle_file.close()
 
-    save_release_info(release_info)
+
+def main():
+    args = build_parser().parse_args()
+
+    if args.stable:
+        tag_name = args.tag_name
+        release_info = get_release(tag_name) if tag_name else get_latest_release()
+        logging.info('Founded tag ' + release_info['tag_name'])
+        if is_up2date(release_info):
+            logging.info('Already up to date :)')
+            exit(0)
+        bundle_url = get_bundle_url(release_info)
+        download_and_install(bundle_url)
+        save_github_release_info(release_info)
+    else:
+        bundle_url = 'https://storage.googleapis.com/nuimk-nmk/nmk.tar.gz'
+        download_and_install(bundle_url)
+        remove_github_release_info()
     logging.info('Done')
+
 
 if __name__ == '__main__':
     main()
