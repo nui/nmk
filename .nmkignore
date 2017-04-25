@@ -1,8 +1,0 @@
-# exclude following files from nmk bundle
-vim/bundle/dockerfile.vim/vim-dockerfile-example.png
-vim/bundle/syntastic/_assets
-vim/bundle/typescript-vim/vimshot01.png
-vim/bundle/vim-colors-solarized/bitmaps/togglebg.png
-vim/bundle/vim-go/assets
-vim/bundle/vim-multiple-cursors/assets
-zsh/plugins/zsh-syntax-highlighting/images

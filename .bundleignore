@@ -1,0 +1,23 @@
+# exclude following files and directories from nmk release
+
+# submodule unnecessary files
+./vim/bundle/dockerfile.vim/vim-dockerfile-example.png
+./vim/bundle/syntastic/_assets
+./vim/bundle/typescript-vim/vimshot01.png
+./vim/bundle/vim-colors-solarized/bitmaps/togglebg.png
+./vim/bundle/vim-go/assets
+./vim/bundle/vim-multiple-cursors/assets
+./zsh/plugins/zsh-syntax-highlighting/images
+# our directories
+./lib
+./tools
+./zsh/src
+# our files
+.bundleignore
+./create-release
+./package.json
+./settings.js
+./tmux/*.js
+./tmux/*.njk
+./yarn.lock
+./zsh/*.js

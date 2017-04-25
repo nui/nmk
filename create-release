@@ -1,0 +1,97 @@
+#!/bin/zsh
+set -e
+
+# Parse options {{{
+usage() {
+cat <<- EOU
+Usage: create-release [OPTIONS]
+
+Options
+    -s, --stable              create bundle for upload to github release
+    -h, --help                print this help message
+EOU
+}
+
+_OPTIONS=(
+    help
+    stable
+)
+
+if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o hs --long ${(j:,:)_OPTIONS} -- "$@"); then
+    # exit if error
+    usage
+    exit 1
+fi
+
+eval set -- $_TEMP
+
+# Variables
+_STABLE=
+
+while true; do
+    case $1 in
+        -s | --stable ) _STABLE=true; shift ;;
+        -h | --help ) usage; exit 0 ;;
+        -- ) shift; break ;;
+    esac
+done
+# }}}
+set -x
+
+tmp_dir=$(mktemp -d --suffix=.bundle.nmk)
+cloud_object=gs://nuimk-nmk/nmk.tar.gz
+
+archive_name=nmk.tar.gz
+archive_path=$tmp_dir/$archive_name
+git_dir=$tmp_dir/nmk
+staging_dir=$tmp_dir/staging
+
+$NMK_DIR/setup/automate $git_dir
+
+cd $git_dir
+# don't run this on working environment
+if [[ -e zsh/.zcompdump || -e zsh/.zsh_history || -d node_modules ]]; then
+    >&2 echo "Aborted"
+    exit 1
+fi
+date --rfc-3339=seconds > build-time
+git log -n 10 --no-color --oneline --decorate --graph > last-10-commits
+mkdir $staging_dir
+tar -c --exclude-vcs --exclude-from=$NMK_DIR/.bundleignore . | tar -x -C $staging_dir
+
+cd $staging_dir
+# add uninstaller script
+cat > uninstall.sh << 'EOF'
+#!/bin/sh
+set -e
+find . -name '*.pyc' -exec rm -f {} +
+<.bundle-files xargs --null rm
+EOF
+# create a list of bundled files
+find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files
+# unset write permission to get warning message on update read-only files
+find . -type f -exec chmod ugo-w {} +
+# set update script execute bit
+chmod +x bin/nmk-update.py
+# create final tar archive
+tar -caf $archive_path --owner=0 --group=0 --mtime='' --transform 's#^\./#.nmk/#' .
+# create sha256 hash
+(cd $tmp_dir && sha256sum -b $archive_name > $archive_name.sha256)
+# clean temporary directories
+cd $tmp_dir
+rm -rf $git_dir $staging_dir
+
+# upload to google cloud storage
+gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_path $cloud_object
+gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_path.sha256 $cloud_object.sha256
+
+if [[ $_STABLE == true ]]; then
+    gpg2 -b $archive_path
+    gpg2 -b --armor $archive_path.sha256
+    print -- $tmp_dir
+    if (( ${+commands[dolphin]} )); then
+        dolphin $tmp_dir 2>/dev/null
+    fi
+fi
+rm -rf $tmp_dir
+
