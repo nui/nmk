@@ -168,7 +168,7 @@ def is_inside_docker():
 def setup_terminal(args):
     support_256color = any((
         args.force256color,
-        ENV.get('TERM') in ('cygwin', 'gnome-256color', 'linux', 'putty', 'screen-256color', 'xterm-256color'),
+        ENV.get('TERM') in ('cygwin', 'gnome-256color', 'putty', 'screen-256color', 'xterm-256color'),
         ENV.get('COLORTERM') in ('gnome-terminal', 'rxvt-xpm', 'xfce4-terminal'),
         args.autofix and is_inside_docker(),
     ))
