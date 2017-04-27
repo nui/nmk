@@ -117,7 +117,6 @@ gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $ar
 # Optional step for stable release
 if [[ $_STABLE == true ]]; then
     gpg2 -b $archive_name
-    gpg2 -b --armor $archive_name.sha256
     print -- $tmp_dir
     if (( ${+commands[dolphin]} )); then
         dolphin $tmp_dir 2>/dev/null
