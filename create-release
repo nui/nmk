@@ -42,12 +42,17 @@ tmp_dir=$(mktemp -d --suffix=.bundle.nmk)
 cloud_object=gs://nuimk-nmk/nmk.tar.gz
 
 archive_name=nmk.tar.gz
-archive_path=$tmp_dir/$archive_name
+default_nmk_dir=.nmk
 git_dir=$tmp_dir/nmk
 staging_dir=$tmp_dir/staging
 
+# Step 1. Clone from github
+# -----------------------------------------------------------------------------
 $NMK_DIR/setup/automate $git_dir
 
+
+# Step 2. Generate files that need information from git
+# -----------------------------------------------------------------------------
 cd $git_dir
 # don't run this on working environment
 if [[ -e zsh/.zcompdump || -e zsh/.zsh_history || -d node_modules ]]; then
@@ -56,10 +61,18 @@ if [[ -e zsh/.zcompdump || -e zsh/.zsh_history || -d node_modules ]]; then
 fi
 date --rfc-3339=seconds > build-time
 git log -n 10 --no-color --oneline --decorate --graph > last-10-commits
-mkdir $staging_dir
-tar -c --exclude-vcs --exclude-from=$NMK_DIR/.bundleignore . | tar -x -C $staging_dir
 
-cd $staging_dir
+
+# Step 3. Get rid of git and unnecessary files
+# -----------------------------------------------------------------------------
+mkdir $staging_dir
+mkdir -m 700 $staging_dir/$default_nmk_dir
+tar -c --exclude-vcs --exclude-from=$NMK_DIR/.bundleignore . | tar -x -C $staging_dir/$default_nmk_dir
+
+
+# Step 4. Generate more files
+# -----------------------------------------------------------------------------
+cd $staging_dir/$default_nmk_dir
 # add uninstaller script
 cat > uninstall.sh << 'EOF'
 #!/bin/sh
@@ -73,21 +86,29 @@ find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files
 find . -type f -exec chmod ugo-w {} +
 # set update script execute bit
 chmod +x bin/nmk-update.py
-# create final tar archive
-tar -caf $archive_path --owner=0 --group=0 --mtime='' --transform 's#^\./#.nmk/#' .
-# create sha256 hash
-(cd $tmp_dir && sha256sum -b $archive_name > $archive_name.sha256)
-# clean temporary directories
+
+
+# Step 5. Create final tar archive
+# -----------------------------------------------------------------------------
+cd $staging_dir
+tar -caf $tmp_dir/$archive_name --owner=0 --group=0 --mtime='' $default_nmk_dir
+
+
+# Step 6. The final
+# -----------------------------------------------------------------------------
 cd $tmp_dir
+# clean temporary directories
 rm -rf $git_dir $staging_dir
+# create sha256 hash
+sha256sum -b $archive_name > $archive_name.sha256
 
 # upload to google cloud storage
-gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_path $cloud_object
-gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_path.sha256 $cloud_object.sha256
+gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_name $cloud_object
+gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_name.sha256 $cloud_object.sha256
 
 if [[ $_STABLE == true ]]; then
-    gpg2 -b $archive_path
-    gpg2 -b --armor $archive_path.sha256
+    gpg2 -b $archive_name
+    gpg2 -b --armor $archive_name.sha256
     print -- $tmp_dir
     if (( ${+commands[dolphin]} )); then
         dolphin $tmp_dir 2>/dev/null
