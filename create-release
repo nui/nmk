@@ -7,17 +7,19 @@ cat <<- EOU
 Usage: create-release [OPTIONS]
 
 Options
-    -s, --stable              create bundle for upload to github release
-    -h, --help                print this help message
+    -b, --branch BRANCH   git branch
+    -s, --stable          create bundle for upload to github release
+    -h, --help            print this help message
 EOU
 }
 
 _OPTIONS=(
+    branch:
     help
     stable
 )
 
-if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o hs --long ${(j:,:)_OPTIONS} -- "$@"); then
+if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o b:hs --long ${(j:,:)_OPTIONS} -- "$@"); then
     # exit if error
     usage
     exit 1
@@ -27,10 +29,12 @@ eval set -- $_TEMP
 
 # Variables
 _STABLE=
+_BRANCH=
 
 while true; do
     case $1 in
         -s | --stable ) _STABLE=true; shift ;;
+        -b | --branch ) _BRANCH=$2; shift 2 ;;
         -h | --help ) usage; exit 0 ;;
         -- ) shift; break ;;
     esac
@@ -48,7 +52,11 @@ staging_dir=$tmp_dir/staging
 
 # Step 1. Clone from github
 # -----------------------------------------------------------------------------
-$NMK_DIR/setup/automate $git_dir
+if [[ -n $_BRANCH ]]; then
+    $NMK_DIR/setup/automate --branch $_BRANCH $git_dir
+else
+    $NMK_DIR/setup/automate $git_dir
+fi
 
 
 # Step 2. Generate files that need information from git
@@ -94,18 +102,19 @@ cd $staging_dir
 tar -caf $tmp_dir/$archive_name --owner=0 --group=0 --mtime='' $default_nmk_dir
 
 
-# Step 6. The final
+# Step 6. Clean up and hash
 # -----------------------------------------------------------------------------
 cd $tmp_dir
-# clean temporary directories
+# remove temporary directories
 rm -rf $git_dir $staging_dir
-# create sha256 hash
+# sha256 hash
 sha256sum -b $archive_name > $archive_name.sha256
 
-# upload to google cloud storage
+# Step 7. Upload to google cloud storage
 gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_name $cloud_object
 gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_name.sha256 $cloud_object.sha256
 
+# Optional step for stable release
 if [[ $_STABLE == true ]]; then
     gpg2 -b $archive_name
     gpg2 -b --armor $archive_name.sha256

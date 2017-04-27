@@ -8,12 +8,20 @@ usage() {
 		Usage: automate [options] [base directory]
 
 		Options
-		  -r REPO     -- clone from REPO
-		  -h          -- print this help message
+		  -b, --branch BRANCH   git branch
+		  -r, --repo REPO       clone from REPO
+		  -h, --help            print this help message
 	EOU
 }
 
-if ! _TEMP=$(getopt -o hr: -- "$@"); then
+
+_OPTIONS=(
+    branch:
+    help
+    repo:
+)
+
+if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o b:hr: --long ${(j:,:)_OPTIONS} -- "$@"); then
     # exit if error
     usage
     exit 1
@@ -21,13 +29,15 @@ fi
 
 eval set -- $_TEMP
 
+_BRANCH=
 _GITHUB_REPO='https://github.com/nuimk/nmk.git'
 _REPO=$_GITHUB_REPO
 
 while true; do
     case $1 in
-        -r ) _REPO=$2; shift 2 ;;
-        -h ) usage; exit 0 ;;
+        -b | --branch ) _BRANCH=$2; shift 2 ;;
+        -r | --repo ) _REPO=$2; shift 2 ;;
+        -h | --help ) usage; exit 0 ;;
         -- ) shift; break ;;
     esac
 done
@@ -35,7 +45,11 @@ done
 
 _NMK_DIR=${${1:-$HOME/.nmk}:A}
 
-git clone --quiet $_REPO $_NMK_DIR
+if [[ -n $_BRANCH ]]; then
+    git clone --quiet --branch $_BRANCH $_REPO $_NMK_DIR
+else
+    git clone --quiet $_REPO $_NMK_DIR
+fi
 cd $_NMK_DIR
 git submodule init
 git submodule --quiet update --recursive
