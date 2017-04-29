@@ -40,6 +40,20 @@ while true; do
     esac
 done
 # }}}
+
+find_remote_branch() {
+    local tracked
+    local -a parts
+    tracked=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+    if [[ -z $tracked ]]; then
+        print -- "Can't find remote tracking branch"
+        exit 1
+    fi
+    parts=(${(@s#/#)tracked})
+    # remote branch without remote name
+    typeset -g find_remote_branch_result=${(@j#/#)parts[2,-1]}
+}
+
 set -x
 
 tmp_dir=$(mktemp -d --suffix=.bundle.nmk)
@@ -52,11 +66,8 @@ staging_dir=$tmp_dir/staging
 
 # Step 1. Clone from github
 # -----------------------------------------------------------------------------
-if [[ -n $_BRANCH ]]; then
-    $NMK_DIR/setup/automate --branch $_BRANCH $git_dir
-else
-    $NMK_DIR/setup/automate $git_dir
-fi
+find_remote_branch
+$NMK_DIR/setup/automate --branch ${_BRANCH:-$find_remote_branch_result} $git_dir
 
 
 # Step 2. Generate files that need information from git
