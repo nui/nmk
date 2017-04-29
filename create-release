@@ -110,7 +110,7 @@ chmod +x bin/nmk-update.py
 # Step 5. Create final tar archive
 # -----------------------------------------------------------------------------
 cd $staging_dir
-tar -caf $tmp_dir/$archive_name --owner=0 --group=0 --mtime='' $default_nmk_dir
+fakeroot tar -caf $tmp_dir/$archive_name --mtime="$(date)" $default_nmk_dir
 
 
 # Step 6. Clean up and hash
