@@ -28,13 +28,13 @@ fi
 eval set -- $_TEMP
 
 # Variables
-_STABLE=
 _BRANCH=
+_STABLE=
 
 while true; do
     case $1 in
-        -s | --stable ) _STABLE=true; shift ;;
         -b | --branch ) _BRANCH=$2; shift 2 ;;
+        -s | --stable ) _STABLE=true; shift ;;
         -h | --help ) usage; exit 0 ;;
         -- ) shift; break ;;
     esac
