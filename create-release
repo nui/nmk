@@ -78,8 +78,9 @@ if [[ -e zsh/.zcompdump || -e zsh/.zsh_history || -d node_modules ]]; then
     >&2 echo "Aborted"
     exit 1
 fi
-date --rfc-3339=seconds > build-time
-git log -n 10 --no-color --oneline --decorate --graph > last-10-commits
+print -- "Built on $(date --rfc-3339=seconds)\n" >> BUILD_INFO
+print -- "Last 10 commits" >> BUILD_INFO
+git log -n 10 --no-color --oneline --decorate --graph >> BUILD_INFO
 
 
 # Step 3. Get rid of git and unnecessary files
