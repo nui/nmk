@@ -16,7 +16,7 @@ ENV = os.environ
 
 
 def build_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog='nmk')
     parser.add_argument('-2',
                         dest='force256color',
                         action='store_true',

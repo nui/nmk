@@ -4,24 +4,34 @@ set -e
 
 setopt extendedglob
 
+readonly _SCRIPT_NAME=${0:t}
+
 # parse option {{{
 usage() {
-    cat <<- 'EOU'
-	Usage: docker-update-tag IMAGE
+cat <<- EOU
+Usage: $_SCRIPT_NAME IMAGE
 
-	  Options
-	     -i, --interactive  select tags to update using checklist
-	     -d                 select none
-	     -h, --help         print this help message
+optional arguments:
+  -i, --interactive  select tags to update using checklist
+  -d                 select none
+  -h, --help         print this help message
 EOU
 }
 
-if ! TEMP=$(getopt -q -o hdi --long help,interactive -- "$@"); then
+getopt_options=(
+    help
+    interactive
+)
+
+if ! getopt_tmp=$(POSIXLY_CORRECT=true getopt -q -o hdi --long ${(j:,:)getopt_options} -- "$@"); then
+    # exit if error
     usage
     exit 1
 fi
 
-eval set -- $TEMP
+eval set -- $getopt_tmp
+unset getopt_options
+unset getopt_tmp
 
 _DEFAULT_STATUS=on
 _INTERACTIVE=0

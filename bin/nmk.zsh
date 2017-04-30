@@ -3,23 +3,23 @@
 #!/usr/bin/env zsh
 
 # Constant
-_UNICODE_NAME='en_US.UTF-8'
+readonly _UNICODE_NAME='en_US.UTF-8'
 
 # Parse options {{{
 usage() {
 cat <<- EOU
 Usage: nmk [OPTIONS] [TMUX_COMMANDS [TMUX_OPTIONS...]]
 
-Options
-    -2                        force 256 colors terminal
-    -L SOCKET_NAME            set tmux socket name
-    -u, --unicode             export LANG=$_UNICODE_NAME
-        --force-unicode       export LC_ALL=$_UNICODE_NAME
-        --detach-on-destroy   detach the client when the session is destroyed
-        --no-autofix          disable automatically fix
-        --no-autoload         do not detect and load common development tools
-    -I, --ignore-local        ignore local configuration
-    -h, --help                print this help message
+optional arguments:
+  -2                        force 256 colors terminal
+  -L SOCKET_NAME            set tmux socket name
+  -u, --unicode             export LANG=$_UNICODE_NAME
+      --force-unicode       export LC_ALL=$_UNICODE_NAME
+      --detach-on-destroy   detach the client when the session is destroyed
+      --no-autofix          disable automatically fix
+      --no-autoload         do not detect and load common development tools
+  -I, --ignore-local        ignore local configuration
+  -h, --help                print this help message
 EOU
 }
 

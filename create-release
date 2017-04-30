@@ -1,15 +1,17 @@
 #!/bin/zsh
 set -e
 
+readonly _SCRIPT_NAME=${0:t}
+
 # Parse options {{{
 usage() {
 cat <<- EOU
-Usage: create-release [OPTIONS]
+Usage: $_SCRIPT_NAME [OPTIONS]
 
-Options
-    -b, --branch BRANCH   git branch
-    -s, --stable          create bundle for upload to github release
-    -h, --help            print this help message
+optional arguments:
+  -b, --branch BRANCH   git branch
+  -s, --stable          create bundle for upload to github release
+  -h, --help            print this help message
 EOU
 }
 

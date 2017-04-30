@@ -1,17 +1,18 @@
 #!/usr/bin/env zsh
 
 set -e
+readonly _SCRIPT_NAME=${0:t}
 
 # parse options {{{
 usage() {
-    cat <<- 'EOU'
-		Usage: automate [options] [target directory]
+cat <<- EOU
+Usage: $_SCRIPT_NAME [options] [target directory]
 
-		Options
-		  -b, --branch BRANCH   git branch
-		  -r, --repo REPO       clone from REPO
-		  -h, --help            print this help message
-	EOU
+optional arguments:
+  -b, --branch BRANCH   git branch
+  -r, --repo REPO       clone from REPO
+  -h, --help            print this help message
+EOU
 }
 
 

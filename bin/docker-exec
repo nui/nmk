@@ -4,28 +4,37 @@
 # this script wrap around docker exec to make tmux work properly
 set -e
 
-_PROG=${0:t}
+readonly _SCRIPT_NAME=${0:t}
 
 # Parse options {{{
 usage() {
-    cat <<- EOU
-		Usage: $_PROG [options] CONTAINER [command] [args..]
+cat <<- EOU
+Usage: $_SCRIPT_NAME [options] CONTAINER [command] [args..]
 
-		options:
-		  -a, --alternate  set NMK_DIR to /tmp/$USER/nmk
-		  -n, --nmk        run NMK rather than interactive shell
-		  -s, --ssh        print ssh command and exit
-		  -u, --user       username or UID
-	EOU
+optional arguments:
+  -a, --alternate  set NMK_DIR to /tmp/$USER/nmk
+  -n, --nmk        run NMK rather than interactive shell
+  -s, --ssh        print ssh command and exit
+  -u, --user       username or UID
+EOU
 }
 
-if ! getopt_tmp=$(POSIXLY_CORRECT=true getopt -q -o ahnsu: --long alternate,help,nmk,ssh,user: -- "$@"); then
+getopt_options=(
+    alternate
+    help
+    nmk
+    ssh
+    user:
+)
+
+if ! getopt_tmp=$(POSIXLY_CORRECT=true getopt -q -o ahnsu: --long ${(j:,:)getopt_options} -- "$@"); then
     # exit if error
     usage
     exit 1
 fi
 
 eval set -- $getopt_tmp
+unset getopt_options
 unset getopt_tmp
 
 _ALTERNATE=false
