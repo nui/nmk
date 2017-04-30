@@ -19,13 +19,14 @@ usage() {
 	EOU
 }
 
-if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o ahnsu: --long alternate,help,nmk,ssh,user: -- "$@"); then
+if ! getopt_tmp=$(POSIXLY_CORRECT=true getopt -q -o ahnsu: --long alternate,help,nmk,ssh,user: -- "$@"); then
     # exit if error
     usage
     exit 1
 fi
 
-eval set -- $_TEMP
+eval set -- $getopt_tmp
+unset getopt_tmp
 
 _ALTERNATE=false
 _SSH=false

@@ -5,7 +5,7 @@ set -e
 # parse options {{{
 usage() {
     cat <<- 'EOU'
-		Usage: automate [options] [base directory]
+		Usage: automate [options] [target directory]
 
 		Options
 		  -b, --branch BRANCH   git branch
@@ -15,23 +15,26 @@ usage() {
 }
 
 
-_OPTIONS=(
+getopt_options=(
     branch:
     help
     repo:
 )
 
-if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o b:hr: --long ${(j:,:)_OPTIONS} -- "$@"); then
+if ! getopt_tmp=$(POSIXLY_CORRECT=true getopt -q -o b:hr: --long ${(j:,:)getopt_options} -- "$@"); then
     # exit if error
     usage
     exit 1
 fi
 
-eval set -- $_TEMP
+eval set -- $getopt_tmp
+unset getopt_options
+unset getopt_tmp
 
-_BRANCH=
-_GITHUB_REPO='https://github.com/nuimk/nmk.git'
-_REPO=$_GITHUB_REPO
+readonly _DEFAULT_NMK_DIR=$HOME/.nmk
+readonly _GITHUB_REPO='https://github.com/nuimk/nmk.git'
+declare _BRANCH
+declare _REPO=$_GITHUB_REPO
 
 while true; do
     case $1 in
@@ -41,9 +44,23 @@ while true; do
         -- ) shift; break ;;
     esac
 done
+readonly _BRANCH
+readonly _REPO
+
+declare _NMK_DIR
+if [[ -n $1 ]]; then
+    _NMK_DIR=${1:A}
+    shift
+else
+    _NMK_DIR=$_DEFAULT_NMK_DIR
+fi
+readonly _NMK_DIR
 # }}}
 
-_NMK_DIR=${${1:-$HOME/.nmk}:A}
+if [[ -d $_NMK_DIR ]]; then
+    print -- "target directory: $_NMK_DIR already exist"
+    exit 1
+fi
 
 if [[ -n $_BRANCH ]]; then
     git clone --quiet --branch $_BRANCH $_REPO $_NMK_DIR

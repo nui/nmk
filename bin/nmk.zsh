@@ -23,7 +23,7 @@ Options
 EOU
 }
 
-_OPTIONS=(
+getopt_options=(
     detach-on-destroy
     force-unicode
     help
@@ -33,13 +33,15 @@ _OPTIONS=(
     unicode
 )
 
-if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o 2hIL:u --long ${(j:,:)_OPTIONS} -- "$@"); then
+if ! getopt_tmp=$(POSIXLY_CORRECT=true getopt -q -o 2hIL:u --long ${(j:,:)getopt_options} -- "$@"); then
     # exit if error
     usage
     exit 1
 fi
 
-eval set -- $_TEMP
+eval set -- $getopt_tmp
+unset getopt_options
+unset getopt_tmp
 
 # Variables
 NMK_AUTOLOAD=

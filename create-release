@@ -13,23 +13,25 @@ Options
 EOU
 }
 
-_OPTIONS=(
+getopt_options=(
     branch:
     help
     stable
 )
 
-if ! _TEMP=$(POSIXLY_CORRECT=true getopt -q -o b:hs --long ${(j:,:)_OPTIONS} -- "$@"); then
+if ! getopt_tmp=$(POSIXLY_CORRECT=true getopt -q -o b:hs --long ${(j:,:)getopt_options} -- "$@"); then
     # exit if error
     usage
     exit 1
 fi
 
-eval set -- $_TEMP
+eval set -- $getopt_tmp
+unset getopt_options
+unset getopt_tmp
 
 # Variables
-_BRANCH=
-_STABLE=
+declare _BRANCH
+declare _STABLE
 
 while true; do
     case $1 in
@@ -39,30 +41,31 @@ while true; do
         -- ) shift; break ;;
     esac
 done
+readonly _BRANCH
+readonly _STABLE
 # }}}
 
 find_remote_branch() {
-    local tracked
-    local -a parts
-    tracked=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
-    if [[ -z $tracked ]]; then
+    local -a tmp_arr
+    local remote_tracked=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+    if [[ -z $remote_tracked ]]; then
         print -- "Can't find remote tracking branch"
         exit 1
     fi
-    parts=(${(@s#/#)tracked})
+    tmp_arr=(${(@s#/#)remote_tracked})
     # remote branch without remote name
-    typeset -g find_remote_branch_result=${(@j#/#)parts[2,-1]}
+    typeset -g find_remote_branch_result=${(@j#/#)tmp_arr[2,-1]}
 }
 
 set -x
 
-tmp_dir=$(mktemp -d --suffix=.bundle.nmk)
-cloud_object=gs://nuimk-nmk/nmk.tar.gz
+readonly tmp_dir=$(mktemp -d --suffix=.bundle.nmk)
+readonly cloud_object=gs://nuimk-nmk/nmk.tar.gz
 
-archive_name=nmk.tar.gz
-default_nmk_dir=.nmk
-git_dir=$tmp_dir/nmk
-staging_dir=$tmp_dir/staging
+readonly archive_name=nmk.tar.gz
+readonly default_nmk_dir=.nmk
+readonly git_dir=$tmp_dir/nmk
+readonly staging_dir=$tmp_dir/staging
 
 # Step 1. Clone from github
 # -----------------------------------------------------------------------------
