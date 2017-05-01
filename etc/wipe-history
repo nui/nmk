@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-cd ${0:A:h}
+cd ${0:A:h:h}
 
 files=(
     vim/shada/main.shada
@@ -8,6 +8,10 @@ files=(
     zsh/.zcompdump
     zsh/.zsh_history
 )
+
+read -q "confirm?Wipe history? (y/n)"
+
+[[ $confirm != y ]] && exit 0
 
 for file in $files; do
     if [[ -f $file ]]; then

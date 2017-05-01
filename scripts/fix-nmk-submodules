@@ -1,8 +1,0 @@
-#!/usr/bin/env zsh
-
-set -e
-
-cd ${0:A:h:h}
-rm -rf .git/modules
-rm -rf zsh/plugins/*
-git submodule update
