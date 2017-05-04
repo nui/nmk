@@ -21,5 +21,5 @@ bindkey ${terminfo[kend]}  end-of-line
 bindkey ${terminfo[kdch1]} delete-char
 
 HISTFILE="${ZDOTDIR}/.zsh_history"
-HISTSIZE=4000
+HISTSIZE=2500
 SAVEHIST=$HISTSIZE
