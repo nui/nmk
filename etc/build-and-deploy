@@ -10,6 +10,7 @@ Usage: $_SCRIPT_NAME [OPTIONS]
 
 optional arguments:
   -b, --branch BRANCH   git branch
+  -k, --keep            do not delete temporary files
   -s, --stable          create bundle for upload to github release
   -h, --help            print this help message
 EOU
@@ -18,10 +19,11 @@ EOU
 getopt_options=(
     branch:
     help
+    keep
     stable
 )
 
-if ! getopt_tmp=$(POSIXLY_CORRECT=true getopt -q -o b:hs --long ${(j:,:)getopt_options} -- "$@"); then
+if ! getopt_tmp=$(POSIXLY_CORRECT=true getopt -q -o b:hks --long ${(j:,:)getopt_options} -- "$@"); then
     # exit if error
     usage
     exit 1
@@ -33,17 +35,20 @@ unset getopt_tmp
 
 # Variables
 declare _BRANCH
+declare _KEEP
 declare _STABLE
 
 while true; do
     case $1 in
         -b | --branch ) _BRANCH=$2; shift 2 ;;
+        -k | keep ) _KEEP=true; shift ;;
         -s | --stable ) _STABLE=true; shift ;;
         -h | --help ) usage; exit 0 ;;
         -- ) shift; break ;;
     esac
 done
 readonly _BRANCH
+readonly _KEEP
 readonly _STABLE
 # }}}
 
@@ -65,6 +70,7 @@ readonly tmp_dir=$(mktemp -d --suffix=.bundle.nmk)
 readonly cloud_object=gs://nuimk-nmk/nmk.tar.gz
 
 readonly archive_name=nmk.tar.gz
+readonly assets_dir=$tmp_dir/assets
 readonly default_nmk_dir=.nmk
 readonly git_dir=$tmp_dir/nmk
 readonly staging_dir=$tmp_dir/staging
@@ -127,29 +133,30 @@ chmod +x bin/nmk-update.py
 
 # Step 5. Create final tar archive
 # -----------------------------------------------------------------------------
+mkdir $assets_dir
 cd $staging_dir
-fakeroot tar -caf $tmp_dir/$archive_name --mtime="$(date)" $default_nmk_dir
+fakeroot tar -caf $assets_dir/$archive_name --mtime="$(date)" $default_nmk_dir
 
 
-# Step 6. Clean up and hash
+# Step 7. hash and uploading
 # -----------------------------------------------------------------------------
-cd $tmp_dir
-# remove temporary directories
-rm -rf $git_dir $staging_dir
+cd $assets_dir
 # sha256 hash
 sha256sum -b $archive_name > $archive_name.sha256
 
-# Step 7. Upload to google cloud storage
 gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_name $cloud_object
 gsutil -h "Cache-Control:private, max-age=0, no-transform" cp -a public-read $archive_name.sha256 $cloud_object.sha256
 
-# Optional step for stable release
+# Step 7.1 (Stable only) Create gpg signature
 if [[ $_STABLE == true ]]; then
     gpg2 -b $archive_name
-    print -- $tmp_dir
     if (( ${+commands[dolphin]} )); then
-        dolphin $tmp_dir 2>/dev/null
+        dolphin $assets_dir 2>/dev/null
+    else
+        print -- $assets_dir
     fi
 fi
-rm -rf $tmp_dir
-
+# Step 8. remove temporary directories
+if [[ $_KEEP != true ]]; then
+    rm -rf $tmp_dir
+fi
