@@ -51,11 +51,11 @@ function {
 function rf {
     local abspath
     abspath=${1:A}
-    # if xclip is present, pipe output to xclip
+    # pipe output to tmux clipboard, and if present, also pipe to xclip
     if (( ${+commands[xclip]} )); then
-        print -n -- $abspath | tee >(xclip) >(xclip -selection clipboard) >(tmux load-buffer -)
+        print -n -- $abspath >&1 > >(tmux load-buffer -) > >(xclip) > >(xclip -selection clipboard)
     else
-        print -n -- $abspath | tmux load-buffer -
+        print -n -- $abspath >&1 > >(tmux load-buffer -)
     fi
 }
 
