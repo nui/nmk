@@ -92,7 +92,7 @@ fi
 () {
     set +x
     print -- "Built on $(date --rfc-3339=seconds)"
-    print -- "\nBranch: $(git rev-parse --abbrev-ref HEAD)"
+    print -- "\nBranch: $find_remote_branch_result"
     print -- "\nLast 10 commits"
     git --no-pager log -n 10 --no-color --oneline --decorate --graph
     print -- "\nSubmodule:"
