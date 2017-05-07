@@ -110,18 +110,20 @@ function {
 }
 
 function rf {
+    local -a list
     local abspath
     abspath=${1:A}
-    # print path
-    print $abspath
+    list=('print -n -- $abspath >&1')
     # if running tmux session, load into tmux buffer
     if [[ -n $TMUX ]]; then
-        print -n $abspath > >(tmux load-buffer -)
+        list+='> >(tmux load-buffer -)'
     fi
     # if present and usable, also pipe to xclip
     if (( ${+commands[xclip]} )) && xclip -o &> /dev/null; then
-        print -n $abspath > >(xclip) > >(xclip -selection clipboard)
+        list+='> >(xclip)'
+        list+='> >(xclip -selection clipboard)'
     fi
+    eval ${(j: :)list}
 }
 
 # Productive Git aliases and functions
