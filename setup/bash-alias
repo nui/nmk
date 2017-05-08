@@ -3,10 +3,17 @@
 append_alias() {
 cat << 'EOF'
 # nmk alias
-if [ -e ~/.nmk/bin/nmk ]; then alias nmk='exec ~/.nmk/bin/nmk'; fi
+if [[ -e ~/.nmk/bin/nmk ]]; then alias nmk='~/.nmk/bin/nmk'; fi
 EOF
 }
 
-if [ -e ~/.bashrc ]; then
-    grep -q -F "alias nmk" ~/.bashrc || append_alias >> ~/.bashrc
+delete_alias() {
+    sed -i '/alias nmk=/d' $1
+}
+
+RCFILE=~/.bashrc
+
+if [[ -e $RCFILE ]]; then
+    delete_alias $RCFILE
+    append_alias >> $RCFILE
 fi
