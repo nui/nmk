@@ -4,7 +4,7 @@
 
 ```sh
 # Debian system dependencies
-sudo apt install git tmux zsh
+sudo apt install git python tmux zsh
 
 # Recommended packages
 # For desktop
