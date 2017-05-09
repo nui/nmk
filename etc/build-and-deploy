@@ -41,7 +41,7 @@ declare _STABLE
 while true; do
     case $1 in
         -b | --branch ) _BRANCH=$2; shift 2 ;;
-        -k | keep ) _KEEP=true; shift ;;
+        -k | --keep ) _KEEP=true; shift ;;
         -s | --stable ) _STABLE=true; shift ;;
         -h | --help ) usage; exit 0 ;;
         -- ) shift; break ;;
