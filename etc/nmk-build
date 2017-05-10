@@ -70,65 +70,68 @@ find_remote_branch() {
 
 set -x
 
-readonly tmp_dir=$(mktemp -d --suffix=.bundle.nmk)
+readonly archive_name='nmk.tar.gz'
+readonly archive_prefix='.nmk'
 readonly cloud_object=gs://nuimk-nmk/nmk.tar.gz
+readonly script_git_root=${0:A:h:h}
+readonly tmp_dir=$(mktemp -d --suffix=.nmk-build)
 
-readonly archive_name=nmk.tar.gz
-readonly assets_dir=$tmp_dir/assets
-readonly default_nmk_dir=.nmk
-readonly git_dir=$tmp_dir/nmk
-readonly staging_dir=$tmp_dir/staging
+readonly archive_dir="$tmp_dir/$archive_prefix"
+readonly assets_dir="$tmp_dir/assets"
+readonly tmp_repo="$tmp_dir/nmk"
+
+# Step 0. Change directory to git root of this script
+cd $script_git_root
 
 # Step 1. Clone from github
 # -----------------------------------------------------------------------------
 find_remote_branch
-$NMK_DIR/setup/automate --branch ${_BRANCH:-$find_remote_branch_result} $git_dir
+$script_git_root/setup/automate --branch ${_BRANCH:-$find_remote_branch_result} $tmp_repo
 
 
 # Step 2. Generate files that need information from git
 # -----------------------------------------------------------------------------
-cd $git_dir
+cd $tmp_repo
 # don't run this on working environment
-if [[ -e zsh/.zcompdump || -e zsh/.zsh_history || -d node_modules ]]; then
+if [[ $script_git_root == $tmp_repo || -e zsh/.zcompdump || -e zsh/.zsh_history || -d node_modules ]]; then
     >&2 echo "Aborted"
     exit 1
 fi
+set +x
 () {
-    set +x
     print -- "Built on $(date --rfc-3339=seconds)"
     print -- "\nBranch: $find_remote_branch_result"
     print -- "\nLast 10 commits"
     git --no-pager log -n 10 --no-color --oneline --decorate --graph
     print -- "\nSubmodule:"
-    git submodule
+    git submodule status
     print -- "\nVim plugins:"
     for repo (vim/bundle/*/) {
         cd $repo
         print -- "$(git rev-parse --verify HEAD)  ${repo:t}"
         cd -
     }
-    set -x
-} >> BUILD_INFO
+} >> .buildinfo
+set -x
 
 # Step 3. Get rid of git and unnecessary files
 # -----------------------------------------------------------------------------
-mkdir $staging_dir
-mkdir -m 700 $staging_dir/$default_nmk_dir
-tar -c --exclude-vcs --exclude-from=$NMK_DIR/.bundleignore . | tar -x -C $staging_dir/$default_nmk_dir
+mkdir $archive_dir # don't remove this line, it should thrown error if $archive_dir = $tmp_repo
+tar -c --exclude-vcs --exclude-from=$script_git_root/.archiveignore . | tar -x -C $archive_dir
 
 
 # Step 4. Generate more files
 # -----------------------------------------------------------------------------
-cd $staging_dir/$default_nmk_dir
+cd $archive_dir
 # add uninstaller script
 cat > uninstall.sh << 'EOF'
 #!/bin/sh
 set -e
 find . -name '*.pyc' -exec rm -f {} +
-<.bundle-files xargs --null rm
+<.installed-files xargs --null rm
 EOF
 # create a list of bundled files
-find . ! -type d -print0 | sort --reverse --zero-terminated > .bundle-files
+find . ! -type d -print0 | sort --reverse --zero-terminated > .installed-files
 # unset write permission to get warning message on update read-only files
 find . -type f -exec chmod ugo-w {} +
 # set update script execute bit
@@ -138,9 +141,9 @@ chmod +x bin/nmk-update.py
 # Step 5. Create final tar archive
 # -----------------------------------------------------------------------------
 mkdir $assets_dir
-cd $staging_dir
 tar --owner=root:0 --group=root:0 --mtime="$(date)" \
-    -caf $assets_dir/$archive_name $default_nmk_dir
+    -C $tmp_dir \
+    -caf $assets_dir/$archive_name $archive_prefix
 
 
 # Step 7. hash and uploading

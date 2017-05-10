@@ -13,8 +13,8 @@
 ./tools
 ./zsh/src
 # our files
-.bundleignore
-./etc/build-and-deploy
+.archiveignore
+./etc/nmk-build
 ./package.json
 ./settings.js
 ./tmux/*.js
