@@ -14,7 +14,7 @@
 ./zsh/src
 # our files
 .archiveignore
-./etc/nmk-build
+./etc/build
 ./package.json
 ./settings.js
 ./tmux/*.js

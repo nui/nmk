@@ -9,9 +9,12 @@ import json
 import logging
 import os
 import subprocess
+import sys
 import time
 
 from six.moves.urllib import request
+from six.moves import input
+from six import print_
 import argparse
 
 logging.basicConfig(format='{0}: %(message)s'.format(path.basename(__file__)),
@@ -68,13 +71,28 @@ class GithubReleaseResource(ArchiveResource):
         return self.release['tag_name']
 
     def fetch(self):
-        response = request.urlopen('https://api.github.com/repos/nuimk/nmk/releases/latest')
-        self.release = json.loads(response.read())
-
-    def fetch_tag(self, tag_name):
         response = request.urlopen('https://api.github.com/repos/nuimk/nmk/releases')
-        releases = json.loads(response.read())
-        self.release = next((x for x in releases if x['tag_name'] == tag_name))
+        releases = filter(self.has_archive, json.loads(response.read()))
+        if len(releases) == 0:
+            logging.error('Not found any release')
+            sys.exit(1)
+        self.release = self.interactive_choose_release(releases)
+
+    @staticmethod
+    def interactive_choose_release(releases):
+        print_('Select Github release to update\n')
+        d = dict((k, v) for k, v in enumerate(releases, start=1))
+        for i, release in d.iteritems():
+            print_("  ({0}). {1}".format(i, release['tag_name']))
+        ch = input('\nEnter number of release (default to 1): ') or '1'
+        release = d.get(int(ch))
+        logging.debug('Selected {0}'.format(release['tag_name']))
+        return release
+
+    @staticmethod
+    def has_archive(release):
+        assets = release['assets']
+        return any((x['name'] == 'nmk.tar.gz' for x in assets))
 
     @staticmethod
     def get_archive_info(release):
@@ -83,7 +101,7 @@ class GithubReleaseResource(ArchiveResource):
 
     def is_up2date(self):
         if not path.exists(self.cache_path):
-            logging.info('Not found Github API cache')
+            logging.debug('Not found Github API cache')
             return False
         archive_info = self.get_archive_info(self.release)
         with open(self.cache_path) as f:
@@ -99,11 +117,11 @@ class GithubReleaseResource(ArchiveResource):
         with open(self.cache_path, 'w') as f:
             f.write(json.dumps(self.release, sort_keys=True, indent=4))
             f.flush()
-            logging.info('Cached Github release json in {0}'.format(self.cache_path))
+            logging.debug('Cached Github release json in {0}'.format(self.cache_path))
 
     def clear_cache(self):
         if super(GithubReleaseResource, self).clear_cache():
-            logging.info('Cleared Github API cache')
+            logging.debug('Cleared Github API cache')
 
 
 class GoogleCloudStorageResource(ArchiveResource):
@@ -124,7 +142,7 @@ class GoogleCloudStorageResource(ArchiveResource):
 
     def is_up2date(self):
         if not path.exists(self.cache_path):
-            logging.info('Not found GoogleCloudStorage API cache')
+            logging.debug('Not found GoogleCloudStorage API cache')
             return False
         with open(self.cache_path) as f:
             cached_resource = json.loads(f.read())
@@ -134,11 +152,11 @@ class GoogleCloudStorageResource(ArchiveResource):
         with open(self.cache_path, 'w') as f:
             f.write(json.dumps(self.resource, sort_keys=True, indent=4))
             f.flush()
-            logging.info('Cached GoogleCloudStorage object resource json in {0}'.format(self.cache_path))
+            logging.debug('Cached GoogleCloudStorage object resource json in {0}'.format(self.cache_path))
 
     def clear_cache(self):
         if super(GoogleCloudStorageResource, self).clear_cache():
-            logging.info('Cleared GoogleCloudStorage API cache')
+            logging.debug('Cleared GoogleCloudStorage API cache')
 
 
 def download_bundle(url):
@@ -148,19 +166,19 @@ def download_bundle(url):
     tf.write(rq.read())
     end = time.time()
     tf.flush()
-    logging.info('Downloaded in {0:.2f} s'.format(end - start))
-    logging.info('Downloaded data to ' + tf.name)
+    logging.debug('Downloaded in {0:.2f} s'.format(end - start))
+    logging.debug('Downloaded data to ' + tf.name)
     return tf
 
 
 def download_and_install(archive_url):
-    logging.info('Downloading ' + archive_url)
+    logging.debug('Downloading ' + archive_url)
     archive_file = download_bundle(archive_url)
 
     os.chdir(NMK_DIR)
-    logging.info('Uninstalling')
+    logging.debug('Uninstalling')
     subprocess.call(['sh', 'uninstall.sh'])
-    logging.info('Extracting update data')
+    logging.debug('Extracting update data')
     subprocess.call(['tar', '-xzf', archive_file.name, '--strip-components=1'])
     archive_file.close()
 
@@ -172,27 +190,28 @@ def build_parser():
                         action='store_true',
                         default=False,
                         help='Update with stable release from Github')
-    parser.add_argument('tag_name',
-                        nargs=argparse.OPTIONAL,
-                        help='git tag')
+    parser.add_argument('-d', '--debug',
+                        dest='debug',
+                        action='store_true',
+                        default=False,
+                        help='print debug message')
     return parser
 
 
 def main():
     args = build_parser().parse_args()
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
 
     github = GithubReleaseResource()
     gcloud = GoogleCloudStorageResource()
     if args.stable:
         resource = github
         other_resource = gcloud
-        tag_name = args.tag_name
-        github.fetch_tag(tag_name) if tag_name else github.fetch()
-        logging.info('Founded Github tag ' + github.tag_name)
     else:
         resource = gcloud
         other_resource = github
-        resource.fetch()
+    resource.fetch()
     if resource.is_up2date():
         logging.info('Already up to date :)')
         exit(0)
