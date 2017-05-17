@@ -20,6 +20,8 @@ sudo apt install vim-nox
     git clone --recursive https://github.com/nuimk/nmk.git ~/.nmk
     ~/.nmk/bin/nmk
     ~/.nmk/vim/update-plugins
+# or installation without git
+    wget -qO- https://storage.googleapis.com/nuimk-nmk/nmk.tar.gz | tar xz
 ```
 
 
