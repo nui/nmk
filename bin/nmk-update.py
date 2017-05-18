@@ -13,9 +13,10 @@ import sys
 import time
 
 from six.moves.urllib import request
-from six.moves import input
+from six.moves import filter, input
 from six import print_
 import argparse
+import six
 
 logging.basicConfig(format='{0}: %(message)s'.format(path.basename(__file__)),
                     level=logging.INFO)
@@ -23,9 +24,15 @@ logging.basicConfig(format='{0}: %(message)s'.format(path.basename(__file__)),
 NMK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-class ArchiveResource(object):
-    __metaclass__ = ABCMeta
+def loads_json_api(uri):
+    response = request.urlopen(uri)
+    data = response.read()
+    json_string = data.decode('utf-8') if isinstance(data, six.binary_type) else data
+    return json.loads(json_string)
 
+
+@six.add_metaclass(ABCMeta)
+class ArchiveResource(object):
     @abstractproperty
     def cache_path(self):
         return NotImplemented
@@ -71,8 +78,8 @@ class GithubReleaseResource(ArchiveResource):
         return self.release['tag_name']
 
     def fetch(self):
-        response = request.urlopen('https://api.github.com/repos/nuimk/nmk/releases')
-        releases = filter(self.has_archive, json.loads(response.read()))
+        releases = loads_json_api('https://api.github.com/repos/nuimk/nmk/releases')
+        releases = list(filter(self.has_archive, releases))
         if len(releases) == 0:
             logging.error('ERROR: Not found updatable github release')
             sys.exit(1)
@@ -82,7 +89,7 @@ class GithubReleaseResource(ArchiveResource):
     def interactive_choose_release(releases):
         print_('Select Github release to update\n')
         d = dict((k, v) for k, v in enumerate(releases, start=1))
-        for i, release in d.iteritems():
+        for i, release in six.iteritems(d):
             print_("  ({0}). {1}".format(i, release['tag_name']))
         ch = input('\nEnter number of release (default to 1): ') or '1'
         release = d.get(int(ch))
@@ -137,8 +144,7 @@ class GoogleCloudStorageResource(ArchiveResource):
         return self.resource['mediaLink']
 
     def fetch(self):
-        response = request.urlopen('https://www.googleapis.com/storage/v1/b/nuimk-nmk/o/nmk.tar.gz')
-        self.resource = json.loads(response.read())
+        self.resource = loads_json_api('https://www.googleapis.com/storage/v1/b/nuimk-nmk/o/nmk.tar.gz')
 
     def is_up2date(self):
         if not path.exists(self.cache_path):
