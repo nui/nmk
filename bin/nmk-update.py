@@ -74,7 +74,7 @@ class GithubReleaseResource(ArchiveResource):
         response = request.urlopen('https://api.github.com/repos/nuimk/nmk/releases')
         releases = filter(self.has_archive, json.loads(response.read()))
         if len(releases) == 0:
-            logging.error('Not found any release')
+            logging.error('ERROR: Not found updatable github release')
             sys.exit(1)
         self.release = self.interactive_choose_release(releases)
 
