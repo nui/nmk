@@ -107,9 +107,9 @@ set +x
     git submodule status
     print -- "\nVim plugins:"
     for repo (vim/bundle/*/) {
-        cd $repo
+        pushd -q $repo
         print -- "$(git rev-parse --verify HEAD)  ${repo:t}"
-        cd -
+        popd -q
     }
 } >> .buildinfo
 set -x

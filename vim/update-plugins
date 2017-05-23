@@ -23,8 +23,11 @@ if [[ -d $NMK_DIR ]]; then
             _PLUGIN_DIR=$_BUNDLE_DIR/$_PLUGIN
             # Update if it is git repo
             if is_git_repo $_PLUGIN_DIR; then
-                print -n -- "$_PLUGIN: "
-                (cd $_PLUGIN_DIR && git remote update --prune && git reset --hard origin/HEAD)
+                print -- "\n${_PLUGIN}: "
+                pushd -q $_PLUGIN_DIR
+                git remote update --prune
+                git reset --hard origin/HEAD
+                popd -q
             # Otherwise, clone it
             else
                 rm -rf $_PLUGIN_DIR
