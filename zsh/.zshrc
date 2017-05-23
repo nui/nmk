@@ -215,7 +215,7 @@ alias ssenv=' eval $(tmux show-environment -s)'
 
 # Disable terminal flow control, so that we can use '^S'
 # for history-search-forward.
-stty -ixon
+unsetopt FLOW_CONTROL
 
 # Don't display git branch symbol if terminal does not support 256 colors
 (( ${+commands[tput]} )) && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=

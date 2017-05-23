@@ -154,4 +154,4 @@ alias ssenv=' eval $(tmux show-environment -s)'
 
 # Disable terminal flow control, so that we can use '^S'
 # for history-search-forward.
-stty -ixon
+unsetopt FLOW_CONTROL
