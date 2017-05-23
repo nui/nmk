@@ -1,10 +1,12 @@
 autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz promptinit && promptinit
 
+setopt AUTO_PUSHD
 setopt DVORAK
 setopt EXTENDED_GLOB
 setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_IGNORE_SPACE
+setopt PUSHD_MINUS
 setopt SHARE_HISTORY
 
 # force emacs keybindings
