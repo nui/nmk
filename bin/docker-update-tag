@@ -2,7 +2,7 @@
 
 set -e
 
-setopt extendedglob
+setopt EXTENDED_GLOB
 
 readonly _SCRIPT_NAME=${0:t}
 

@@ -5,11 +5,11 @@ fi
 autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz promptinit && promptinit
 
-setopt extendedglob
-setopt histignorealldups
-setopt histignorespace
-setopt sharehistory
-setopt dvorak
+setopt DVORAK
+setopt EXTENDED_GLOB
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt SHARE_HISTORY
 
 # force emacs keybindings
 bindkey -e
