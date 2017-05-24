@@ -18,7 +18,7 @@ from six import print_
 import argparse
 import six
 
-logging.basicConfig(format='{0}: %(message)s'.format(path.basename(__file__)),
+logging.basicConfig(format='%(levelname)5s: %(message)s',
                     level=logging.INFO)
 
 NMK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -81,7 +81,7 @@ class GithubReleaseResource(ArchiveResource):
         releases = loads_json_api('https://api.github.com/repos/nuimk/nmk/releases')
         releases = list(filter(self.has_archive, releases))
         if len(releases) == 0:
-            logging.error('ERROR: Not found updatable github release')
+            logging.error('Not found updatable github release')
             sys.exit(1)
         self.release = self.interactive_choose_release(releases)
 
@@ -90,7 +90,7 @@ class GithubReleaseResource(ArchiveResource):
         print_('Select Github release to update\n')
         d = dict((k, v) for k, v in enumerate(releases, start=1))
         for i, release in six.iteritems(d):
-            print_("  ({0}). {1}".format(i, release['tag_name']))
+            print_("  {0}) {1}".format(i, release['tag_name']))
         ch = input('\nEnter number of release (default to 1): ') or '1'
         release = d.get(int(ch))
         logging.debug('Selected {0}'.format(release['tag_name']))
@@ -178,7 +178,7 @@ def download_bundle(url):
 
 
 def download_and_install(archive_url):
-    logging.debug('Downloading ' + archive_url)
+    logging.info('Downloading ' + archive_url)
     archive_file = download_bundle(archive_url)
 
     os.chdir(NMK_DIR)
