@@ -57,6 +57,11 @@ def build_parser():
                         action='store_false',
                         default=True,
                         help='do not detect and load common development tools')
+    parser.add_argument('--inception',
+                        dest='inception',
+                        action='store_true',
+                        default=False,
+                        help='Allow tmux nested sessions')
     parser.add_argument('-d', '--debug',
                         dest='debug',
                         action='store_true',
@@ -273,6 +278,9 @@ def exec_tmux(args, tmux_dir):
         if tmux_args:
             params += tuple(tmux_args)
         else:
+            if 'TMUX' in ENV and not args.inception:
+                logging.error('add --inception to allow nested sessions')
+                sys.exit(1)
             params += ('attach',)
     else:
         # start tmux server
