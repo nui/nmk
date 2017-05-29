@@ -7,7 +7,7 @@ const templateName = 'tmux.conf.njk';
 const templatePath = path.join(tmuxDir, templateName);
 
 module.exports = {
-    versions: [1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4],
+    versions: [1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5],
     output: {
         dir: tmuxDir,
     },
