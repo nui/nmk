@@ -94,7 +94,7 @@ def whence(program):
         return None
 
 
-def filter_duplicate_values(iterable):
+def filter_unique(iterable):
     seen = set()
     for item in iterable:
         if item not in seen:
@@ -139,17 +139,17 @@ def setup_path(nmk_dir):
         path.join(nmk_dir, 'bin'),
         path.join(nmk_dir, 'local', 'bin')
     ] + [d for d in env['PATH'].split(os.pathsep) if not is_virtualenv_bin(d)]
-    unique_paths = list(filter_duplicate_values(paths))
-    for p in unique_paths:
-        logging.debug('PATH:' + p)
+    unique_paths = list(filter_unique(paths))
+    for i, p in enumerate(unique_paths, start=1):
+        logging.debug('path[{0:02d}]:{1}'.format(i, p))
     env['PATH'] = os.pathsep.join(unique_paths)
     logging.debug('PATH:' + env['PATH'])
 
 
 def check_dependencies():
-    for prog in ('tmux', 'zsh'):
-        if not whence(prog):
-            logging.error('{0} not found'.format(prog))
+    for binary in ('tmux', 'zsh'):
+        if not whence(binary):
+            logging.error('{0} not found'.format(binary))
             sys.exit(1)
 
 
@@ -236,7 +236,7 @@ def add_local_library(nmk_dir):
         logging.debug(LD_LIBRARY_PATH + ' = ' + env[LD_LIBRARY_PATH])
 
 
-def find_tmux_version():
+def get_tmux_version():
     output = check_output(('tmux', '-V'))
     if isinstance(output, six.binary_type):
         output = output.decode()
@@ -244,7 +244,7 @@ def find_tmux_version():
 
 
 def get_tmux_conf(tmux_dir):
-    version = find_tmux_version()
+    version = get_tmux_version()
     logging.debug('using tmux {0}'.format(version))
     conf = path.join(tmux_dir, '{0}.conf'.format(version))
     if not path.exists(conf):
@@ -258,7 +258,7 @@ def is_socket_exist(socket):
     exists = 0 == subprocess.call(('tmux', '-L', socket, 'list-sessions'),
                                   stdout=devnull,
                                   stderr=devnull)
-    status = "does exists" if exists else "doesn't exists"
+    status = "does exists" if exists else "does not exists"
     logging.debug("socket '{0}' {1}".format(socket, status))
     return exists
 
