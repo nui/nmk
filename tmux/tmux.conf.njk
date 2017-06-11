@@ -9,16 +9,16 @@ bind-key -n F1 select-pane -t :.+ \; display-panes
 bind-key -n F2 last-window
 bind-key -n F3 previous-window
 bind-key -n F4 next-window
-bind-key -n F5 resize-pane -Z
 
-{% if hasCustomKeytable %}
-bind-key -n F11 switch-client -T fxtable
-bind-key -T fxtable -r Space next-layout
-bind-key -T fxtable 1 select-layout even-horizontal
-bind-key -T fxtable 2 select-layout even-vertical
-bind-key -T fxtable 3 select-layout main-horizontal
-bind-key -T fxtable 4 select-layout main-vertical
-bind-key -T fxtable 5 select-layout tiled
+{% if false and hasCustomKeytable %}
+bind-key -n F11 switch-client -T foo
+bind-key -T foo F11 resize-pane -Z
+bind-key -T foo -r Space next-layout
+bind-key -T foo 1 select-layout even-horizontal
+bind-key -T foo 2 select-layout even-vertical
+bind-key -T foo 3 select-layout main-horizontal
+bind-key -T foo 4 select-layout main-vertical
+bind-key -T foo 5 select-layout tiled
 {% endif %}
 
 bind-key -n F12 detach-client
