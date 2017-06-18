@@ -5,25 +5,25 @@ export NMK_DEVELOPMENT=true
 export NMK_DIR=~/.nmk
 export VIMINIT='source $NMK_DIR/vim/init.vim'
 
-# export NMK_PYTHON=~/.pyenv/versions/3.6.0/bin/python3
+# export NMK_PYTHON=~/.pyenv/versions/3.6.1/bin/python3
 # export GOPATH=~/go
 
 path=(
-    ~/.nmk/bin
-    ~/.pyenv/bin
-    # ~/.rbenv/bin
-    # ~/.opt/google-cloud-sdk/bin
-    # ~/.cargo/bin # rust
-    # $GOPATH/bin
-    # /usr/local/go/bin
+    $NMK_DIR/bin
     $path
+    ~/.cargo/bin
+    ~/.opt/google-cloud-sdk/bin
+    ~/.pyenv/bin
+    ~/.rbenv/bin
+    /usr/local/go/bin
+    # $GOPATH/bin
 )
 
 # gpg-agent as ssh-agent
 (( ${+commands[gpg-connect-agent]} )) && [[ -n $DISPLAY ]] && {
     gpg-connect-agent /bye # start the agent if it is not running
-    # export SSH_AUTH_SOCK=~/.gnupg/S.gpg-agent.ssh # gpg <= 2.1.12
-    export SSH_AUTH_SOCK=/run/user/$UID/gnupg/S.gpg-agent.ssh # gpg > 2.1.12
+    export SSH_AUTH_SOCK=~/.gnupg/S.gpg-agent.ssh # gpg <= 2.1.12
+    # export SSH_AUTH_SOCK=/run/user/$UID/gnupg/S.gpg-agent.ssh # gpg > 2.1.12
 }
 # Note for kubuntu
 #   comment out use-ssh-agent in /etc/X11/Xsession.options to disable default ssh-agent
