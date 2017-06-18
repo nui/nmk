@@ -1,5 +1,5 @@
 # Detect & load version managers
-function {
+() {
     typeset -a managers
     # Detect nvm
     [[ -e $HOME/.nvm/nvm.sh ]] && {

@@ -1,5 +1,5 @@
 # Aliases and interactive shell configuration
-function cdd {
+cdd() {
     # Change pwd to directory in which $1 is located
     if [[ ! -e $1 ]]; then
         >&2 print -- '$1 does not exist'
@@ -8,7 +8,7 @@ function cdd {
     cd ${1:A:h}
 }
 
-function cde {
+cde() {
     # Change current working directory to directory in which $1 is located,
     # and execute the command.
     if [[ ! -x $1 ]]; then
@@ -27,7 +27,7 @@ alias cd=' cd'
 alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
 alias help=run-help
-function {
+() {
     local -a option
     # Test if --group-directories-first option is available
     ls --group-directories-first --version &> /dev/null && {
@@ -48,11 +48,17 @@ function {
     alias ls="ls $color_auto"
 }
 
-function rf {
+rf() {
     local -a list
-    local abspath
-    abspath=${1:A}
-    list=('print -n -- $abspath >&1')
+    local _path
+    # relative path
+    if (( ${+2} )); then
+        _path=$(realpath --relative-to=$2 -- $1)
+    # absolute path
+    else
+        _path=${1:A}
+    fi
+    list=('print -n -- $_path >&1')
     # if running tmux session, load into tmux buffer
     if [[ -n $TMUX ]]; then
         list+='> >(tmux load-buffer -)'

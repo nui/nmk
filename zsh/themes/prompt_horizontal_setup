@@ -3,6 +3,7 @@
 
 # Naming convension
 # functions
+#    - avoid function keyword
 #    - snake case
 #    - prefix function name with _horizontal_
 #    - store function result in FUNCNAME_result variable
