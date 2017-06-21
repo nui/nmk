@@ -42,7 +42,7 @@ class ArchiveResource(object):
         return NotImplemented
 
     @abstractmethod
-    def fetch(self):
+    def fetch(self, latest):
         return NotImplemented
 
     @abstractmethod
@@ -77,13 +77,16 @@ class GithubReleaseResource(ArchiveResource):
     def tag_name(self):
         return self.release['tag_name']
 
-    def fetch(self):
+    def fetch(self, latest):
         releases = loads_json_api('https://api.github.com/repos/nuimk/nmk/releases')
         releases = list(filter(self.has_archive, releases))
         if len(releases) == 0:
             logging.error('Not found updatable github release')
             sys.exit(1)
-        self.release = self.interactive_choose_release(releases)
+        if latest:
+            self.release = releases[0]
+        else:
+            self.release = self.interactive_choose_release(releases)
 
     @staticmethod
     def interactive_choose_release(releases):
@@ -143,7 +146,7 @@ class GoogleCloudStorageResource(ArchiveResource):
     def download_url(self):
         return self.resource['mediaLink']
 
-    def fetch(self):
+    def fetch(self, latest):
         self.resource = loads_json_api('https://www.googleapis.com/storage/v1/b/nuimk-nmk/o/nmk.tar.gz')
 
     def is_up2date(self):
@@ -201,6 +204,11 @@ def build_parser():
                         action='store_true',
                         default=False,
                         help='print debug message')
+    parser.add_argument('-i',
+                        dest='interactive',
+                        action='store_true',
+                        default=False,
+                        help='interactive choose release')
     return parser
 
 
@@ -211,13 +219,10 @@ def main():
 
     github = GithubReleaseResource()
     gcloud = GoogleCloudStorageResource()
-    if args.stable:
-        resource = github
-        other_resource = gcloud
-    else:
-        resource = gcloud
-        other_resource = github
-    resource.fetch()
+    resource = github if args.stable else gcloud
+    other_resource = gcloud if args.stable else github
+
+    resource.fetch(latest=not args.interactive)
     if resource.is_up2date():
         logging.info('Already up to date :)')
         exit(0)
