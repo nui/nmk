@@ -83,10 +83,7 @@ class GithubReleaseResource(ArchiveResource):
         if len(releases) == 0:
             logging.error('Not found updatable github release')
             sys.exit(1)
-        if latest:
-            self.release = releases[0]
-        else:
-            self.release = self.interactive_choose_release(releases)
+        self.release = releases[0] if latest else self.interactive_choose_release(releases)
 
     @staticmethod
     def interactive_choose_release(releases):
