@@ -180,11 +180,7 @@ def setup_terminal(args):
     ))
 
     use_256color = not args.force8color and support_256color
-    if use_256color:
-        terminal = 'screen-256color'
-    else:
-        terminal = 'screen'
-    env['NMK_TMUX_DEFAULT_TERMINAL'] = terminal
+    env['NMK_TMUX_DEFAULT_TERMINAL'] = 'screen-256color' if use_256color else 'screen'
     env['NMK_TMUX_256_COLOR'] = "1" if use_256color else "0"
 
 
