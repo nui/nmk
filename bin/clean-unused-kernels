@@ -2,8 +2,7 @@
 
 import os
 import re
-from shutil import which
-from subprocess import call, check_output
+import subprocess
 from tempfile import TemporaryFile
 
 version_matcher = re.compile('linux-image-(\d+[\d.-]+\d+).*')
@@ -20,7 +19,7 @@ def get_kernel_version(package):
 
 def init():
     cmd = 'dpkg --get-selections | grep "\sinstall" | grep "^linux" | cut -f 1'
-    packages = check_output(cmd, shell=True).decode().splitlines()
+    packages = subprocess.check_output(cmd, shell=True).decode().splitlines()
     kernel_versions = set()
     for p in packages:
         v = get_kernel_version(p)
@@ -56,11 +55,18 @@ def get_keep_remove_list(version, packages):
     return keep, remove
 
 
-def create_stdin_from_text(data):
+def copy_to_system_clipboard(data):
     t = TemporaryFile(mode='wt')
     t.write(data)
     t.seek(os.SEEK_SET)
-    return t
+    subprocess.call(['xclip', '-selection', 'clipboard'], stdin=t)
+
+
+def can_copy_to_system_clipboard():
+    try:
+        return subprocess.call(['xclip', '-o'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+    except FileNotFoundError:
+        return False
 
 
 def print_command_and_copy(keep, remove):
@@ -71,11 +77,10 @@ def print_command_and_copy(keep, remove):
     for p in remove:
         print('  ', p)
     print('\nGenerated command')
-    cmd = 'sudo apt-get -y remove {}'.format(' '.join(remove))
+    cmd = 'sudo apt -y remove {}'.format(' '.join(remove))
     print(cmd)
-    if which('xclip'):
-        stdin = create_stdin_from_text(cmd)
-        call(['xclip', '-selection', 'clipboard'], stdin=stdin)
+    if can_copy_to_system_clipboard():
+        copy_to_system_clipboard(cmd)
 
 
 def main():
