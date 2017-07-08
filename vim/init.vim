@@ -6,7 +6,6 @@
 " This must be first, because it changes other options as a side effect.
 set nocompatible
 
-let g:nmk_neovim = exists(':terminal') ? 1 : 0
 let g:nmk_config_dir = expand('$NMK_DIR/vim')
 let g:nmk_256color = $TERM =~ '256color'
 
@@ -16,7 +15,7 @@ let s:local_settings_file = printf('%s/local.vim', g:nmk_config_dir)
 " Use pathogen to easily modify the runtime path
 
 " Don't read default configuration directory
-let s:default_config_dir = expand(g:nmk_neovim ? '$HOME/.config/nvim' : '$HOME/.vim')
+let s:default_config_dir = expand(has('nvim') ? '$HOME/.config/nvim' : '$HOME/.vim')
 let &rtp = substitute(&rtp, s:default_config_dir, g:nmk_config_dir, 'g')
 execute pathogen#infect()
 execute pathogen#helptags()
@@ -62,7 +61,7 @@ let &tabstop = 4  " a tab is four spaces
 let &mouse = ($NMK_DEVELOPMENT == 'true') ? 'a' : ''
 
 " Put share data under configuration directory
-if g:nmk_neovim
+if has('nvim')
     let &shada = printf('%s,n%s/shada/main.shada', &shada, g:nmk_config_dir)
 else
     let &viminfo = printf('%s,n%s/viminfo', &viminfo, g:nmk_config_dir)

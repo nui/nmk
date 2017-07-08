@@ -11,7 +11,7 @@ function! nmk#init() abort
 endfunction
 
 function nmk#runcmd(cmd) abort
-    if g:nmk_neovim
+    if has('nvim')
         exec 'tabnew | terminal '.a:cmd
     else
         exec 'Start '.a:cmd
@@ -53,7 +53,7 @@ endfunction
 nnoremap <leader>slt :call nmk#set_local_tab_size()<left>
 
 function! s:autodetect_neovim_python()
-    if g:nmk_neovim
+    if has('nvim')
         let python2 = expand('$HOME/.pyenv/shims/python2')
         let python3 = expand('$HOME/.pyenv/shims/python3')
         if !exists('g:python_host_prog') && filereadable(python2)
@@ -123,7 +123,7 @@ nnoremap <C-l> gt
 
 nnoremap <leader>9 [c
 nnoremap <leader>0 ]c
-if g:nmk_neovim
+if has('nvim')
     nnoremap <M-9> [c
     nnoremap <M-0> ]c
 endif
