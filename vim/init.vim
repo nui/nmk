@@ -29,7 +29,6 @@ let mapleader = ','
 let maplocalleader = '\'
 
 let &colorcolumn = 80
-let &inccommand = 'nosplit'
 let &laststatus = 2  " always show status line
 set list
 let &listchars = 'tab:▸ ,trail:·,extends:#,nbsp:·'
@@ -57,8 +56,10 @@ set smarttab  " insert tabs on the start of a line according to shiftwidth, not 
 let &softtabstop = 4  " when hitting <BS>, pretend like a tab is removed, even if spaces
 let &tabstop = 4  " a tab is four spaces
 
-" Turn mouse off on server
-let &mouse = ($NMK_DEVELOPMENT == 'true') ? 'a' : ''
+" Nvim specific
+if has('nvim')
+    let &inccommand = 'split'
+endif
 
 " Put share data under configuration directory
 if has('nvim')
@@ -66,6 +67,9 @@ if has('nvim')
 else
     let &viminfo = printf('%s,n%s/viminfo', &viminfo, g:nmk_config_dir)
 endif
+
+" Turn mouse off on server
+let &mouse = ($NMK_DEVELOPMENT == 'true') ? 'a' : ''
 " }}}
 
 " Plugin settings --------------------------------------------------------- {{{
