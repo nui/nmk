@@ -18,7 +18,7 @@ def get_kernel_version(package):
 
 
 def init():
-    cmd = 'dpkg --get-selections | grep "\sinstall" | grep "^linux" | cut -f 1'
+    cmd = 'dpkg --get-selections | grep "\sinstall" | grep "^linux-image-" | cut -f 1'
     packages = subprocess.check_output(cmd, shell=True).decode().splitlines()
     kernel_versions = set()
     for p in packages:
@@ -84,6 +84,9 @@ def print_command_and_copy(keep, remove):
 
 
 def main():
+    if len(KERNEL_VERSIONS) == 0:
+        print("Can't find kernel packages")
+        exit(1)
     if len(KERNEL_VERSIONS) == 1:
         print('You have only one kernel version')
         exit(1)
