@@ -6,7 +6,6 @@ endif
 let g:loaded_nmk = 1
 
 function! nmk#init() abort
-    call s:autodetect_neovim_python()
     call s:check_diff_mode()
 endfunction
 
@@ -51,19 +50,6 @@ function! nmk#set_local_tab_size(size) abort
     let &l:tabstop = a:size
 endfunction
 nnoremap <leader>slt :call nmk#set_local_tab_size()<left>
-
-function! s:autodetect_neovim_python()
-    if has('nvim')
-        let python2 = expand('$HOME/.pyenv/shims/python2')
-        let python3 = expand('$HOME/.pyenv/shims/python3')
-        if !exists('g:python_host_prog') && filereadable(python2)
-            let g:python_host_prog = python2
-        endif
-        if !exists('g:python3_host_prog') && filereadable(python3)
-            let g:python3_host_prog = expand(python3)
-        endif
-    endif
-endfunction
 
 " Section: Mapping
 
