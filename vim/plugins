@@ -6,6 +6,7 @@ ctrlp.vim  https://github.com/kien/ctrlp.vim.git
 dockerfile.vim  https://github.com/ekalinin/Dockerfile.vim.git
 jellybeans.vim  https://github.com/nanotech/jellybeans.vim.git
 nerdtree  https://github.com/scrooloose/nerdtree.git
+nginx.vim https://github.com/chr4/nginx.vim.git
 python-syntax  https://github.com/hdima/python-syntax.git
 syntastic  https://github.com/scrooloose/syntastic.git
 tcomment_vim  https://github.com/tomtom/tcomment_vim.git
