@@ -17,7 +17,7 @@ def get_kernel_version(package):
     return version
 
 
-def init():
+def get_installed_kernel_versions():
     cmd = 'dpkg --get-selections | grep "\sinstall" | grep "^linux-image-" | cut -f 1'
     packages = subprocess.check_output(cmd, shell=True).decode().splitlines()
     kernel_versions = set()
@@ -25,15 +25,20 @@ def init():
         v = get_kernel_version(p)
         if v:
             kernel_versions.add(v)
+    return frozenset(kernel_versions)
+
+
+def get_installed_kernel_packages(versions):
     kernel_packages = set()
-    for p in packages:
-        for v in kernel_versions:
-            if v in p:
-                kernel_packages.add(p)
-    return frozenset(kernel_versions), frozenset(kernel_packages)
+    for v in versions:
+        cmd = 'dpkg --get-selections | grep "\sinstall" | grep "{}" | cut -f 1'.format(v)
+        packages = subprocess.check_output(cmd, shell=True).decode().splitlines()
+        kernel_packages.update(packages)
+    return frozenset(kernel_packages)
 
 
-KERNEL_VERSIONS, KERNEL_PACKAGES = init()
+KERNEL_VERSIONS = get_installed_kernel_versions()
+KERNEL_PACKAGES = get_installed_kernel_packages(KERNEL_VERSIONS)
 
 
 def select_version(version_set):
