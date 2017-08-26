@@ -19,5 +19,6 @@
 ./settings.js
 ./tmux/*.js
 ./tmux/*.njk
+./vim/update-plugins
 ./yarn.lock
 ./zsh/*.js
