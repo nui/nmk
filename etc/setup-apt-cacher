@@ -11,11 +11,6 @@ volume='apt-cacher-data'
 # remove current running apt-cacher-ng
 $docker rm -f $name || true
 
-# Create data container if it doesn't exist
-if $docker volume inspect $volume &> /dev/null; then
-    $docker volume create $volume
-fi
-
 $docker run -d --name $name \
     --restart=always \
     --publish 3142:3142 \
