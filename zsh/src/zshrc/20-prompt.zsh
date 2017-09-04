@@ -6,3 +6,6 @@ prompt horizontal
 # Hide user and host in prompt if NMK_DEVELOPMENT is true by default,
 # this is not apply to zsh in ssh session
 [[ $NMK_DEVELOPMENT == true && -z $SSH_TTY ]] && horizontal[userhost]=0
+
+# Change prompt color to yellow in remote session
+[[ -n $SSH_TTY ]] && horizontal[base_color]=yellow
