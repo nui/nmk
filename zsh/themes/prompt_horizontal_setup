@@ -23,7 +23,7 @@ _horizontal_reset_prompt() {
     if ((${horizontal[color]})); then
         # prompt face turn green if the previous command did exit with 0,
         # otherwise turn yellow
-        PROMPT="%F{cyan} '--%f%B>%(1j. %F{red}%j!%f.) %(?.%F{$happy}:%).%F{$sad}:()%b%f "
+        PROMPT="%F{${horizontal[base_color]}} '--%f%B>%(1j. %F{red}%j!%f.) %(?.%F{$happy}:%).%F{$sad}:()%b%f "
         # restore prompt highlighting if needed
         if ((${#ZSH_HIGHLIGHT_HIGHLIGHTERS} == 0)); then
             ZSH_HIGHLIGHT_HIGHLIGHTERS=($_horizontal_orig_zsh_highlight_highlighters)
@@ -58,7 +58,7 @@ _horizontal_gen_padding() {
 }
 
 _horizontal_join_status() {
-    local separator=${horizontal_status_separator:-"%F{cyan} | %f"}
+    local separator=${horizontal_status_separator:-"%F{${horizontal[base_color]}} | %f"}
     local string
     for item in ${@[1,-1]}; do string+=$separator$item; done
     string=${string:${#separator}} # remove leading separator
@@ -127,7 +127,7 @@ prompt_horizontal_precmd() {
     local rpreprompt
 
     _horizontal_userhost
-    preprompt="%b%F{cyan}.-%B(${_horizontal_userhost_result}%B%F{yellow}%~%F{cyan})%b%F{cyan}-%f"
+    preprompt="%b%F{${horizontal[base_color]}}.-%B(${_horizontal_userhost_result}%B%F{yellow}%~%F{${horizontal[base_color]}})%b%F{${horizontal[base_color]}}-%f"
 
     ((${horizontal[status]})) && {
 
@@ -177,14 +177,14 @@ prompt_horizontal_precmd() {
         # put rstatus to right of preprompt line
         ((${#rprompt_status} > 0)) && {
             _horizontal_join_status $rprompt_status
-            rpreprompt+=" $_horizontal_join_status_result %F{cyan}-%f"
+            rpreprompt+=" $_horizontal_join_status_result %F{${horizontal[base_color]}}-%f"
         }
     }
 
     # make a horizontal line
     ((${horizontal[hr]})) && {
         _horizontal_gen_padding $preprompt $rpreprompt
-        preprompt+="%F{cyan}${_horizontal_gen_padding_result}%f$rpreprompt"
+        preprompt+="%F{${horizontal[base_color]}}${_horizontal_gen_padding_result}%f$rpreprompt"
     }
 
     # blank line before preprompt line
@@ -205,6 +205,7 @@ prompt_horizontal_precmd() {
 prompt_horizontal_setup() {
     typeset -gA horizontal
     # Enable/Disable horizontal features
+    : ${horizontal[base_color]:=cyan}
     : ${horizontal[color]:=1}
     : ${horizontal[cozy]:=0}
     : ${horizontal[exec_time]:=1}
@@ -223,7 +224,7 @@ prompt_horizontal_setup() {
     : ${horizontal[timestamp_threshold_seconds]:=180}
     # horizontal_branch_symbol=''
     # horizontal_hostname=
-    # horizontal_status_separator="%F{cyan} | %f"
+    # horizontal_status_separator="%F{${horizontal[base_color]}} | %f"
 
     # prevent percentage showing up
     # if output doesn't end with a newline
