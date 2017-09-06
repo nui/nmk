@@ -255,9 +255,9 @@ prompt horizontal
         integer has_virtualenv
         integer has_virtualenvwrapper
         [[ ${$(pyenv commands)[(r)virtualenv]} == virtualenv ]] \
-            && has_virtualenv = 1
+            && ((has_virtualenv = 1))
         [[ ${$(pyenv commands)[(r)virtualenvwrapper]} == virtualenvwrapper ]] \
-            && has_virtualenvwrapper = 1
+            && ((has_virtualenvwrapper = 1))
         function init-pyenv {
             eval "$(pyenv init -)"
             ((has_virtualenv)) && ((has_virtualenvwrapper)) && {
