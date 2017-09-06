@@ -91,10 +91,10 @@ alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
 alias help=run-help
 () {
-    local -a option
-    # Test if --group-directories-first option is available
+    local -a ls_options
+    # Test if --group-directories-first exists
     ls --group-directories-first --version &> /dev/null && {
-        option+=--group-directories-first
+        ls_options+=--group-directories-first
     }
     local color_auto
     local color_never
@@ -105,9 +105,9 @@ alias help=run-help
         color_auto='--color=auto'
         color_never='--color=never'
     fi
-    alias la=" ls $color_auto $option -lha"
-    alias lh=" ls $color_auto $option -lh"
-    alias LH=" ls $color_never $option -lhF"
+    alias la=" ls $color_auto $ls_options -lha"
+    alias lh=" ls $color_auto $ls_options -lh"
+    alias LH=" ls $color_never $ls_options -lhF"
     alias ls="ls $color_auto"
 }
 
@@ -159,16 +159,6 @@ rf() {
 export GIT_PAGER='less -+F -+X -c'
 
 (( ${+commands[docker]} )) && {
-    local semver=$(docker version --format '{{.Server.Version}}' 2>/dev/null)
-    local -a versions
-    versions=(${(@s/./)semver})
-    if (( ${#versions} == 3 )); then
-        local major=${versions[1]}
-        local minor=${versions[2]}
-        if (( major >= 1 && minor >= 13)); then
-            alias dksp=' docker system prune'
-        fi
-    fi
     alias dkcc=' docker-clear-containers'
     alias dkci=' docker-clear-images'
 }
@@ -206,8 +196,6 @@ export GIT_PAGER='less -+F -+X -c'
 # Running from command line makes Pycharm inherite all environment variables
 # This makes tools installed by npm using nvm work.
 (( ${+commands[pycharm]} )) && alias pycharm=' nohup pycharm &> /dev/null &!'
-
-alias fumount='fusermount -u'
 
 # Fix multimonitor on kubuntu 16.04
 if [[ $NMK_DEVELOPMENT == true ]]; then
