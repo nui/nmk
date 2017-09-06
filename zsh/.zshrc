@@ -254,19 +254,17 @@ prompt horizontal
         managers+=(pyenv)
         integer has_virtualenv
         integer has_virtualenvwrapper
-        [[ ${$(pyenv commands)[(r)virtualenv]} == virtualenv ]] \
+        typeset -a pyenv_commands
+        pyenv_commands=$(pyenv commands)
+        [[ ${pyenv_commands[(r)virtualenv]} == virtualenv ]] \
             && ((has_virtualenv = 1))
-        [[ ${$(pyenv commands)[(r)virtualenvwrapper]} == virtualenvwrapper ]] \
+        [[ ${pyenv_commands[(r)virtualenvwrapper]} == virtualenvwrapper ]] \
             && ((has_virtualenvwrapper = 1))
         function init-pyenv {
             eval "$(pyenv init -)"
-            ((has_virtualenv)) && ((has_virtualenvwrapper)) && {
-                print -- "Detect both pyenv-virtualenv and pyenv-virtualenvwrapper"
-                print -- "pyenv-virtualenv will be used"
-            }
-            if ((has_virtualenv)); then
+            if (( has_virtualenv )); then
                 eval "$(pyenv virtualenv-init -)"
-            elif ((has_virtualenvwrapper)); then
+            elif (( has_virtualenvwrapper )); then
                 [[ $(pyenv version-name) != system* ]] && pyenv virtualenvwrapper
             fi
         }
