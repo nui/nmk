@@ -68,9 +68,11 @@ find_remote_branch() {
     typeset -g find_remote_branch_result=${(@j#/#)tmp_arr[2,-1]}
 }
 
-TRAPINT() {
+cleanup() {
     rm -rf $tmp_dir
 }
+
+trap cleanup INT
 
 set -x
 
@@ -171,7 +173,8 @@ if (( $_STABLE )); then
         print -- $assets_dir
     fi
 fi
+
 # Step 8. remove temporary directories
 if (( ! $_KEEP )); then
-    rm -rf $tmp_dir
+    cleanup
 fi
