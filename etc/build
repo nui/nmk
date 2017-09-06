@@ -68,6 +68,10 @@ find_remote_branch() {
     typeset -g find_remote_branch_result=${(@j#/#)tmp_arr[2,-1]}
 }
 
+TRAPINT() {
+    rm -rf $tmp_dir
+}
+
 set -x
 
 readonly archive_name='nmk.tar.gz'
