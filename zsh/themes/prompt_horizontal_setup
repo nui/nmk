@@ -213,7 +213,6 @@ prompt_horizontal_setup() {
     : ${horizontal[git_dirty]:=1}
     : ${horizontal[git_untracked_dirty]:=1}
     : ${horizontal[hr]:=1}
-    : ${horizontal[pyenv]:=1}
     : ${horizontal[status]:=1}
     : ${horizontal[timestamp]:=1}
     : ${horizontal[userhost]:=1}
