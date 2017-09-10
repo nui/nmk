@@ -178,14 +178,10 @@ export GIT_PAGER='less -+F -+X -c'
 (( ${+commands[nvim]} )) && {
     function nvim {
         # Deactivate python virtual environment before start nvim
-        if [[ -n $VIRTUAL_ENV ]]; then
-            if (( ${+functions[deactivate]} )); then
-                (deactivate && command nvim "$@")
-            elif (( ${+commands[pyenv]} )); then
-                if [[ ${$(pyenv commands)[(r)deactivate]} == deactivate ]]; then
-                    (pyenv deactivate && command nvim "$@")
-                fi
-            fi
+        if [[ -n $PYENV_VIRTUAL_ENV ]]; then
+            (pyenv deactivate && command nvim "$@")
+        elif [[ -n $VIRTUAL_ENV ]] && (( ${+functions[deactivate]} )); then
+            (deactivate && command nvim "$@")
         else
             command nvim "$@"
         fi
