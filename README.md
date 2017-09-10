@@ -18,7 +18,7 @@ sudo apt install vim-nox
 ## Installation
 ```sh
 # Run setup script
-    culr -sSL https://github.com/nuimk/nmk/raw/master/setup/automate | zsh
+    curl -sSL https://github.com/nuimk/nmk/raw/master/setup/automate | zsh
 # or basic github checkout
     git clone --recursive https://github.com/nuimk/nmk.git ~/.nmk
     ~/.nmk/bin/nmk
