@@ -189,10 +189,6 @@ export GIT_PAGER='less -+F -+X -c'
     alias neo=nvim
 }
 
-# Running from command line makes Pycharm inherite all environment variables
-# This makes tools installed by npm using nvm work.
-(( ${+commands[pycharm]} )) && alias pycharm=' nohup pycharm &> /dev/null &!'
-
 # Fix multimonitor on kubuntu 16.04
 if [[ $NMK_DEVELOPMENT == true ]]; then
     alias mm1='xrandr --output HDMI1 --off; xrandr --output eDP1 --primary --auto --pos 0x0 --rotate normal; reset-plasma5-panel.py'
