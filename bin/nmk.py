@@ -2,6 +2,7 @@
 Run on Python 2.6.6 and later
 """
 
+from distutils.spawn import find_executable
 from os import environ as env
 from os import path
 import logging
@@ -13,6 +14,7 @@ import tempfile
 import argparse
 import six
 
+PY26 = sys.version_info[0:2] == (2, 6)
 UNICODE_NAME = 'en_US.UTF-8'
 
 
@@ -76,24 +78,6 @@ def is_exec(p):
     return path.isfile(p) and os.access(p, os.X_OK)
 
 
-def whence(program):
-    """
-    :return: path to program or None
-    """
-    head, _ = path.split(program)
-    # if 'program' is absolute or relative path
-    if head and is_exec(program):
-        return program
-    # if 'program' is just a name, for example, zsh
-    else:
-        # return absolute path to 'program'
-        for d in env["PATH"].split(os.pathsep):
-            f = path.join(d, program)
-            if is_exec(f):
-                return f
-        return None
-
-
 def filter_unique(iterable):
     seen = set()
     for item in iterable:
@@ -102,14 +86,17 @@ def filter_unique(iterable):
             seen.add(item)
 
 
-def check_output(args):
-    """
-    Replacement of subprocess.check_output in python2.6
-    """
-    stdout = tempfile.TemporaryFile()
-    subprocess.call(args, stdout=stdout)
-    stdout.seek(0)
-    return stdout.read()
+if PY26:
+    def check_output(args):
+        """
+        Replacement of subprocess.check_output in python2.6
+        """
+        stdout = tempfile.TemporaryFile()
+        subprocess.call(args, stdout=stdout)
+        stdout.seek(0)
+        return stdout.read()
+else:
+    check_output = subprocess.check_output
 
 
 def setup_logging(debug):
@@ -148,7 +135,7 @@ def setup_path(nmk_dir):
 
 def check_dependencies():
     for binary in ('tmux', 'zsh'):
-        if not whence(binary):
+        if not find_executable(binary):
             logging.error('{0} not found'.format(binary))
             sys.exit(1)
 
@@ -190,7 +177,7 @@ def setup_environment(args, nmk_dir):
 
     env['NMK_AUTOLOAD'] = str(args.autoload).lower()
     env['NMK_DIR'] = nmk_dir
-    env['NMK_TMUX_DEFAULT_SHELL'] = whence('zsh')
+    env['NMK_TMUX_DEFAULT_SHELL'] = find_executable('zsh')
     env['NMK_TMUX_DETACH_ON_DESTROY'] = args.detach_on_destroy
     env['NMK_TMUX_HISTORY'] = path.join(nmk_dir, 'tmux', '.tmux_history')
     env['VIMINIT'] = 'source {0}'.format(initvim.replace(' ', r'\ '))
@@ -213,7 +200,7 @@ def setup_prefer_editor():
     prefer_editors = ('nvim', 'vim')
     if 'EDITOR' not in env:
         for prog in prefer_editors:
-            if whence(prog):
+            if find_executable(prog):
                 env['EDITOR'] = prog
                 logging.debug('set EDITOR = ' + prog)
                 break
