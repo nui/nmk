@@ -99,6 +99,13 @@ else:
     check_output = subprocess.check_output
 
 
+def get_process_id():
+    output = check_output(('sh', '-c', 'echo $$'))
+    if isinstance(output, six.binary_type):
+        output = output.decode()
+    return int(output)
+
+
 def setup_logging(debug):
     level = logging.DEBUG if debug else logging.WARNING
     logging.basicConfig(format='%(levelname)s:%(message)s',
@@ -277,6 +284,8 @@ def exec_tmux(args, tmux_dir):
 
 def main():
     args = build_parser().parse_args()
+    if args.debug:
+        start_pid = get_process_id()
     setup_logging(debug=args.debug)
     python_info()
     nmk_dir = path.dirname(path.dirname(path.abspath(__file__)))
@@ -287,6 +296,9 @@ def main():
     setup_environment(args=args, nmk_dir=nmk_dir)
     setup_prefer_editor()
     add_local_library(nmk_dir=nmk_dir)
+    if args.debug:
+        end_pid = get_process_id()
+        logging.debug('{0} used processes during initialization'.format(end_pid - start_pid - 1))
     exec_tmux(args=args, tmux_dir=tmux_dir)
 
 
