@@ -74,10 +74,6 @@ def build_parser():
     return parser
 
 
-def is_exec(p):
-    return path.isfile(p) and os.access(p, os.X_OK)
-
-
 def filter_unique(iterable):
     seen = set()
     for item in iterable:
@@ -243,21 +239,19 @@ def get_tmux_conf(tmux_dir):
     return conf
 
 
-def is_socket_exist(socket):
+def is_server_running(socket):
     devnull = open(os.devnull, 'w')
-    exists = 0 == subprocess.call(('tmux', '-L', socket, 'list-sessions'),
-                                  stdout=devnull,
-                                  stderr=devnull)
-    status = "does exists" if exists else "does not exists"
-    logging.debug("socket '{0}' {1}".format(socket, status))
-    return exists
+    running = 0 == subprocess.call(('tmux', '-L', socket, 'list-sessions'),
+                                   stdout=devnull,
+                                   stderr=devnull)
+    status = "found" if running else "not found"
+    logging.debug("{0} server running on socket '{1}'".format(status, socket))
+    return running
 
 
 def exec_tmux(args, tmux_dir):
     conf = path.relpath(get_tmux_conf(tmux_dir))
-
     params = ('tmux',)
-    # Use default socket unless socket name is specified.
     socket = args.socket
     params += ('-L', socket)
     if args.force256color:
@@ -266,7 +260,7 @@ def exec_tmux(args, tmux_dir):
     # If -- is used to separated between tmux and nmk parameters, don't send it to tmux
     if tmux_args and tmux_args[0] == '--':
         tmux_args.pop(0)
-    if is_socket_exist(socket=socket):
+    if is_server_running(socket=socket):
         if tmux_args:
             params += tuple(tmux_args)
         else:
@@ -279,6 +273,7 @@ def exec_tmux(args, tmux_dir):
         params += ('-f', conf) + tuple(tmux_args)
     logging.debug('os.execvp params: ' + str(params))
     sys.stdout.flush()
+    sys.stderr.flush()
     os.execvp('tmux', params)
 
 
