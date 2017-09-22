@@ -101,8 +101,8 @@ def setup_logging(debug):
 
 
 def python_info():
-    logging.debug('use python from ' + sys.executable)
-    logging.debug('python ' + sys.version)
+    logging.debug('python:sys.executable:' + sys.executable)
+    logging.debug('python:sys.version\n' + sys.version)
 
 
 def setup_path(nmk_dir):
@@ -277,7 +277,7 @@ def main():
     add_local_library(nmk_dir=nmk_dir)
     if args.debug:
         end_pid = get_process_id()
-        logging.debug('{0} used processes during initialization'.format(end_pid - start_pid - 1))
+        logging.debug('created {0} processes during initialization'.format(end_pid - start_pid - 1))
     exec_tmux(args=args, tmux_dir=tmux_dir)
 
 
