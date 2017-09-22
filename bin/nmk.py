@@ -113,22 +113,16 @@ def python_info():
     logging.debug('python ' + sys.version)
 
 
-def is_virtualenv_bin(p):
-    virtualenv_files = (path.join(p, name) for name in ('activate', 'python'))
-    return all((path.exists(p) for p in virtualenv_files))
-
-
 def setup_path(nmk_dir):
     """
     Setup PATH environment.
-      - get rid of <virtualenv>/bin
       - prepend NMK_DIR/bin and NMK_DIR/local/bin
       - remove duplicate paths
     """
     paths = [
                 path.join(nmk_dir, 'bin'),
                 path.join(nmk_dir, 'local', 'bin')
-            ] + [d for d in env['PATH'].split(os.pathsep) if not is_virtualenv_bin(d)]
+            ] + env['PATH'].split(os.pathsep)
     unique_paths = list(filter_unique(paths))
     for i, p in enumerate(unique_paths, start=1):
         logging.debug('path[{0:02d}]:{1}'.format(i, p))
