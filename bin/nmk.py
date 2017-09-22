@@ -74,14 +74,6 @@ def build_parser():
     return parser
 
 
-def filter_unique(iterable):
-    seen = set()
-    for item in iterable:
-        if item not in seen:
-            yield item
-            seen.add(item)
-
-
 if PY26:
     def check_output(args):
         """
@@ -117,16 +109,14 @@ def setup_path(nmk_dir):
     """
     Setup PATH environment.
       - prepend NMK_DIR/bin and NMK_DIR/local/bin
-      - remove duplicate paths
     """
     paths = [
                 path.join(nmk_dir, 'bin'),
                 path.join(nmk_dir, 'local', 'bin')
             ] + env['PATH'].split(os.pathsep)
-    unique_paths = list(filter_unique(paths))
-    for i, p in enumerate(unique_paths, start=1):
+    for i, p in enumerate(paths, start=1):
         logging.debug('path[{0:02d}]:{1}'.format(i, p))
-    env['PATH'] = os.pathsep.join(unique_paths)
+    env['PATH'] = os.pathsep.join(paths)
     logging.debug('PATH:' + env['PATH'])
 
 
