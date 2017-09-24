@@ -126,6 +126,8 @@ export GIT_PAGER='less -+F -+X -c'
     alias neo=nvim
 }
 
+alias nmk='python $NMK_DIR/bin/nmk.py'
+
 # Fix multimonitor on kubuntu 16.04
 if [[ $NMK_DEVELOPMENT == true ]]; then
     alias mm1='xrandr --output HDMI1 --off; xrandr --output eDP1 --primary --auto --pos 0x0 --rotate normal; reset-plasma5-panel.py'
