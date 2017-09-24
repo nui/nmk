@@ -200,10 +200,11 @@ def add_local_library(nmk_dir):
     if path.isdir(local_lib_dir):
         library_path = env.get(LD_LIBRARY_PATH)
         library_paths = library_path.split(os.pathsep) if library_path else []
-        library_paths.insert(0, local_lib_dir)
-        env[LD_LIBRARY_PATH] = os.pathsep.join(library_paths)
-        logging.debug('prepend ' + local_lib_dir + ' to ' + LD_LIBRARY_PATH)
-        logging.debug(LD_LIBRARY_PATH + ' = ' + env[LD_LIBRARY_PATH])
+        if local_lib_dir not in library_paths:
+            library_paths.insert(0, local_lib_dir)
+            env[LD_LIBRARY_PATH] = os.pathsep.join(library_paths)
+            logging.debug('prepend ' + local_lib_dir + ' to ' + LD_LIBRARY_PATH)
+            logging.debug(LD_LIBRARY_PATH + ' = ' + env[LD_LIBRARY_PATH])
 
 
 def get_tmux_version():
