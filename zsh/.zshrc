@@ -189,8 +189,6 @@ export GIT_PAGER='less -+F -+X -c'
     alias neo=nvim
 }
 
-alias nmk='python $NMK_DIR/bin/nmk.py'
-
 # Fix multimonitor on kubuntu 16.04
 if [[ $NMK_DEVELOPMENT == true ]]; then
     alias mm1='xrandr --output HDMI1 --off; xrandr --output eDP1 --primary --auto --pos 0x0 --rotate normal; reset-plasma5-panel.py'
@@ -206,6 +204,21 @@ alias ssenv=' eval $(tmux show-environment -s)'
 # Disable terminal flow control, so that we can use '^S'
 # for history-search-forward.
 unsetopt FLOW_CONTROL
+
+nmk() {
+    local python
+    if [[ -n $NMK_PYTHON ]]; then
+        if [[ ! -x $NMK_PYTHON ]]; then
+            >&2 print -- "$NMK_PYTHON not found"
+            >&2 print -- 'Please update $NMK_PYTHON'
+            return 1
+        fi
+        python=$NMK_PYTHON
+    else
+        python=python
+    fi
+    $python $NMK_DIR/bin/nmk.py "$@"
+}
 
 # Don't display git branch symbol if terminal does not support 256 colors
 (( ${+commands[tput]} )) && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=

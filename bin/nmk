@@ -7,5 +7,5 @@ for python in "$NMK_PYTHON" python3 python; do
     "$python" --version > /dev/null 2>&1 && exec "$python" "$nmk_dir/bin/nmk.py" "$@"
 done
 
-echo "Error: Python not found"
+>&2 echo "Error: Python not found"
 exit 1
