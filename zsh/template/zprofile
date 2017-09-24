@@ -5,7 +5,7 @@ export NMK_DEVELOPMENT=true
 export NMK_DIR=~/.nmk
 export VIMINIT='source $NMK_DIR/vim/init.vim'
 
-# export NMK_PYTHON=~/.pyenv/versions/3.6.1/bin/python3
+export NMK_PYTHON=/usr/bin/python3
 # export GOPATH=~/go
 
 path=(
