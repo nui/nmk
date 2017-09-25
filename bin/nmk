@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# note: this line call 3 external processes
 nmk_dir=$(dirname "$(dirname "$(readlink -f "$0")")")
 
 for python in "$NMK_PYTHON" python3 python; do
