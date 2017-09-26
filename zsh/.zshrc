@@ -270,20 +270,18 @@ prompt horizontal
             eval "$(rbenv init -)"
         }
     }
-    if [[ $NMK_AUTOLOAD != false ]]; then
-        # set default value if nmk_version_managers is unset
-        (( ! ${+nmk_version_managers} )) && {
-            typeset -ga nmk_version_managers
-            nmk_version_managers=($managers)
-        }
-        for manager in $nmk_version_managers; do
-            case $manager in
-                nvm ) init-nvm; unfunction init-nvm ;;
-                pyenv ) init-pyenv; unfunction init-pyenv ;;
-                rbenv ) init-rbenv; unfunction init-rbenv ;;
-            esac
-        done
-    fi
+    # set default value if nmk_version_managers is unset
+    (( ! ${+nmk_version_managers} )) && {
+        typeset -ga nmk_version_managers
+        nmk_version_managers=($managers)
+    }
+    for manager in $nmk_version_managers; do
+        case $manager in
+            nvm ) init-nvm; unfunction init-nvm ;;
+            pyenv ) init-pyenv; unfunction init-pyenv ;;
+            rbenv ) init-rbenv; unfunction init-rbenv ;;
+        esac
+    done
 }
 
 typeset -U path

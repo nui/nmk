@@ -55,11 +55,6 @@ def build_parser():
                         action='store_false',
                         default=True,
                         help='disable automatically fix')
-    parser.add_argument('--no-autoload',
-                        dest='autoload',
-                        action='store_false',
-                        default=True,
-                        help='do not detect and load common development tools')
     parser.add_argument('--inception',
                         dest='inception',
                         action='store_true',
@@ -162,7 +157,6 @@ def setup_environment(args, nmk_dir):
     initvim = path.join(nmk_dir, 'vim/init.vim')
     zdotdir = path.join(nmk_dir, 'zsh')
 
-    env['NMK_AUTOLOAD'] = str(args.autoload).lower()
     env['NMK_DIR'] = nmk_dir
     env['NMK_TMUX_DEFAULT_SHELL'] = find_executable('zsh')
     env['NMK_TMUX_DETACH_ON_DESTROY'] = args.detach_on_destroy
