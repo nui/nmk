@@ -15,7 +15,8 @@ module.exports = {
         2.2,
         2.3,
         // 2.4, this one is buggy, avoid it
-        2.5
+        2.5,
+        2.6
     ],
     output: {
         dir: tmuxDir,
