@@ -1,7 +1,7 @@
 # FORMAT
 # plugin_folder_name remote_repository
 
-ag.vim  https://github.com/rking/ag.vim.git
+ack.vim https://github.com/mileszs/ack.vim.git
 ctrlp.vim  https://github.com/kien/ctrlp.vim.git
 dockerfile.vim  https://github.com/ekalinin/Dockerfile.vim.git
 jellybeans.vim  https://github.com/nanotech/jellybeans.vim.git
