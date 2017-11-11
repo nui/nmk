@@ -9,7 +9,7 @@
     "watch": "node tools/run watch"
   },
   "devDependencies": {
-    "async": "^2.5.0",
+    "async": "^2.6.0",
     "chokidar": "^1.7.0",
     "nunjucks": "^3.0.1",
     "request": "^2.83.0",
