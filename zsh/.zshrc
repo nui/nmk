@@ -155,6 +155,7 @@ rf() {
     alias lol=" git log --oneline --decorate --graph --color=auto"
     alias gpr=' git pull --rebase'
     alias grrr=' git-reset-to-remote-branch'
+    alias rebase='git rebase -i'
 }
 export GIT_PAGER='less -+F -+X -c'
 
