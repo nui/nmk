@@ -1042,9 +1042,9 @@ strip-json-comments@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
 
-tapable@^0.2.8:
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/tapable/-/tapable-0.2.8.tgz#99372a5c999bf2df160afc0d74bed4f47948cd22"
+tapable@^1.0.0-beta.4:
+  version "1.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/tapable/-/tapable-1.0.0-beta.4.tgz#0b32094cbb6eb217f5dd049fc27c3a7e99705b9e"
 
 tar-pack@^3.4.0:
   version "3.4.1"
