@@ -144,7 +144,7 @@ class GoogleCloudStorageResource(ArchiveResource):
         return self.resource['mediaLink']
 
     def fetch(self, latest):
-        self.resource = loads_json_api('https://www.googleapis.com/storage/v1/b/nuimk-nmk/o/nmk.tar.gz')
+        self.resource = loads_json_api('https://www.googleapis.com/storage/v1/b/nmk-files/o/nmk.tar.gz')
 
     def is_up2date(self):
         if not path.exists(self.cache_path):

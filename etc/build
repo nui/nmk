@@ -78,7 +78,7 @@ set -x
 
 readonly archive_name='nmk.tar.gz'
 readonly archive_prefix='.nmk'
-readonly cloud_object=gs://nuimk-nmk/nmk.tar.gz
+readonly cloud_object=gs://nmk-files/nmk.tar.gz
 readonly script_git_root=${0:A:h:h}
 readonly tmp_dir=$(mktemp -d --suffix=.nmk-build)
 
