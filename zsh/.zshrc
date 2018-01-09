@@ -211,6 +211,17 @@ nmk() {
     $python $NMK_DIR/bin/nmk.py "$@"
 }
 
+nmk-precmd-hook() {
+    if (( ${+commands[kubectl]} )); then
+        if (( ${+K8S_CONTEXT} )); then
+            alias kubectl='kubectl --context=$K8S_CONTEXT'
+        else
+            alias kubectl=kubectl
+        fi
+    fi
+}
+add-zsh-hook precmd nmk-precmd-hook
+
 # Don't display git branch symbol if terminal does not support 256 colors
 (( ${+commands[tput]} )) && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
 
