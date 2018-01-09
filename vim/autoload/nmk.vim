@@ -186,6 +186,10 @@ if has('autocmd')
         " open all folds
         autocmd FileType python normal zR
     augroup END
+
+    augroup yaml_files
+        autocmd FileType yaml setlocal shiftwidth=2 softtabstop=2 tabstop=2
+    augroup END
 endif
 
 " vim:set et foldmethod=expr foldexpr=getline(v\:lnum)=~'^\"\ Section\:'?'>1'\:getline(v\:lnum)=~#'^fu'?'a1'\:getline(v\:lnum)=~#'^endf'?'s1'\:'=':
