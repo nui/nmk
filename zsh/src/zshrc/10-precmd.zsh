@@ -1,10 +1,17 @@
-nmk-precmd-hook() {
-    if (( ${+commands[kubectl]} )); then
-        if (( ${+K8S_CONTEXT} )); then
-            alias kubectl='kubectl --context=$K8S_CONTEXT'
-        else
-            alias kubectl=kubectl
-        fi
+_nmk-precmd-kubectl-hook() {
+    if (( ${+kubectl_context} )); then
+        alias kubectl="kubectl --context=$kubectl_context"
+    elif (( ${+aliases[kubectl]} )); then
+        unalias kubectl
     fi
 }
-add-zsh-hook precmd nmk-precmd-hook
+
+_nmk_precmd_hooks=()
+(( ${+commands[kubectl]} )) && _nmk_precmd_hooks+=_nmk-precmd-kubectl-hook
+
+_nmk-precmd-hook() {
+    for hook in $_nmk_precmd_hooks; do
+        $hook
+    done
+}
+add-zsh-hook precmd _nmk-precmd-hook
