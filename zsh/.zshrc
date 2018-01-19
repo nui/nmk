@@ -213,8 +213,8 @@ nmk() {
 }
 
 _nmk-precmd-kubectl-hook() {
-    if (( ${+kubectl_context} )); then
-        alias kubectl="kubectl --context=$kubectl_context"
+    if [[ -n $KUBECTL_CONTEXT ]]; then
+        alias kubectl="kubectl --context=$KUBECTL_CONTEXT"
     elif (( ${+aliases[kubectl]} )); then
         unalias kubectl
     fi
