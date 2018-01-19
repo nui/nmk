@@ -12,7 +12,6 @@ path=(
     $NMK_DIR/bin
     $path
     ~/.cargo/bin
-    ~/.opt/google-cloud-sdk/bin
     ~/.pyenv/bin
     ~/.rbenv/bin
     /usr/local/go/bin
