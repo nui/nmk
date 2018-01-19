@@ -131,6 +131,7 @@ rf() {
         list+='> >(xclip)'
         list+='> >(xclip -selection clipboard)'
     fi
+    list+='; print' # add newline to output
     eval ${(j: :)list}
 }
 
