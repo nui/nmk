@@ -278,6 +278,7 @@ _nmk_precmd_hooks=()
 (( ${+commands[kubectl]} )) && _nmk_precmd_hooks+=_nmk-precmd-kubectl-hook
 
 _nmk-precmd-hook() {
+    local hook
     for hook in $_nmk_precmd_hooks; do
         $hook
     done
@@ -340,6 +341,7 @@ prompt horizontal
         typeset -ga nmk_version_managers
         nmk_version_managers=($managers)
     }
+    local manager
     for manager in $nmk_version_managers; do
         case $manager in
             nvm ) init-nvm; unfunction init-nvm ;;
@@ -352,6 +354,11 @@ prompt horizontal
 typeset -U path
 
 [[ -e $ZDOTDIR/zshrc.extra ]] && source $ZDOTDIR/zshrc.extra
-for file ($ZDOTDIR/zshrc.extra.d/*.zsh(N)) {source $file}
+() {
+    local file
+    for file ($ZDOTDIR/zshrc.extra.d/*.zsh(N)) {
+        source $file
+    }
+}
 
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

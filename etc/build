@@ -112,6 +112,7 @@ set +x
     print -- "\nSubmodule:"
     git submodule status
     print -- "\nVim plugins:"
+    local repo
     for repo (vim/bundle/*/) {
         pushd -q $repo
         print -- "$(git rev-parse --verify HEAD)  ${repo:t}"

@@ -10,6 +10,7 @@ _nmk_precmd_hooks=()
 (( ${+commands[kubectl]} )) && _nmk_precmd_hooks+=_nmk-precmd-kubectl-hook
 
 _nmk-precmd-hook() {
+    local hook
     for hook in $_nmk_precmd_hooks; do
         $hook
     done

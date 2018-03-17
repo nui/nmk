@@ -40,6 +40,7 @@
         typeset -ga nmk_version_managers
         nmk_version_managers=($managers)
     }
+    local manager
     for manager in $nmk_version_managers; do
         case $manager in
             nvm ) init-nvm; unfunction init-nvm ;;
