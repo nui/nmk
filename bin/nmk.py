@@ -2,14 +2,14 @@
 Run on Python 2.6.6 and later
 """
 
-from distutils.spawn import find_executable
-from os import environ as env
-from os import path
 import logging
 import os
 import subprocess
 import sys
 import tempfile
+from distutils.spawn import find_executable
+from os import environ as env
+from os import path
 
 import argparse
 import six
@@ -153,7 +153,7 @@ def setup_terminal(args):
     env['NMK_TMUX_256_COLOR'] = "1" if use_256color else "0"
 
 
-def setup_environment(args, nmk_dir):
+def setup_environment(args, nmk_dir, tmux_version):
     initvim = path.join(nmk_dir, 'vim/init.vim')
     zdotdir = path.join(nmk_dir, 'zsh')
 
@@ -161,6 +161,7 @@ def setup_environment(args, nmk_dir):
     env['NMK_TMUX_DEFAULT_SHELL'] = find_executable('zsh')
     env['NMK_TMUX_DETACH_ON_DESTROY'] = args.detach_on_destroy
     env['NMK_TMUX_HISTORY'] = path.join(nmk_dir, 'tmux', '.tmux_history')
+    env['NMK_TMUX_VERSION'] = tmux_version
     env['VIMINIT'] = 'source {0}'.format(initvim.replace(' ', r'\ '))
     env['ZDOTDIR'] = zdotdir
 
@@ -208,8 +209,7 @@ def get_tmux_version():
     return output.split()[1]
 
 
-def get_tmux_conf(tmux_dir):
-    version = get_tmux_version()
+def get_tmux_conf(version, tmux_dir):
     logging.debug('using tmux {0}'.format(version))
     conf = path.join(tmux_dir, '{0}.conf'.format(version))
     if not path.exists(conf):
@@ -228,8 +228,8 @@ def is_server_running(socket):
     return running
 
 
-def exec_tmux(args, tmux_dir):
-    conf = path.relpath(get_tmux_conf(tmux_dir))
+def exec_tmux(args, version, tmux_dir):
+    conf = path.relpath(get_tmux_conf(version, tmux_dir))
     params = ('tmux',)
     socket = args.socket
     params += ('-L', socket)
@@ -266,14 +266,15 @@ def main():
     tmux_dir = path.join(nmk_dir, 'tmux')
     setup_path(nmk_dir=nmk_dir)
     check_dependencies()
+    tmux_version = get_tmux_version()
     setup_terminal(args=args)
-    setup_environment(args=args, nmk_dir=nmk_dir)
+    setup_environment(args=args, nmk_dir=nmk_dir, tmux_version=tmux_version)
     setup_prefer_editor()
     add_local_library(nmk_dir=nmk_dir)
     if args.debug:
         end_pid = get_process_id()
         logging.debug('created {0} processes during initialization'.format(end_pid - start_pid - 1))
-    exec_tmux(args=args, tmux_dir=tmux_dir)
+    exec_tmux(args=args, version=tmux_version, tmux_dir=tmux_dir)
 
 
 if __name__ == '__main__':
