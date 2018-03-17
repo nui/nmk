@@ -79,7 +79,11 @@ bind-key C-l send-keys -R C-l\; clear-history
 
 {# ---- COPY-MODE BINDING ---- #}
 {# -- C-u to enter copy-mode -- #}
+{% if version >= 2.1 %}
+bind-key    C-u copy-mode -eu
+{% else %}
 bind-key    C-u copy-mode -u
+{% endif %}
 
 {# -- halfpage-up and halfpage-down -- #}
 {# -- Copy to system clipboard using copy-pipe -- #}
