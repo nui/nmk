@@ -60,6 +60,7 @@ _horizontal_gen_padding() {
 _horizontal_join_status() {
     local separator=${horizontal_status_separator:-"%F{${horizontal[base_color]}} | %f"}
     local string
+    local item
     for item in $@; do string+=$separator$item; done
     string=${string:${#separator}} # remove leading separator
     typeset -g _horizontal_join_status_result=$string
