@@ -248,6 +248,17 @@ export GIT_PAGER='less -+F -+X -c'
 # apply tmux session environment to running shell
 alias ssenv=' eval $(tmux show-environment -s)'
 
+# fix tmux and zsh corrupt after cat binary file
+reset() {
+    stty sane
+    printf '\033k%s\033\\\033]2;%s\007' "`basename "$SHELL"`" "`uname -n`"
+    tput reset
+    if [[ -n $NMK_TMUX_VERSION ]]; then
+        tmux refresh
+        tmux set-window-option automatic-rename on
+    fi
+}
+
 # Disable terminal flow control, so that we can use '^S'
 # for history-search-forward.
 unsetopt FLOW_CONTROL
