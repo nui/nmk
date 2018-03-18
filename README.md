@@ -26,7 +26,7 @@ sudo apt install vim-nox
 # or just grab the latest build and extract it (without git)
     curl -sSL https://storage.googleapis.com/nmk.nuimk.com/nmk.tar.gz | tar xz
     or
-    curl -sSL http://nmk.nuimk.com/nmk.tar.gz | tar xz
+    curl -sSL nmk.nuimk.com/nmk.tar.gz | tar xz
 ```
 
 
