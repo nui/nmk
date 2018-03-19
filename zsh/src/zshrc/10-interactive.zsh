@@ -143,6 +143,11 @@ reset() {
     fi
 }
 
+# if TMOUT is set on some environment, extend it to 1 hour
+if [[ $TMOUT = <-> ]] && (( $TMOUT < 3600 )); then
+    export TMOUT=3600
+fi
+
 # Disable terminal flow control, so that we can use '^S'
 # for history-search-forward.
 unsetopt FLOW_CONTROL
