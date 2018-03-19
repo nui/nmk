@@ -132,13 +132,14 @@ export GIT_PAGER='less -+F -+X -c'
 alias ssenv=' eval $(tmux show-environment -s)'
 
 # fix tmux and zsh corrupt after cat binary file
+# ref: https://unix.stackexchange.com/a/253369
 reset() {
     stty sane
-    printf '\033k%s\033\\\033]2;%s\007' "`basename "$SHELL"`" "`uname -n`"
+    printf '\033k\033\\\033]2;\007'
     tput reset
-    if [[ -n $NMK_TMUX_VERSION ]]; then
-        tmux refresh
+    if [[ -n $TMUX ]]; then
         tmux set-window-option automatic-rename on
+        tmux refresh
     fi
 }
 
