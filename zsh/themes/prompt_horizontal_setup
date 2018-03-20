@@ -163,14 +163,14 @@ prompt_horizontal_precmd() {
         ((${horizontal[exec_time]})) && {
             displayed_exec_time=0
             _horizontal_exec_seconds
-            (($_horizontal_exec_seconds_result > ${horizontal[cmd_max_exec_time]})) && {
+            (($_horizontal_exec_seconds_result >= ${horizontal[show_exec_time_threshold]})) && {
                 displayed_exec_time=1
                 _horizontal_human_time $_horizontal_exec_seconds_result
                 prompt_status+="%F{yellow}$_horizontal_human_time_result%f"
             }
             ((! $displayed_exec_time)) && {
                 _horizontal_idle_seconds
-                (($_horizontal_idle_seconds_result > ${horizontal[cmd_max_idle_time]})) && {
+                (($_horizontal_idle_seconds_result >= ${horizontal[show_idle_time_threshold]})) && {
                     _horizontal_human_time $_horizontal_idle_seconds_result
                     prompt_status+="%F{blue}$_horizontal_human_time_result%f"
                 }
@@ -179,7 +179,7 @@ prompt_horizontal_precmd() {
 
         ((${horizontal[timestamp]})) && {
             _horizontal_exec_seconds
-            (($_horizontal_exec_seconds_result - ${horizontal[timestamp_threshold_seconds]} >= 0)) && {
+            (($_horizontal_exec_seconds_result >= ${horizontal[show_timestamp_threshold]})) && {
                 strftime -s timestamp '%D %R' $EPOCHSECONDS
                 rprompt_status+=$timestamp
             }
@@ -237,10 +237,10 @@ prompt_horizontal_setup() {
     : ${horizontal[userhost]:=1}
     : ${horizontal[virtualenv]:=1}
 
-    : ${horizontal[cmd_max_exec_time]:=5}
-    : ${horizontal[cmd_max_idle_time]:=300}
+    : ${horizontal[show_exec_time_threshold]:=5}
+    : ${horizontal[show_idle_time_threshold]:=300}
+    : ${horizontal[show_timestamp_threshold]:=180}
     : ${horizontal[fill_character]:=-}
-    : ${horizontal[timestamp_threshold_seconds]:=180}
     # horizontal_branch_symbol=''
     # horizontal_hostname=
     # horizontal_status_separator="%F{${horizontal[base_color]}} | %f"
