@@ -84,9 +84,15 @@ _horizontal_human_time() {
 }
 
 _horizontal_exec_seconds() {
-    local stop=$EPOCHSECONDS
-    local start=${_horizontal_cmd_timestamp:-$stop}
+    integer stop=$EPOCHSECONDS
+    integer start=${_horizontal_cmd_timestamp:-$stop}
     typeset -g _horizontal_exec_seconds_result=$((stop-start))
+}
+
+_horizontal_idle_seconds() {
+    integer stop=$EPOCHSECONDS
+    integer start=${_horizontal_idle_timestamp:-$stop}
+    typeset -g _horizontal_idle_seconds_result=$((stop-start))
 }
 
 _horizontal_git_dirty() {
@@ -137,6 +143,7 @@ prompt_horizontal_precmd() {
 
         local git_info
         local timestamp
+        integer displayed_exec_time
 
         ((${horizontal[git]})) && vcs_info
 
@@ -154,10 +161,19 @@ prompt_horizontal_precmd() {
 
         # last command execute time
         ((${horizontal[exec_time]})) && {
+            displayed_exec_time=0
             _horizontal_exec_seconds
             (($_horizontal_exec_seconds_result > ${horizontal[cmd_max_exec_time]})) && {
+                displayed_exec_time=1
                 _horizontal_human_time $_horizontal_exec_seconds_result
                 prompt_status+="%F{yellow}$_horizontal_human_time_result%f"
+            }
+            ((! $displayed_exec_time)) && {
+                _horizontal_idle_seconds
+                (($_horizontal_idle_seconds_result > ${horizontal[cmd_max_idle_time]})) && {
+                    _horizontal_human_time $_horizontal_idle_seconds_result
+                    prompt_status+="%F{blue}$_horizontal_human_time_result%f"
+                }
             }
         }
 
@@ -201,6 +217,8 @@ prompt_horizontal_precmd() {
 
     # reset value since `preexec` isn't always triggered
     unset _horizontal_cmd_timestamp
+
+    typeset -g _horizontal_idle_timestamp=$EPOCHSECONDS
 }
 
 prompt_horizontal_setup() {
@@ -220,6 +238,7 @@ prompt_horizontal_setup() {
     : ${horizontal[virtualenv]:=1}
 
     : ${horizontal[cmd_max_exec_time]:=5}
+    : ${horizontal[cmd_max_idle_time]:=300}
     : ${horizontal[fill_character]:=-}
     : ${horizontal[timestamp_threshold_seconds]:=180}
     # horizontal_branch_symbol=''
