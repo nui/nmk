@@ -312,7 +312,7 @@ prompt horizontal
 [[ $NMK_DEVELOPMENT == true && -z $SSH_TTY ]] && horizontal[userhost]=0
 
 # Change prompt color to yellow in remote session
-[[ -n $SSH_TTY ]] && horizontal[base_color]=yellow
+# [[ -n $SSH_TTY ]] && horizontal[base_color]=yellow
 
 [[ -e /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
 
