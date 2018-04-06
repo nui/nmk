@@ -45,7 +45,7 @@
         zle -N _nmk-tmux-copy-mode
         bind2maps emacs         -- PageUp     _nmk-tmux-copy-mode
 
-        bindkey -r ${key[CtrlL]} 
+        bindkey -r ${key[CtrlL]}
         _nmk-tmux-clear-history() {
             tput reset
             zle clear-screen

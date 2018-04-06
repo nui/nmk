@@ -96,7 +96,7 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,cmd'
         zle -N _nmk-tmux-copy-mode
         bind2maps emacs         -- PageUp     _nmk-tmux-copy-mode
 
-        bindkey -r ${key[CtrlL]} 
+        bindkey -r ${key[CtrlL]}
         _nmk-tmux-clear-history() {
             tput reset
             zle clear-screen
@@ -270,9 +270,9 @@ reset() {
     fi
 }
 
-# if TMOUT is set on some environment, extend it to 4 hour
-if [[ $TMOUT = <-> ]] && (( $TMOUT <= 4*3600 )); then
-    export TMOUT=$(( 4*3600 ))
+# if TMOUT is set on some environment, extend it to 24 hours
+if [[ $TMOUT = <-> ]] && (( $TMOUT <= 24*3600 )); then
+    export TMOUT=$(( 24*3600 ))
 fi
 
 # Disable terminal flow control, so that we can use '^S'
