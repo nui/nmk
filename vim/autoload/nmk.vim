@@ -116,7 +116,7 @@ endif
 
 " Section: Color and font
 let s:background = 'dark'
-let s:colorscheme = g:nmk_256color ? 'Tomorrow-Night-Eighties' : 'default'
+let s:colorscheme = g:nmk_256color ? 'jellybeans' : 'default'
 
 if has('gui_running')
     if has('gui_gtk2')
