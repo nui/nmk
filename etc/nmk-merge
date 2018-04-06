@@ -5,12 +5,14 @@ set -xe
 local nmk=${1:A}
 local nmkpkg=${2:A}
 
+[[ ! -f $nmk || ! -f $nmkpkg ]] && exit 1
+
 readonly tmp_dir=$(mktemp -d --suffix=.nmk-merge)
 readonly tmp_file=$(mktemp --suffix=.tar.xz)
 pushd $tmp_dir
-tar xf $nmk
+tar -xf $nmk
 cd .nmk/local
-tar xf $nmkpkg
+tar -xf $nmkpkg
 cd $tmp_dir
 tar --owner=root:0 --group=root:0 --mtime="$(date)" -caf $tmp_file .nmk
 popd
