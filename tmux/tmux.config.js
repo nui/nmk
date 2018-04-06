@@ -8,9 +8,6 @@ const templatePath = path.join(tmuxDir, templateName);
 
 module.exports = {
     versions: [
-        1.8,
-        1.9,
-        2.0,
         2.1,
         2.2,
         2.3,

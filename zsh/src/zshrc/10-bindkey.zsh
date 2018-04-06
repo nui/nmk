@@ -13,6 +13,7 @@
         Right      "${terminfo[kcuf1]}"
         PageUp     "${terminfo[kpp]}"
         PageDown   "${terminfo[knp]}"
+        CtrlL      "^L"
     )
 
     bind2maps() {
@@ -43,6 +44,15 @@
         fi
         zle -N _nmk-tmux-copy-mode
         bind2maps emacs         -- PageUp     _nmk-tmux-copy-mode
+
+        bindkey -r ${key[CtrlL]} 
+        _nmk-tmux-clear-history() {
+            tput reset
+            zle clear-screen
+            tmux clear-history
+        }
+        zle -N _nmk-tmux-clear-history
+        bind2maps emacs         -- CtrlL      _nmk-tmux-clear-history
     else
         bind2maps emacs         -- PageUp     redisplay
     fi

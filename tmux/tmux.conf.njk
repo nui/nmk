@@ -1,7 +1,6 @@
 # tmux {{ version }} configuration
-{# For tmux >= 1.8 #}
+{# For tmux >= 2.1 #}
 
-{% set hasCustomKeytable = version >= 2.1 %}
 {% set functionKeys = range(1, 1 + 12) %}
 
 {# ---- FUNCTION KEYS BINDING ---- #}
@@ -11,7 +10,7 @@ bind-key -n F3 previous-window
 bind-key -n F4 next-window
 bind-key -n F5 resize-pane -Z
 
-{% if false and hasCustomKeytable %}
+{% if false %}
 bind-key -n F11 switch-client -T foo
 bind-key -T foo F11 resize-pane -Z
 bind-key -T foo -r Space next-layout
@@ -36,17 +35,15 @@ bind-key -r b   select-pane -t :.+ \; display-panes
 bind-key    C-c command-prompt
 
 {# -- Override tmux default -- #}
-set-option -g default-shell "$NMK_TMUX_DEFAULT_SHELL"
-set-option -g default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
+set-option -g     default-shell "$NMK_TMUX_DEFAULT_SHELL"
+set-option -g  default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
 set-option -g detach-on-destroy "$NMK_TMUX_DETACH_ON_DESTROY"
 set-option -g display-time 1200
 set-option -g history-limit 2500
 set-option -g status-keys emacs
 set-option -g status-right-length 60
 set-window-option -g mode-keys vi
-{% if version >= 2.1 %}
 set-option -g history-file "$NMK_TMUX_HISTORY"
-{% endif %}
 
 {# -- Copy to system clipboard using copy-pipe -- #}
 {% if version >= 2.4 %}
@@ -55,35 +52,18 @@ if-shell 'xclip -o > /dev/null 2>&1' 'bind-key -T copy-mode-vi y send-keys -X co
 if-shell 'xclip -o > /dev/null 2>&1' 'bind-key -t vi-copy y copy-pipe "xclip -selection clipboard"'
 {% endif %}
 
-{# -- Status format argument changed on tmux 1.9 -- #}
-{% if version >= 1.9 %}
 set-option -g status-right "#{?client_prefix,^B ,}'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d"
-{% else %}
-set-option -g status-right "#{?client_prefix,^B ,}'#[fg=colour51]#40T#[default]' %H:%M %Z %a, %d"
-{% endif %}
 
 {# -- Keep new-window and split-window with current/working directory behavior same as 1.8 -- #}
-{% if version >= 1.9 %}
-unbind-key '"'; bind-key '"' split-window -c "#{pane_current_path}"
-unbind-key %; bind-key % split-window -h -c "#{pane_current_path}"
-unbind-key c; bind-key c new-window -c "#{pane_current_path}"
-{% endif %}
+unbind-key '"'; bind-key '"' split-window    -c "#{pane_current_path}"
+unbind-key %;   bind-key %   split-window -h -c "#{pane_current_path}"
+unbind-key c;   bind-key c   new-window      -c "#{pane_current_path}"
 
-{# -- Reset terminal state and clear pane history -- #}
-{% if version >= 2.0 %} {# 'if-shell' command understands formats via -F in tmux 2.0 #}
-{# No effect if alternate screen is on #}
-bind-key C-l if-shell -F "#{alternate_on}" "send-keys C-l" "send-keys -R C-l; clear-history"
-{% else %}
-bind-key C-l send-keys -R C-l\; clear-history
-{% endif %}
+bind-key C-l switch-client -l
 
 {# ---- COPY-MODE BINDING ---- #}
 {# -- C-u to enter copy-mode -- #}
-{% if version >= 2.1 %}
-bind-key    C-u copy-mode -eu
-{% else %}
-bind-key    C-u copy-mode -u
-{% endif %}
+bind-key C-u copy-mode -eu
 
 {# -- halfpage-up and halfpage-down -- #}
 {# -- Copy to system clipboard using copy-pipe -- #}
@@ -101,18 +81,14 @@ bind-key -t vi-copy PageDown halfpage-down
 
 {# -- Fix mouse scrolling in 2.1 and later -- #}
 {# Credit https://github.com/tmux/tmux/issues/145 #}
-{% if version >= 2.1 %}
 bind-key -T root WheelUpPane if-shell -Ft= "#{mouse_any_flag}" "send-keys -M" "if-shell -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
-{% endif %}
 
 {#
  | PageUp and PageDown special behaviors
  |   If the condition is match, PageUp should enter copy mode
  |   see https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/
 #}
-{% if version >= 2.1 %} {# Multiple key tabels added in tmux 2.1 #}
 bind-key -T root PageUp if-shell -F "#{?pane_in_mode,1,}#{?alternate_on,1,}" "send-keys PageUp" "copy-mode -eu"
-{% endif %}
 
 {# -- Colors -- #}
 if-shell 'zsh -c "[[ $NMK_TMUX_256_COLOR == 1 ]]"' 'source-file $NMK_DIR/tmux/256color.conf' 'source-file $NMK_DIR/tmux/8color.conf'
