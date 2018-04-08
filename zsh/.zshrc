@@ -230,9 +230,6 @@ export GIT_PAGER='less -+F -+X -c'
 }
 
 # vi = Vim without my plugins
-#   The use of command keyword in function declaration
-#   is to prevent vi get expanded to vim on some system
-#   that alias vi=vim
 (( ${+commands[vi]} )) && function vi {
     local VIMINIT=
     command vi "$@"
