@@ -86,6 +86,8 @@ readonly archive_dir="$tmp_dir/$archive_prefix"
 readonly assets_dir="$tmp_dir/assets"
 readonly tmp_repo="$tmp_dir/nmk"
 
+readonly absolute_archive_path=$assets_dir/$archive_name
+
 # Step 0. Change directory to git root of this script
 cd $script_git_root
 
@@ -151,7 +153,7 @@ chmod +x bin/nmk-update.py
 mkdir $assets_dir
 tar --owner=root:0 --group=root:0 --mtime="$(date)" \
     -C $tmp_dir \
-    -caf $assets_dir/$archive_name $archive_prefix
+    -caf $absolute_archive_path $archive_prefix
 
 
 # Step 7. hash and uploading
@@ -176,6 +178,8 @@ if (( $_STABLE )); then
 fi
 
 # Step 8. remove temporary directories
-if (( ! $_KEEP )); then
+if (( $_KEEP )); then
+    print -- $absolute_archive_path
+else
     cleanup
 fi
