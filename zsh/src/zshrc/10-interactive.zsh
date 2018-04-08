@@ -103,7 +103,7 @@ export GIT_PAGER='less -+F -+X -c'
 }
 
 # vi = Vim without my plugins
-#   The use of function keyword in function declaration
+#   The use of command keyword in function declaration
 #   is to prevent vi get expanded to vim on some system
 #   that alias vi=vim
 (( ${+commands[vi]} )) && function vi {
@@ -113,7 +113,6 @@ export GIT_PAGER='less -+F -+X -c'
 # unalias vi, because it can override previous vi function
 (( ${+aliases[vi]} )) && unalias vi
 
-# Prefer nvim
 (( ${+commands[nvim]} )) && {
     function nvim {
         # Deactivate python virtual environment before start nvim
@@ -125,8 +124,8 @@ export GIT_PAGER='less -+F -+X -c'
             command nvim "$@"
         fi
     }
-    alias neo=nvim
 }
+alias neo=$EDITOR
 
 # apply tmux session environment to running shell
 alias ssenv=' eval $(tmux show-environment -s)'
