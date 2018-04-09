@@ -13,6 +13,9 @@ setopt HIST_IGNORE_SPACE
 setopt PUSHD_MINUS
 setopt SHARE_HISTORY
 
+# Release ^S for use in history-incremental-pattern-search-forward
+unsetopt FLOW_CONTROL
+
 # force emacs keybindings
 bindkey -e
 # Search backwards and forwards with a pattern
@@ -29,6 +32,9 @@ bindkey ${terminfo[kdch1]} delete-char
 HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=2500
 SAVEHIST=$HISTSIZE
+
+typeset -U path
+
 
 autoload -Uz compinit && compinit
 zstyle ':completion:*' auto-description 'specify: %d'
@@ -48,82 +54,6 @@ zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p
 zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,cmd'
-
-() {
-    # see /etc/zsh/zshrc
-    local -A key
-    key=(
-        BackSpace  "${terminfo[kbs]}"
-        Home       "${terminfo[khome]}"
-        End        "${terminfo[kend]}"
-        Insert     "${terminfo[kich1]}"
-        Delete     "${terminfo[kdch1]}"
-        Up         "${terminfo[kcuu1]}"
-        Down       "${terminfo[kcud1]}"
-        Left       "${terminfo[kcub1]}"
-        Right      "${terminfo[kcuf1]}"
-        PageUp     "${terminfo[kpp]}"
-        PageDown   "${terminfo[knp]}"
-        CtrlL      "^L"
-    )
-
-    bind2maps() {
-        local i sequence widget
-        local -a maps
-
-        while [[ "$1" != "--" ]]; do
-            maps+=( "$1" )
-            shift
-        done
-        shift
-
-        sequence="${key[$1]}"
-        widget="$2"
-
-        [[ -z "$sequence" ]] && return 1
-
-        for i in "${maps[@]}"; do
-            bindkey -M "$i" "$sequence" "$widget"
-        done
-    }
-
-    if [[ -n $NMK_TMUX_VERSION ]]; then
-        if (( $NMK_TMUX_VERSION >= 2.1 )); then
-            _nmk-tmux-copy-mode() tmux copy-mode -eu
-        else
-            _nmk-tmux-copy-mode() tmux copy-mode -u
-        fi
-        zle -N _nmk-tmux-copy-mode
-        bind2maps emacs         -- PageUp     _nmk-tmux-copy-mode
-
-        bindkey -r ${key[CtrlL]}
-        _nmk-tmux-clear-history() {
-            tput reset
-            zle clear-screen
-            tmux clear-history
-        }
-        zle -N _nmk-tmux-clear-history
-        bind2maps emacs         -- CtrlL      _nmk-tmux-clear-history
-    else
-        bind2maps emacs         -- PageUp     redisplay
-    fi
-    # press PageDown do nothing
-    bind2maps emacs             -- PageDown   redisplay
-
-    unfunction bind2maps
-}
-
-# see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
-function _nmk-fancy-ctrl-z {
-    if [[ ${#BUFFER} -eq 0 ]]; then
-        bg
-        zle redisplay
-    else
-        zle push-input
-    fi
-}
-zle -N _nmk-fancy-ctrl-z
-bindkey '^Z' _nmk-fancy-ctrl-z
 
 # Aliases and interactive shell configuration
 cdd() {
@@ -271,23 +201,80 @@ if [[ $TMOUT = <-> ]] && (( $TMOUT <= 24*3600 )); then
     export TMOUT=$(( 24*3600 ))
 fi
 
-# Disable terminal flow control, so that we can use '^S'
-# for history-search-forward.
-unsetopt FLOW_CONTROL
 
-# zsh function implementation of main entrypoint
-nmk() {
-    local python=python
-    if [[ -n $NMK_PYTHON ]]; then
-        if [[ ! -x $NMK_PYTHON ]]; then
-            >&2 print -- "$NMK_PYTHON not found"
-            >&2 print -- 'Please update $NMK_PYTHON'
-            return 1
-        fi
-        python=$NMK_PYTHON
+() {
+    # see /etc/zsh/zshrc
+    local -A key
+    key=(
+        BackSpace  "${terminfo[kbs]}"
+        Home       "${terminfo[khome]}"
+        End        "${terminfo[kend]}"
+        Insert     "${terminfo[kich1]}"
+        Delete     "${terminfo[kdch1]}"
+        Up         "${terminfo[kcuu1]}"
+        Down       "${terminfo[kcud1]}"
+        Left       "${terminfo[kcub1]}"
+        Right      "${terminfo[kcuf1]}"
+        PageUp     "${terminfo[kpp]}"
+        PageDown   "${terminfo[knp]}"
+        CtrlL      "^L"
+    )
+
+    bind2maps() {
+        local i sequence widget
+        local -a maps
+
+        while [[ "$1" != "--" ]]; do
+            maps+=( "$1" )
+            shift
+        done
+        shift
+
+        sequence="${key[$1]}"
+        widget="$2"
+
+        [[ -z "$sequence" ]] && return 1
+
+        for i in "${maps[@]}"; do
+            bindkey -M "$i" "$sequence" "$widget"
+        done
+    }
+
+    if [[ -n $NMK_TMUX_VERSION ]]; then
+        # PageUp to enter copy mode
+        _nmk-tmux-copy-mode() tmux copy-mode -eu
+        zle -N _nmk-tmux-copy-mode
+        bind2maps emacs         -- PageUp     _nmk-tmux-copy-mode
+
+        # ^L to clear tmux history
+        bindkey -r ${key[CtrlL]}
+        _nmk-tmux-clear-history() {
+            tput reset
+            zle clear-screen
+            tmux clear-history
+        }
+        zle -N _nmk-tmux-clear-history
+        bind2maps emacs         -- CtrlL      _nmk-tmux-clear-history
+    else
+        bind2maps emacs         -- PageUp     redisplay
     fi
-    $python $NMK_DIR/bin/nmk.py "$@"
+    # PageDown do nothing
+    bind2maps emacs             -- PageDown   redisplay
+
+    unfunction bind2maps
 }
+
+# see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
+function _nmk-fancy-ctrl-z {
+    if [[ ${#BUFFER} -eq 0 ]]; then
+        bg
+        zle redisplay
+    else
+        zle push-input
+    fi
+}
+zle -N _nmk-fancy-ctrl-z
+bindkey '^Z' _nmk-fancy-ctrl-z
 
 _nmk-precmd-kubectl-hook() {
     if [[ -n $KUBECTL_CONTEXT ]]; then
@@ -319,8 +306,6 @@ prompt horizontal
 
 # Change prompt color to yellow in remote session
 [[ -n $SSH_TTY ]] && horizontal[base_color]=magenta
-
-[[ -e /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
 
 # Detect & load version managers
 () {
@@ -374,7 +359,21 @@ prompt horizontal
     done
 }
 
-typeset -U path
+[[ -e /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
+
+# zsh function implementation of main entrypoint
+nmk() {
+    local python=python
+    if [[ -n $NMK_PYTHON ]]; then
+        if [[ ! -x $NMK_PYTHON ]]; then
+            >&2 print -- "$NMK_PYTHON not found"
+            >&2 print -- 'Please update $NMK_PYTHON'
+            return 1
+        fi
+        python=$NMK_PYTHON
+    fi
+    $python $NMK_DIR/bin/nmk.py "$@"
+}
 
 [[ -e $ZDOTDIR/zshrc.extra ]] && source $ZDOTDIR/zshrc.extra
 () {

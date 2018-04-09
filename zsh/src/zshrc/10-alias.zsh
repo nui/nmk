@@ -144,6 +144,3 @@ if [[ $TMOUT = <-> ]] && (( $TMOUT <= 24*3600 )); then
     export TMOUT=$(( 24*3600 ))
 fi
 
-# Disable terminal flow control, so that we can use '^S'
-# for history-search-forward.
-unsetopt FLOW_CONTROL

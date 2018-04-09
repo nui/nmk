@@ -37,14 +37,12 @@
     }
 
     if [[ -n $NMK_TMUX_VERSION ]]; then
-        if (( $NMK_TMUX_VERSION >= 2.1 )); then
-            _nmk-tmux-copy-mode() tmux copy-mode -eu
-        else
-            _nmk-tmux-copy-mode() tmux copy-mode -u
-        fi
+        # PageUp to enter copy mode
+        _nmk-tmux-copy-mode() tmux copy-mode -eu
         zle -N _nmk-tmux-copy-mode
         bind2maps emacs         -- PageUp     _nmk-tmux-copy-mode
 
+        # ^L to clear tmux history
         bindkey -r ${key[CtrlL]}
         _nmk-tmux-clear-history() {
             tput reset
@@ -56,7 +54,7 @@
     else
         bind2maps emacs         -- PageUp     redisplay
     fi
-    # press PageDown do nothing
+    # PageDown do nothing
     bind2maps emacs             -- PageDown   redisplay
 
     unfunction bind2maps

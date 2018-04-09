@@ -9,6 +9,9 @@ setopt HIST_IGNORE_SPACE
 setopt PUSHD_MINUS
 setopt SHARE_HISTORY
 
+# Release ^S for use in history-incremental-pattern-search-forward
+unsetopt FLOW_CONTROL
+
 # force emacs keybindings
 bindkey -e
 # Search backwards and forwards with a pattern
@@ -25,3 +28,6 @@ bindkey ${terminfo[kdch1]} delete-char
 HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=2500
 SAVEHIST=$HISTSIZE
+
+typeset -U path
+
