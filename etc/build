@@ -99,7 +99,7 @@ $script_git_root/setup/automate --branch ${_BRANCH:-$find_remote_branch_result} 
 
 # Step 2. Generate files that need information from git
 # -----------------------------------------------------------------------------
-cd $tmp_repo
+pushd -q $tmp_repo
 # don't run this on working environment
 if [[ $script_git_root == $tmp_repo || -e zsh/.zcompdump || -e zsh/.zsh_history || -d node_modules ]]; then
     >&2 echo "Aborted"
@@ -176,6 +176,8 @@ if (( $_STABLE )); then
         print -- $assets_dir
     fi
 fi
+
+popd -q
 
 # Step 8. remove temporary directories
 if (( $_KEEP )); then
