@@ -190,7 +190,7 @@ def install(archive_file):
     logging.debug('Uninstalling')
     subprocess.call(['sh', 'uninstall.sh'])
     logging.debug('Extracting update data')
-    subprocess.call(['tar', '-xzf', archive_file.name, '--strip-components=1'])
+    subprocess.call(['tar', '-xf', archive_file.name, '--strip-components=1'])
 
 
 def build_parser():
