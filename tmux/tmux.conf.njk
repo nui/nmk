@@ -5,23 +5,17 @@
 
 {# ---- FUNCTION KEYS BINDING ---- #}
 bind-key -n F1 select-pane -t :.+ \; display-panes
-bind-key -n F2 next-window
+bind-key -n F2 last-window
 bind-key -n F3 switch-client -n
-bind-key -n F4 choose-tree
 bind-key -n F5 resize-pane -Z
 
-{% if false %}
-bind-key -n F11 switch-client -T foo
-bind-key -T foo F11 resize-pane -Z
-bind-key -T foo -r Space next-layout
-bind-key -T foo 1 select-layout even-horizontal
-bind-key -T foo 2 select-layout even-vertical
-bind-key -T foo 3 select-layout main-horizontal
-bind-key -T foo 4 select-layout main-vertical
-bind-key -T foo 5 select-layout tiled
-{% endif %}
+bind-key -n F12 switch-client -T fast
+bind-key -T fast F12 detach-client
+bind-key -T fast -r Space next-layout
+{% for i in range(1, 10) %}
+bind-key -T fast {{i}} select-window -t {{i}}
+{% endfor %}
 
-bind-key -n F12 detach-client
 
 {# -- Use Shift-Fx or <prefix> Fx to send Fx key -- #}
 {% for i in functionKeys %}
@@ -31,10 +25,11 @@ bind-key -n S-F{{i}} send-keys F{{i}}
 
 unbind-key  C-b
 bind-key -r C-b send-prefix
-bind-key -r b   select-pane -t :.+ \; display-panes
+# bind-key -r b   select-pane -t :.+ \; display-panes
 bind-key    C-c command-prompt
 
 {# -- Override tmux default -- #}
+set-option -g base-index 1
 set-option -g     default-shell "$NMK_TMUX_DEFAULT_SHELL"
 set-option -g  default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
 set-option -g detach-on-destroy "$NMK_TMUX_DETACH_ON_DESTROY"
