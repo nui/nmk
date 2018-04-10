@@ -181,12 +181,16 @@ def download_and_install(archive_url):
     logging.info('Downloading ' + archive_url)
     archive_file = download_bundle(archive_url)
 
+    install(archive_file)
+    archive_file.close()
+
+
+def install(archive_file):
     os.chdir(NMK_DIR)
     logging.debug('Uninstalling')
     subprocess.call(['sh', 'uninstall.sh'])
     logging.debug('Extracting update data')
     subprocess.call(['tar', '-xzf', archive_file.name, '--strip-components=1'])
-    archive_file.close()
 
 
 def build_parser():
@@ -195,12 +199,15 @@ def build_parser():
                         dest='stable',
                         action='store_true',
                         default=False,
-                        help='Update with stable release from Github')
+                        help='update using stable release from Github')
     parser.add_argument('-d', '--debug',
                         dest='debug',
                         action='store_true',
                         default=False,
                         help='print debug message')
+    parser.add_argument('-f',
+                        dest='input',
+                        help='update using local file')
     parser.add_argument('-i',
                         dest='interactive',
                         action='store_true',
@@ -209,11 +216,12 @@ def build_parser():
     return parser
 
 
-def main():
-    args = build_parser().parse_args()
-    if args.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
+def update_from_file(args):
+    with open(os.path.abspath(args.input), 'rb') as archive_file:
+        install(archive_file)
 
+
+def update_from_remote(args):
     github = GithubReleaseResource()
     gcloud = GoogleCloudStorageResource()
     resource = github if args.stable else gcloud
@@ -228,6 +236,17 @@ def main():
     resource.save_to_cache()
     other_resource.clear_cache()
     logging.info('Done')
+
+
+def main():
+    args = build_parser().parse_args()
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    if args.input:
+        update_from_file(args)
+    else:
+        update_from_remote(args)
 
 
 if __name__ == '__main__':
