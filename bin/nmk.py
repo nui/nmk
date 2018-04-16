@@ -34,6 +34,11 @@ def build_parser():
                         dest='socket',
                         default='nmk',
                         help='set tmux socket name')
+    parser.add_argument('-l', '--login',
+                        dest='login',
+                        action='store_true',
+                        default=False,
+                        help='Start login shell instead of tmux')
     parser.add_argument('-u', '--unicode',
                         dest='unicode',
                         action='store_true',
@@ -59,7 +64,7 @@ def build_parser():
                         dest='inception',
                         action='store_true',
                         default=False,
-                        help='Allow tmux nested sessions')
+                        help='allow tmux nested sessions')
     parser.add_argument('-d', '--debug',
                         dest='debug',
                         action='store_true',
@@ -228,8 +233,14 @@ def is_server_running(socket):
     return running
 
 
-def exec_tmux(args, version, tmux_dir):
-    conf = path.relpath(get_tmux_conf(version, tmux_dir))
+def execvp(file, params):
+    logging.debug('os.execvp params: ' + str(params))
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os.execvp(file, params)
+
+
+def exec_tmux(args, tmux_conf):
     params = ('tmux',)
     socket = args.socket
     params += ('-L', socket)
@@ -249,11 +260,16 @@ def exec_tmux(args, version, tmux_dir):
             params += ('attach',)
     else:
         # start tmux server
-        params += ('-f', conf) + tuple(tmux_args)
-    logging.debug('os.execvp params: ' + str(params))
-    sys.stdout.flush()
-    sys.stderr.flush()
-    os.execvp('tmux', params)
+        params += ('-f', tmux_conf) + tuple(tmux_args)
+    execvp('tmux', params)
+
+
+def start_login_shell(args, tmux_conf):
+    params = ('tmux',)
+    if args.force256color:
+        params += ('-2',)
+    params += ('-f', tmux_conf, '-c', 'zsh -l')
+    execvp('tmux', params)
 
 
 def main():
@@ -274,7 +290,11 @@ def main():
     if args.debug:
         end_pid = get_process_id()
         logging.debug('created {0} processes during initialization'.format(end_pid - start_pid - 1))
-    exec_tmux(args=args, version=tmux_version, tmux_dir=tmux_dir)
+    tmux_conf = path.relpath(get_tmux_conf(tmux_version, tmux_dir))
+    if args.login:
+        start_login_shell(args=args, tmux_conf=tmux_conf)
+    else:
+        exec_tmux(args=args, tmux_conf=tmux_conf)
 
 
 if __name__ == '__main__':
