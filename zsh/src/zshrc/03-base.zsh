@@ -29,5 +29,3 @@ HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=2500
 SAVEHIST=$HISTSIZE
 
-typeset -U path
-

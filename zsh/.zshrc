@@ -33,8 +33,6 @@ HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=2500
 SAVEHIST=$HISTSIZE
 
-typeset -U path
-
 
 autoload -Uz compinit && compinit
 zstyle ':completion:*' auto-description 'specify: %d'
@@ -382,5 +380,7 @@ nmk() {
         source $file
     }
 }
+
+typeset -U path
 
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
