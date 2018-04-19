@@ -1,5 +1,6 @@
 autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz promptinit && promptinit
+autoload -Uz async && async
 
 setopt AUTO_PUSHD
 setopt DVORAK

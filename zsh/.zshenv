@@ -6,6 +6,7 @@
 [[ -f /etc/arch-release ]] && unsetopt GLOBAL_RCS
 
 fpath=(
+    $ZDOTDIR/fpath
     # My completion
     $ZDOTDIR/completion
     # My theme
