@@ -18,7 +18,7 @@ _horizontal_plaintext() {
 _horizontal_reset_prompt() {
     # face color
     readonly happy='green'
-    readonly sad='yellow'
+    readonly sad='red'
 
     if ((${horizontal[color]})); then
         # prompt face turn green if the previous command did exit with 0,
