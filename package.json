@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "async": "^2.6.0",
-    "chokidar": "^2.0.2",
+    "chokidar": "^2.0.3",
     "nunjucks": "^3.1.2",
     "request": "^2.85.0",
     "request-promise": "^4.2.2",
