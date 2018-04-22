@@ -59,6 +59,7 @@ let &tabstop = 4  " a tab is four spaces
 " Nvim specific
 if has('nvim')
     let &inccommand = 'split'
+    set guicursor=  " Fix nvim & konsole bug https://github.com/neovim/neovim/issues/6403
 endif
 
 " Put share data under configuration directory
