@@ -122,7 +122,8 @@ export GIT_PAGER='less -+F -+X -c'
         fi
     }
 }
-alias neo=$EDITOR
+
+[[ -n $EDITOR ]] && alias neo=$EDITOR
 
 # apply tmux session environment to running shell
 alias ssenv=' eval $(tmux show-environment -s)'
