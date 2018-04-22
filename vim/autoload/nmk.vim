@@ -33,6 +33,9 @@ function! nmk#yank_to_system_clipboard(type, ...) abort
     endif
 
     call setreg('+', @@)
+    if !empty($TMUX)
+        call system('tmux loadb -', @@)
+    endif
 
     let &selection = sel_save
     let @@ = reg_save
