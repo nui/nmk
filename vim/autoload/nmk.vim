@@ -32,7 +32,9 @@ function! nmk#yank_to_system_clipboard(type, ...) abort
         silent exe "normal! `[v`]y"
     endif
 
-    call setreg('+', @@)
+    if has('clipboard')
+        call setreg('+', @@)
+    endif
     if !empty($TMUX)
         call system('tmux loadb -', @@)
     endif
