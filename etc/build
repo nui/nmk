@@ -68,6 +68,10 @@ find_remote_branch() {
     typeset -g find_remote_branch_result=${(@j#/#)tmp_arr[2,-1]}
 }
 
+find_last_tag() {
+    git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1)
+}
+
 cleanup() {
     rm -rf $tmp_dir
 }
@@ -122,6 +126,7 @@ set +x
     }
 } >> .buildinfo
 set -x
+readonly last_tag=$(find_last_tag)
 
 # Step 3. Get rid of git and unnecessary files
 # -----------------------------------------------------------------------------
@@ -170,6 +175,9 @@ fi
 # Step 7.1 (Stable only) Create gpg signature
 if (( $_STABLE )); then
     gpg2 -b $archive_name
+    if [[ -n $last_tag ]]; then
+        print -- "Open https://github.com/nuimk/nmk/releases/tag/2018-04-23/$last_tag to upload files"
+    fi
     if (( ${+commands[dolphin]} )); then
         dolphin $assets_dir 2>/dev/null
     else
