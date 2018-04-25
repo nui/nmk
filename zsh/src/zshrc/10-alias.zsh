@@ -110,19 +110,6 @@ export GIT_PAGER='less -+F -+X -c'
 # unalias vi, because it can override previous vi function
 (( ${+aliases[vi]} )) && unalias vi
 
-(( ${+commands[nvim]} )) && {
-    function nvim {
-        # Deactivate python virtual environment before start nvim
-        if [[ -n $PYENV_VIRTUAL_ENV ]]; then
-            (pyenv deactivate && command nvim "$@")
-        elif [[ -n $VIRTUAL_ENV ]] && (( ${+functions[deactivate]} )); then
-            (deactivate && command nvim "$@")
-        else
-            command nvim "$@"
-        fi
-    }
-}
-
 [[ -n $EDITOR ]] && alias neo=$EDITOR
 
 # apply tmux session environment to running shell
