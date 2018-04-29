@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for python in "$NMK_PYTHON" python3 python; do
+    # Call binary to determine python existence
+    # Check binary existence doesn't work because pyenv provide python shims.
+    "$python" --version > /dev/null 2>&1 && exec "$python" "$nmk_dir/bin/nmk-update.py" "$@"
+done

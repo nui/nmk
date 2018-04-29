@@ -1,7 +1,7 @@
-#!/usr/bin/env python
 """
 Run on Python 2.6.6 and later
 """
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 from os import path
 from tempfile import NamedTemporaryFile
