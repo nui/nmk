@@ -7,12 +7,16 @@ import os
 import subprocess
 import sys
 import tempfile
-from distutils.spawn import find_executable
 from os import environ as env
 from os import path
 
 import argparse
 import six
+
+if sys.version_info[0:2] >= (3, 3):
+    from shutil import which as find_executable
+else:
+    from distutils.spawn import find_executable
 
 PY26 = sys.version_info[0:2] == (2, 6)
 UNICODE_NAME = 'C.UTF-8'
