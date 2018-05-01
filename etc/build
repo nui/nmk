@@ -143,7 +143,7 @@ cat > uninstall.sh << 'EOF'
 set -e
 find . -name '*.pyc' -exec rm -f {} +
 find . -name __pycache__ -exec rmdir {} +
-<.installed-files xargs --null rm
+<.installed-files xargs -0 rm
 EOF
 # create a list of bundled files
 find . ! -type d -print0 | sort --reverse --zero-terminated > .installed-files
