@@ -174,7 +174,7 @@ fi
 if (( $_STABLE )); then
     gpg2 -b $archive_name
     if [[ -n $last_tag ]]; then
-        print -- "Open https://github.com/nuimk/nmk/releases/tag/2018-04-23/$last_tag to upload files"
+        print -- "Open https://github.com/nuimk/nmk/releases/tag/$last_tag to upload files"
     fi
     if (( ${+commands[dolphin]} )); then
         dolphin $assets_dir 2>/dev/null
