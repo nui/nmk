@@ -1,14 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 
-# note: this line call 3 external processes
-nmk_dir=$(dirname "$(dirname "$(readlink -f "$0")")")
-
-[ -d "$nmk_dir/.git" ] && echo ".git found, exit" && exit 1
+nmk_dir=$(CDPATH= cd -- "$(dirname -- "$(dirname -- "$0")")" && pwd)
+script=$nmk_dir/bin/nmk-update.py
 
 for python in "$NMK_PYTHON" python3 python; do
     # Call binary to determine python existence
     # Check binary existence doesn't work because pyenv provide python shims.
-    "$python" --version > /dev/null 2>&1 && exec "$python" "$nmk_dir/bin/nmk-update.py" "$@"
+    [ -n "$python" ] && "$python" --version > /dev/null 2>&1 && exec "$python" "$script" "$@"
 done
 
 >&2 echo "Error: Python not found"

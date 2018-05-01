@@ -2,21 +2,22 @@
 Run on Python 2.6.6 and later
 """
 
-from abc import ABCMeta, abstractmethod, abstractproperty
-from os import path
-from tempfile import NamedTemporaryFile
 import json
 import logging
 import os
 import subprocess
 import sys
 import time
+from abc import ABCMeta, abstractmethod, abstractproperty
+from os import path
+from tempfile import NamedTemporaryFile
 
-from six.moves.urllib import request
 from six.moves import filter, input
-from six import print_
+from six.moves.urllib import request
+
 import argparse
 import six
+from six import print_
 
 logging.basicConfig(format='%(levelname)5s: %(message)s',
                     level=logging.INFO)
@@ -238,10 +239,18 @@ def update_from_remote(args):
     logging.info('Done')
 
 
+def prevent_run_on_git():
+    if path.isdir(path.join(NMK_DIR, '.git')):
+        logging.error('Found .git dir')
+        exit(1)
+
+
 def main():
     args = build_parser().parse_args()
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    prevent_run_on_git()
 
     if args.input:
         update_from_file(args)
