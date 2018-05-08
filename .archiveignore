@@ -10,10 +10,13 @@
 ./zsh/plugins/zsh-syntax-highlighting/images
 # our directories
 ./lib
+./project
+./src
 ./tools
 ./zsh/src
 # our files
-.archiveignore
+./.archiveignore
+./build.sbt
 ./etc/build
 ./package.json
 ./settings.js

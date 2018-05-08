@@ -3,6 +3,7 @@
 
 .idea/
 .netrwhist
+target/
 /.cache/
 /local/
 /tmux/.tmux_history

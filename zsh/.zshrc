@@ -1,7 +1,6 @@
 if [[ -e $ZDOTDIR/zshrc.pre ]]; then
     source $ZDOTDIR/zshrc.pre
 fi
-
 autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz promptinit && promptinit
 autoload -Uz async && async
@@ -34,7 +33,6 @@ HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=2500
 SAVEHIST=$HISTSIZE
 
-
 autoload -Uz compinit && compinit
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
@@ -53,7 +51,6 @@ zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p
 zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,cmd'
-
 # Aliases and interactive shell configuration
 cdd() {
     # Change pwd to directory in which $1 is located
@@ -188,7 +185,6 @@ if [[ $TMOUT = <-> ]] && (( $TMOUT <= 24*3600 )); then
     export TMOUT=$(( 24*3600 ))
 fi
 
-
 () {
     # see /etc/zsh/zshrc
     local -A key
@@ -250,7 +246,6 @@ fi
 
     unfunction bind2maps
 }
-
 # see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
 function _nmk-fancy-ctrl-z {
     if [[ ${#BUFFER} -eq 0 ]]; then
@@ -262,7 +257,6 @@ function _nmk-fancy-ctrl-z {
 }
 zle -N _nmk-fancy-ctrl-z
 bindkey '^Z' _nmk-fancy-ctrl-z
-
 _nmk-precmd-kubectl-hook() {
     if [[ -n $KUBECTL_CONTEXT ]]; then
         alias kubectl="kubectl --context=$KUBECTL_CONTEXT"
@@ -281,7 +275,6 @@ _nmk-precmd-hook() {
     done
 }
 add-zsh-hook precmd _nmk-precmd-hook
-
 # Don't display git branch symbol if terminal does not support 256 colors
 (( ${+commands[tput]} )) && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
 
@@ -293,7 +286,6 @@ prompt horizontal
 
 # Change prompt color to yellow in remote session
 [[ -n $SSH_TTY ]] && horizontal[base_color]=magenta
-
 # Detect & load version managers
 () {
     typeset -a managers
@@ -345,9 +337,7 @@ prompt horizontal
         esac
     done
 }
-
 [[ -e /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
-
 # zsh function implementation of main entrypoint
 nmk() {
     local python=python
@@ -361,7 +351,6 @@ nmk() {
     fi
     $python $NMK_DIR/bin/nmk.py "$@"
 }
-
 [[ -e $ZDOTDIR/zshrc.extra ]] && source $ZDOTDIR/zshrc.extra
 () {
     local file
@@ -369,7 +358,5 @@ nmk() {
         source $file
     }
 }
-
 typeset -U path
-
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
