@@ -10,6 +10,5 @@ lazy val root = (project in file(".")).
     name := "nmk",
     libraryDependencies ++= Seq(
       scalaGuice,
-      scalaTest % Test
     )
   )

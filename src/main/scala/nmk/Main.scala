@@ -16,7 +16,7 @@ class Main @Inject()(tmux: Tmux,
   def run = {
     Files.write(ZshRc, zsh.render(NmkDir).getBytes())
     Version.supported.foreach(v => {
-      val conf = Paths.get(NmkDir, "tmux", v.toString + ".conf")
+      val conf = Paths.get(NmkDir, "tmux", s"$v.conf")
       Files.write(conf, tmux.render(v).getBytes())
     })
   }

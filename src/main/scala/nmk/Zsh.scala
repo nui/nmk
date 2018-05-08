@@ -13,6 +13,6 @@ class Zsh {
     val zshSrcDir = Paths.get(nmkDir, "zsh", "src", "zshrc")
     val paths = ListBuffer.empty[Path]
     Files.list(zshSrcDir).forEach(paths.append(_))
-    paths.sorted.flatMap(Files.readAllLines(_).iterator().asScala).mkString("\n")
+    paths.sorted.flatMap(Files.readAllLines(_).asScala).mkString("\n")
   }
 }

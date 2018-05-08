@@ -9,7 +9,6 @@
 ./vim/bundle/vim-multiple-cursors/assets
 ./zsh/plugins/zsh-syntax-highlighting/images
 # our directories
-./lib
 ./project
 ./src
 ./tools

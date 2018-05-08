@@ -31,16 +31,16 @@ class Tmux @Inject()() {
     //  Use Shift-Fx or <prefix> Fx to send Fx key
     r ++= (1 to 12) flatMap { n =>
       Seq(
-        s"bind-key    F$n   send-keys F$n",
+        s"bind-key F$n send-keys F$n",
         s"bind-key -n S-F$n send-keys F$n"
       )
     }
-    r += "unbind-key  C-b"
+    r += "unbind-key C-b"
     r += "bind-key -r C-b send-prefix"
-    r += s"bind-key -r b   $nextPane"
-    r += "bind-key    C-c command-prompt"
-    r += """bind-key    C   command-prompt "new-session -c '#{pane_current_path}' -s '%%'""""
-    r += tmuxOptions
+    r += s"bind-key -r b $nextPane"
+    r += "bind-key C-c command-prompt"
+    r += """bind-key C command-prompt "new-session -c '#{pane_current_path}' -s '%%'""""
+    r += options
     r += copyToSystemClipboard
     r += """set-option -g status-right "#{?client_prefix,^B ,}'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d""""
     r += newPaneWindowCurrentDirectory
@@ -72,16 +72,16 @@ class Tmux @Inject()() {
 
   private def chooseTree(implicit version: Version): String = {
     val options = version match {
-      case v if v >= V27 => "-sZ"
+      case x if x >= V27 => "-sZ"
       case _ => "-s"
     }
     "choose-tree " + options
   }
 
-  private def tmuxOptions = {
+  private def options = {
     """set-option -g base-index 1
-      |set-option -g     default-shell "$NMK_TMUX_DEFAULT_SHELL"
-      |set-option -g  default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
+      |set-option -g default-shell "$NMK_TMUX_DEFAULT_SHELL"
+      |set-option -g default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
       |set-option -g detach-on-destroy "$NMK_TMUX_DETACH_ON_DESTROY"
       |set-option -g display-time 1200
       |set-option -g history-limit 2500
@@ -106,18 +106,17 @@ class Tmux @Inject()() {
   }
 
   private def newPaneWindowCurrentDirectory = {
-    """unbind-key '"'; bind-key '"' split-window    -c "#{pane_current_path}"
-      |unbind-key %;   bind-key %   split-window -h -c "#{pane_current_path}"
-      |unbind-key c;   bind-key c   new-window      -c "#{pane_current_path}"
+    """unbind-key '"'; bind-key '"' split-window -c "#{pane_current_path}"
+      |unbind-key %; bind-key % split-window -h -c "#{pane_current_path}"
+      |unbind-key c; bind-key c new-window -c "#{pane_current_path}"
       |""".stripMargin
   }
 
   private def pageUpDown(implicit version: Version) = {
-    val keyMap = Map(
+    Map(
       "PageUp" -> "halfpage-up",
       "PageDown" -> "halfpage-down"
-    )
-    keyMap flatMap { case (k, v) =>
+    ) flatMap { case (k, v) =>
       version match {
         case x if x >= V24 => Seq(
           s"unbind-key -T copy-mode-vi $k",
