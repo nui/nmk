@@ -39,6 +39,7 @@ class Tmux @Inject()() {
     r += "bind-key -r C-b send-prefix"
     r += s"bind-key -r b   $nextPane"
     r += "bind-key    C-c command-prompt"
+    r += """bind-key    C   command-prompt "new-session -c '#{pane_current_path}' -s '%%'""""
     r += tmuxOptions
     r += copyToSystemClipboard
     r += """set-option -g status-right "#{?client_prefix,^B ,}'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d""""
