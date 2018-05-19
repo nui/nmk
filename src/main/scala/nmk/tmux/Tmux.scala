@@ -7,112 +7,139 @@ import scala.collection.mutable.ListBuffer
 
 @Singleton
 class Tmux @Inject()() {
-  private val Table = "fast"
-  private val TmpEnvs = Seq(
+
+  implicit class StringWithToConfig(s: String) {
+    def toConfig: String = s.stripMargin.stripPrefix("\n").stripSuffix("\n")
+  }
+
+  private val Table = "F12"
+  private val TmuxSettingEnv = Seq(
     "NMK_TMUX_256_COLOR",
     "NMK_TMUX_DEFAULT_SHELL",
     "NMK_TMUX_DEFAULT_TERMINAL",
     "NMK_TMUX_DETACH_ON_DESTROY",
     "NMK_TMUX_HISTORY",
   )
+  private val CopyMode = "copy-mode -eu"
+  private val Cwd = "#{pane_current_path}"
+  private val NextPane = """select-pane -t :.+ \; display-panes"""
+  private val NoEnterCopyMode = "#{?pane_in_mode,1,}#{?alternate_on,1,}"
 
   def render(implicit version: Version): String = {
     val r = ListBuffer.empty[String]
-    r += s"# tmux $version"
-    r += s"bind-key -n F1 $nextPane"
-    r += s"bind-key -n F2 last-window"
-    r += s"bind-key -n F3 switch-client -n"
-    r += s"bind-key -n F4 $chooseTree"
-    r += s"bind-key -n F5 resize-pane -Z"
-    r += s"bind-key -n F12 switch-client -T $Table"
-    r += s"bind-key -T $Table F12 detach-client"
-    r += s"bind-key -T $Table -r Space next-layout"
-    r ++= (for (i <- 1 to 9) yield s"bind-key -T $Table $i select-window -t $i")
-    //  Use Shift-Fx or <prefix> Fx to send Fx key
-    r ++= (1 to 12) flatMap { n =>
-      Seq(
-        s"bind-key F$n send-keys F$n",
-        s"bind-key -n S-F$n send-keys F$n"
-      )
+    r += s"# tmux $version configuration"
+    section("tmux option", r)(_ += options)
+    section("prefix key", r) { r =>
+      r += "unbind-key C-b"
+      r += "bind-key -r C-b send-prefix"
+      r += "bind-key -r b " + NextPane
     }
-    r += "unbind-key C-b"
-    r += "bind-key -r C-b send-prefix"
-    r += s"bind-key -r b $nextPane"
     r += "bind-key C-c command-prompt"
-    r += """bind-key C command-prompt "new-session -c '#{pane_current_path}' -s '%%'""""
-    r += options
-    r += copyToSystemClipboard
-    r += """set-option -g status-right "#{?client_prefix,^B ,}'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d""""
-    r += newPaneWindowCurrentDirectory
     r += "bind-key C-l switch-client -l"
-    // ---- COPY-MODE BINDING ----
-    // -- C-u to enter copy-mode --
-    r += "bind-key C-u copy-mode -eu"
-    r ++= pageUpDown
-    // Fix mouse scrolling in 2.1 and later
-    // Credit https://github.com/tmux/tmux/issues/145
-    r +=
-      """bind-key -T root WheelUpPane if-shell -Ft= "#{mouse_any_flag}" "send-keys -M" "if-shell -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
-        |""".stripMargin
-    // PageUp and PageDown special behaviors
-    //  If the condition is match, PageUp should enter copy mode
-    //  see https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/
-    r +=
-      """bind-key -T root PageUp if-shell -F "#{?pane_in_mode,1,}#{?alternate_on,1,}" "send-keys PageUp" "copy-mode -eu"
-        |""".stripMargin
+    section("function key binding", r) { r =>
+      r += s"bind-key -n F1 $NextPane"
+      r += s"bind-key -n F2 previous-window"
+      r += s"bind-key -n F3 next-window"
+      r += s"bind-key -n F4 $chooseTree"
+      r += s"bind-key -n F5 resize-pane -Z"
+    }
+    section("F12 key table", r) { r =>
+      r += s"bind-key -n F12 switch-client -T $Table"
+      r ++= 1 to 11 map { n => s"bind-key -T $Table F$n send-keys F$n" }
+      r += s"bind-key -T $Table F12 detach-client"
+      r += s"bind-key -T $Table -r Space next-layout"
+      r ++= 1 to 9 map { n => s"bind-key -T $Table $n select-window -t $n" }
+    }
+    section("pane_current_path", r)(_ ++= paneCurrentPath)
+    section("copy mode", r) { r =>
+      r += s"bind-key C-u $CopyMode"
+      r += copyToSystemClipboard
+      // Fix mouse scrolling in 2.1 and later, https://github.com/tmux/tmux/issues/145
+      r +=
+        s"""
+           |bind-key -T root WheelUpPane if-shell -F "#{mouse_any_flag}" "send-keys -M" "if-shell -F '$NoEnterCopyMode' 'send-keys -M' '$CopyMode'"
+           |""".toConfig
+      // PageUp and PageDown special behaviors
+      //  If the condition is match, PageUp should enter copy mode
+      //  see https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/
+      r +=
+        s"""
+           |bind-key -T root PageUp if-shell -F "$NoEnterCopyMode" "send-keys PageUp" "$CopyMode"
+           |""".toConfig
+      r ++= halfPageUpDown
+    }
     // Colors
     r +=
-      """if-shell 'zsh -c "[[ $NMK_TMUX_256_COLOR == 1 ]]"' 'source-file $NMK_DIR/tmux/256color.conf' 'source-file $NMK_DIR/tmux/8color.conf'
-        |""".stripMargin
+      """
+        |if-shell '[ x$NMK_TMUX_256_COLOR = x1 ]' 'source-file $NMK_DIR/tmux/256color.conf' 'source-file $NMK_DIR/tmux/8color.conf'
+        |""".toConfig
     // Unset temporary environment variables that were used during tmux initialization
-    r ++= unsetTempEnvs
-    // make final config
-    r.flatMap(_.split('\n')).filterNot(_.trim.isEmpty).mkString("\n") + "\n"
+    r ++= unsetTmuxSettingEnv
+    // Render final config
+    r.flatMap(_.split('\n')).mkString("\n") + "\n"
   }
 
   private def chooseTree(implicit version: Version): String = {
-    val options = version match {
-      case x if x >= V27 => "-sZ"
-      case _ => "-s"
-    }
-    "choose-tree " + options
+    val options = ListBuffer.empty[String]
+    options += "-s"
+    if (version >= V27)
+      options += "-Z"
+    "choose-tree " + options.mkString(" ")
   }
 
   private def options = {
-    """set-option -g base-index 1
+    """
+      |set-option -g base-index 1
       |set-option -g default-shell "$NMK_TMUX_DEFAULT_SHELL"
       |set-option -g default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
       |set-option -g detach-on-destroy "$NMK_TMUX_DETACH_ON_DESTROY"
       |set-option -g display-time 1200
+      |set-option -g history-file "$NMK_TMUX_HISTORY"
       |set-option -g history-limit 2500
       |set-option -g status-keys emacs
+      |set-option -g status-left-length 20
       |set-option -g status-right-length 60
+      |set-option -g status-right "#{?client_prefix,^B ,}'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d"
       |set-window-option -g mode-keys vi
-      |set-option -g history-file "$NMK_TMUX_HISTORY"
-      |""".stripMargin
+      |""".toConfig
   }
 
-  private def nextPane = """select-pane -t :.+ \; display-panes"""
-
   private def copyToSystemClipboard(implicit version: Version) = {
+    val copyToClipboard = "xclip -selection clipboard"
     val head = "if-shell 'xclip -o > /dev/null 2>&1'"
     val tail = version match {
       case x if x >= V24 =>
-        """'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection clipboard"'"""
+        s"""
+           |'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "$copyToClipboard"'
+           |""".toConfig
       case _ =>
-        """'bind-key -t vi-copy y copy-pipe "xclip -selection clipboard"'"""
+        s"""
+           |'bind-key -t vi-copy y copy-pipe "$copyToClipboard"'
+           |""".toConfig
     }
     s"$head $tail"
   }
 
-  private def newPaneWindowCurrentDirectory = {
-    """unbind-key '"'; bind-key '"' split-window -c "#{pane_current_path}"
-      |unbind-key %; bind-key % split-window -h -c "#{pane_current_path}"
-      |unbind-key c; bind-key c new-window -c "#{pane_current_path}"
-      |""".stripMargin
+  private def paneCurrentPath = {
+    val r = ListBuffer.empty[String]
+    r ++= Map(
+      "'\"'" -> "split-window",
+      "%" -> "split-window -h ",
+      "c" -> "new-window"
+    ) flatMap { case (k, v) =>
+      Seq(
+        s"unbind-key $k",
+        s"bind-key $k $v -c '$Cwd'"
+      )
+    }
+    r +=
+      s"""
+         |bind-key C command-prompt "new-session -c '$Cwd' -s '%%'"
+         |""".toConfig
+    r
   }
 
-  private def pageUpDown(implicit version: Version) = {
+  private def halfPageUpDown(implicit version: Version) = {
     Map(
       "PageUp" -> "halfpage-up",
       "PageDown" -> "halfpage-down"
@@ -130,7 +157,25 @@ class Tmux @Inject()() {
     }
   }
 
-  private def unsetTempEnvs = {
-    TmpEnvs.map(env => s"set-environment -gr $env")
+  private def unsetTmuxSettingEnv = TmuxSettingEnv.map("set-environment -gr " + _)
+
+  private def section(name: String, r: ListBuffer[String])
+                     (block: ListBuffer[String] => Unit): Unit = {
+    val buffer = ListBuffer.empty[String]
+    block(buffer)
+    r += lineComment(name, filler = ">")
+    r ++= buffer
+    r += lineComment(name, filler = "<")
+  }
+
+  private def lineComment(s: String, length: Int = 80, filler: String = "=") = {
+    val result = new StringBuilder(s" $s ")
+    val prefix = "# "
+    while (result.length < length - prefix.length) {
+      result.insert(0, filler)
+      result.append(filler)
+    }
+    result.insert(0, prefix)
+    result.toString.substring(0, length)
   }
 }
