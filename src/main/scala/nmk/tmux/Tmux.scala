@@ -24,6 +24,9 @@ class Tmux @Inject()() {
   private val Cwd = "#{pane_current_path}"
   private val NextPane = """select-pane -t :.+ \; display-panes"""
   private val NoEnterCopyMode = "#{?pane_in_mode,1,}#{?alternate_on,1,}"
+  private val LastSession = "switch-client -l"
+  private val NextSession = "switch-client -n"
+  private val PrevSession = "switch-client -p"
 
   def render(implicit version: Version): String = {
     val r = ListBuffer.empty[String]
@@ -34,16 +37,21 @@ class Tmux @Inject()() {
       r += "bind-key -r C-b send-prefix"
       r += "bind-key -r b " + NextPane
     }
-    r += "bind-key C-c command-prompt"
-    r += "bind-key C-l switch-client -l"
+    r += s"bind-key C-c command-prompt"
+    r += s"bind-key C-l $LastSession"
     section("function key binding", r) { r =>
       r += s"bind-key -n F1 $NextPane"
-      r += s"bind-key -n F2 previous-window"
-      r += s"bind-key -n F3 next-window"
-      r += s"bind-key -n F4 $chooseTree"
+      r += s"bind-key -n F2 last-window"
+      r += s"bind-key -n F3 previous-window"
+      r += s"bind-key -n F4 next-window"
       r += s"bind-key -n F5 resize-pane -Z"
+      r += s"bind-key -n F6 $chooseTree"
+      r += s"bind-key -n S-F2 $LastSession"
+      r += s"bind-key -n S-F3 $PrevSession"
+      r += s"bind-key -n S-F4 $NextSession"
     }
     section("F12 key table", r) { r =>
+      r += s"bind-key F12 send-keys F12"
       r += s"bind-key -n F12 switch-client -T $Table"
       r ++= 1 to 11 map { n => s"bind-key -T $Table F$n send-keys F$n" }
       r += s"bind-key -T $Table F12 detach-client"

@@ -30,6 +30,25 @@ sudo apt install vim-nox
 ```
 
 
+## Tmux function key navigation
+```
+F1 Next pane
+F2 Last window
+F3 Previous window
+F4 Next window
+F5 Zoom pane
+F6 Choose tree
+
+Shift-F2 Last session
+Shift-F3 Previous session
+Shift-F4 Next session
+
+F12 F12 detach
+
+F12 (1-9) Select window number x
+```
+
+
 ## Terminal setup
 To use 256 colors, Set `TERM` environment variable to `xterm-256color`.
 
