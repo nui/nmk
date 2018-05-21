@@ -2,7 +2,7 @@
 
 append_alias() {
 cat << 'EOF'
-if [[ -e ~/.nmk/bin/nmk ]]; then alias nmk='exec ~/.nmk/bin/nmk'; fi # just an alias, see https://github.com/nuimk/nmk for more information
+if [[ -e ~/.nmk/bin/nmk ]]; then alias nmk='~/.nmk/bin/nmk'; fi # just an alias, see https://github.com/nuimk/nmk for more information
 EOF
 }
 
