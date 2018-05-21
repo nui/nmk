@@ -89,7 +89,8 @@ class Tmux @Inject()() {
 
   private def chooseTree(implicit version: Version): String = {
     val options = ListBuffer.empty[String]
-    options += "-s"
+    if (version >= V26)
+      options += "-s"
     if (version >= V27)
       options += "-Z"
     "choose-tree " + options.mkString(" ")
