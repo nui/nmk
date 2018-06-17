@@ -86,7 +86,7 @@ let g:jellybeans_use_term_background_color = 1
 let g:multi_cursor_quit_key = '<C-c>'
 let g:solarized_italic = 0
 let g:syntastic_quiet_messages = {'!level':  'errors'}
-let g:tcommentGuessFileType_jinja = 1
+let g:tcomment#filetype#guess_jinja = 1
 
 nnoremap <leader>ag :Ack!<Space>
 
