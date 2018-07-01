@@ -92,6 +92,8 @@ readonly tmp_repo="$tmp_dir/nmk"
 
 readonly absolute_archive_path=$assets_dir/$archive_name
 
+export CLOUDSDK_ACTIVE_CONFIG_NAME=personal
+
 # Step 0. Change directory to git root of this script
 cd $script_git_root
 
