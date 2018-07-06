@@ -1,0 +1,30 @@
+#!/bin/zsh
+
+if (( $# == 0 )); then
+    exit 1
+fi
+
+PROJECT_ID=$1
+LOCATION=${2-asia.}
+BUCKET=gs://${LOCATION}artifacts.$PROJECT_ID.appspot.com
+
+print before
+gsutil du -hs $BUCKET
+
+# set -x
+REPO=${LOCATION}gcr.io/$PROJECT_ID
+IMAGES=("${(@f)$(gcloud container images list --repository $REPO --limit=unlimited --format='get(name)')}")
+for image in $IMAGES; do
+    TAGS=("${(@f)$(gcloud container images list-tags $image --filter='-tags:*'  --format='get(digest)' --limit=unlimited)}")
+    ITEMS=()
+    for tag in $TAGS; do
+        ITEMS+=$image@$tag
+    done
+    if [[ ${#ITEMS} > 0 ]]; then
+        gcloud container images delete --quiet $ITEMS
+    fi
+done
+
+print after
+gsutil du -hs $BUCKET
+
