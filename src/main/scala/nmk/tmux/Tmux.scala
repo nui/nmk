@@ -39,6 +39,7 @@ class Tmux @Inject()() {
     }
     r += s"bind-key C-c command-prompt"
     r += s"bind-key C-l $LastSession"
+    r += s"bind-key C-t display-message '#{pane_tty}'"
     section("function key binding", r) { r =>
       r += s"bind-key -n F1 $NextPane"
       r += s"bind-key -n F2 last-window"
