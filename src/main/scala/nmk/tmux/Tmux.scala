@@ -135,7 +135,9 @@ class Tmux @Inject()() {
     val r = ListBuffer.empty[String]
     r ++= Map(
       "'\"'" -> "split-window",
+      "_" -> "split-window",
       "%" -> "split-window -h ",
+      "|" -> "split-window -h ",
       "c" -> "new-window"
     ) flatMap { case (k, v) =>
       Seq(
