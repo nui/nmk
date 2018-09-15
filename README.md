@@ -84,7 +84,7 @@ To make vim-airline display powerline symbols correctly, you need to install a p
 
 All tags in this repository are signed with my public key, run below command to get it.
 
-`gpg --recv-keys 0xD6F342D866939600`
+`gpg --recv-keys 0x28B07F9036262EEF4D5B2B21B837E20D47A47347`
 
 
 [1]: https://powerline.readthedocs.org/en/latest/installation/linux.html#fonts-installation
