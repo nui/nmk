@@ -97,11 +97,6 @@ rf() {
 }
 export GIT_PAGER='less -+F -+X -c'
 
-(( ${+commands[docker]} )) && {
-    alias dkcc=' docker-clear-containers'
-    alias dkci=' docker-clear-images'
-}
-
 # vi = Vim without plugins
 (( ${+commands[vi]} )) && function vi {
     local VIMINIT=
