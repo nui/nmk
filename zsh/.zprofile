@@ -1,6 +1,3 @@
-# By default, tmux creates login shell for new window.
-# If zprofile is already sourced. It should not be sourced again.
-
 _nmk_setup_completion() {
     local completions_dir=$NMK_DIR/zsh/completion
     local zshrc_extra_dir=$NMK_DIR/zsh/zshrc.extra.d
@@ -10,6 +7,8 @@ _nmk_setup_completion() {
     [[ -e $gcloud_completion ]] && ln -sf $gcloud_completion $zshrc_extra_dir/gcloud-completion.zsh
 }
 
+# By default, tmux creates login shell for new window.
+# If zprofile is already sourced. It should not be sourced again.
 # NMK_PROFILE_INITIATED is set and check to prevent above situation.
 if [[ $NMK_PROFILE_INITIATED != true ]]; then
     if [[ -e $ZDOTDIR/zprofile ]]; then
