@@ -84,7 +84,6 @@ let g:ctrlp_custom_ignore = {'file': '\v\.(pyc)$'}
 let g:jellybeans_overrides = {'Comment': {'attr': ''}, 'DiffChange': {'guifg': 'E0FFFF', 'guibg': '2B5B77'}}
 let g:jellybeans_use_term_background_color = 1
 let g:multi_cursor_quit_key = '<C-c>'
-let g:solarized_italic = 0
 let g:syntastic_quiet_messages = {'!level':  'errors'}
 let g:tcomment#filetype#guess_jinja = 1
 

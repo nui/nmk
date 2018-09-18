@@ -14,9 +14,6 @@ vim-airline         https://github.com/vim-airline/vim-airline.git
 vim-airline-themes  https://github.com/vim-airline/vim-airline-themes.git
 vim-dispatch        https://github.com/tpope/vim-dispatch.git
 vim-fugitive        https://github.com/tpope/vim-fugitive.git
-# vim-go  https://github.com/fatih/vim-go.git
-# vim-jinja  https://github.com/lepture/vim-jinja.git
 vim-multiple-cursors  https://github.com/terryma/vim-multiple-cursors.git
 vim-repeat          https://github.com/tpope/vim-repeat.git
-vim-solarized8      https://github.com/lifepillar/vim-solarized8.git
 vim-surround        https://github.com/tpope/vim-surround.git
