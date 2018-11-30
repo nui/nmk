@@ -11,18 +11,29 @@ BUCKET=gs://${LOCATION}artifacts.$PROJECT_ID.appspot.com
 print before
 gsutil du -hs $BUCKET
 
+delete_tags() {
+    local image
+    image=$1
+    shift
+    local -a items
+    for tag in $@; do
+        items+=$image@$tag
+    done
+    if [[ ${#items} > 0 ]]; then
+        gcloud container images delete --quiet --force-delete-tags $items
+    fi
+}
+
 # set -x
 REPO=${LOCATION}gcr.io/$PROJECT_ID
 IMAGES=("${(@f)$(gcloud container images list --repository $REPO --limit=unlimited --format='get(name)')}")
 for image in $IMAGES; do
-    TAGS=("${(@f)$(gcloud container images list-tags $image --filter='-tags:*'  --format='get(digest)' --limit=unlimited)}")
-    ITEMS=()
-    for tag in $TAGS; do
-        ITEMS+=$image@$tag
-    done
-    if [[ ${#ITEMS} > 0 ]]; then
-        gcloud container images delete --quiet $ITEMS
-    fi
+    # delete untagged
+    TAGS=("${(@f)$(gcloud container images list-tags $image --filter='-tags:*' --format='get(digest)' --limit=unlimited)}")
+    delete_tags $image $TAGS
+    # delete all build-* tags except last 3
+    TAGS=("${(@f)$(gcloud container images list-tags $image --filter='tags:build-*' --format='get(digest)' --limit=unlimited)}")
+    delete_tags $image ${TAGS[@]:3}
 done
 
 print after
