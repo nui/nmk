@@ -3,6 +3,9 @@ set -e
 
 readonly _SCRIPT_NAME=${0:t}
 
+declare GPGPROG
+(( ${+commands[gpg2]} )) && GPGPROG=gpg2 || GPGPROG=gpg
+
 # Parse options {{{
 usage() {
 cat <<- EOU
@@ -174,7 +177,7 @@ fi
 
 # Step 7.1 (Stable only) Create gpg signature
 if (( $_STABLE )); then
-    gpg2 -b $archive_name
+    $GPGPROG -b $archive_name
     if [[ -n $last_tag ]]; then
         print -- "Open https://github.com/nuimk/nmk/releases/tag/$last_tag to upload files"
     fi
