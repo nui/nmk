@@ -5,7 +5,7 @@ cdd() {
         >&2 print -- '$1 does not exist'
         return 1
     fi
-    cd ${1:A:h}
+    cd ${1:a:h}
 }
 
 cde() {
@@ -15,7 +15,7 @@ cde() {
         >&2 print -- '$1 is not executable'
         return 1
     fi
-    local prog=${1:A}
+    local prog=${1:a}
     local target_dir=${prog:h}
     pushd -q $target_dir
     shift 1
@@ -56,7 +56,7 @@ rf() {
         _path=$(realpath --relative-to=$2 -- $1)
     # absolute path
     else
-        _path=${1:A}
+        _path=${1:a}
     fi
     list=('print -n -- $_path >&1')
     # if running tmux session, load into tmux buffer

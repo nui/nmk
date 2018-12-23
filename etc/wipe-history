@@ -16,6 +16,6 @@ read -q "confirm?Wipe history? (y/n)"
 for file in $files; do
     if [[ -f $file ]]; then
         shred -n 30 -u $file
-        print -- "removed ${file:A}"
+        print -- "removed ${file:a}"
     fi
 done

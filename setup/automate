@@ -50,7 +50,7 @@ readonly _REPO
 
 declare _NMK_DIR
 if [[ -n $1 ]]; then
-    _NMK_DIR=${1:A}
+    _NMK_DIR=${1:a}
     shift
 else
     _NMK_DIR=$_DEFAULT_NMK_DIR
