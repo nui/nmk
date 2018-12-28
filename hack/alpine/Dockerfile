@@ -10,6 +10,5 @@ WORKDIR /root
 
 ARG ARCHIVE=nmk.tar.gz
 
-RUN curl -o $ARCHIVE nmk.nuimk.com/$ARCHIVE \
-    && tar xf $ARCHIVE
+RUN curl -sSL https://storage.googleapis.com/nmk.nuimk.com/nmk.tar.gz | tar -C ~ -xzf -
 
