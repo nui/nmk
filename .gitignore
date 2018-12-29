@@ -17,8 +17,7 @@ target/
 /zsh/completion/
 /zsh/zprofile
 /zsh/zshenv.extra
-/zsh/zshrc.extra
 /zsh/zshrc.extra.d/
-/zsh/zshrc.pre
+/zsh/zshrc.pre.d/
 node_modules/
 npm-debug.log

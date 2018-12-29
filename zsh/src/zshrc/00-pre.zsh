@@ -1,3 +1,6 @@
-if [[ -e $ZDOTDIR/zshrc.pre ]]; then
-    source $ZDOTDIR/zshrc.pre
-fi
+() {
+    local file
+    for file ($ZDOTDIR/zshrc.pre.d/*.zsh(N)) {
+        source $file
+    }
+}

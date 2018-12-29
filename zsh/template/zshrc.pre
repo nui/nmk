@@ -1,4 +1,0 @@
-# vi: ft=zsh
-# This is the place to declare variables that control logic in src/zshrc/*.zsh
-
-# nmk_version_managers=(nvm)

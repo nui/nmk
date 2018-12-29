@@ -1,4 +1,0 @@
-# disable git integration in zsh prompt
-# horizontal[git]=0
-
-# vi: ft=zsh

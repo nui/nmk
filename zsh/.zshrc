@@ -1,6 +1,9 @@
-if [[ -e $ZDOTDIR/zshrc.pre ]]; then
-    source $ZDOTDIR/zshrc.pre
-fi
+() {
+    local file
+    for file ($ZDOTDIR/zshrc.pre.d/*.zsh(N)) {
+        source $file
+    }
+}
 autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz promptinit && promptinit
 autoload -Uz async && async
@@ -347,7 +350,6 @@ nmk() {
     fi
     $python $NMK_DIR/bin/nmk.py "$@"
 }
-[[ -e $ZDOTDIR/zshrc.extra ]] && source $ZDOTDIR/zshrc.extra
 () {
     local file
     for file ($ZDOTDIR/zshrc.extra.d/*.zsh(N)) {
