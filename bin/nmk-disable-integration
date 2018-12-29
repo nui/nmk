@@ -1,0 +1,13 @@
+#!/bin/sh
+
+PRE_FILE=$ZDOTDIR/zshrc.pre.d/nmk-disable-integration.zsh
+EXTRA_FILE=$ZDOTDIR/zshrc.extra.d/nmk-disable-integration.zsh
+
+cat > $EXTRA_FILE << EOF
+horizontal[git]=0
+EOF
+
+cat > $PRE_FILE << EOF
+nmk_version_managers=()
+EOF
+
