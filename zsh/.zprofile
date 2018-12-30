@@ -1,10 +1,8 @@
 _nmk_setup_completion() {
-    local completions_dir=$NMK_DIR/zsh/completion
-    local zshrc_extra_dir=$NMK_DIR/zsh/zshrc.extra.d
-    local gcloud_completion='/usr/share/google-cloud-sdk/completion.zsh.inc'
+    local completions_dir=$ZDOTDIR/completion
+    local zshrc_extra_dir=$ZDOTDIR/zshrc.extra.d
     (( ${+commands[kubectl]} )) && kubectl completion zsh > $zshrc_extra_dir/kubectl-completion.zsh
-    (( ${+commands[rustup]} )) && rustup completions zsh > $completions_dir/_rustup
-    [[ -e $gcloud_completion ]] && ln -sf $gcloud_completion $zshrc_extra_dir/gcloud-completion.zsh
+    (( ${+commands[rustup]} ))  && rustup completions zsh > $completions_dir/_rustup
 }
 
 # By default, tmux creates login shell for new window.
