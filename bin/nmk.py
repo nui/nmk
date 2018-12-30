@@ -311,7 +311,7 @@ def start_login_shell(args, tmux_conf):
     params = ('tmux',)
     if args.force256color:
         params += ('-2',)
-    params += ('-f', tmux_conf, '-c', 'zsh -l')
+    params += ('-f', tmux_conf, '-c', 'exec zsh -l')
     execvp('tmux', params)
 
 
