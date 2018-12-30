@@ -10,5 +10,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.alpine
-    image: nmk:python
+    image: nuimk/nmkpkg:alpine
 
