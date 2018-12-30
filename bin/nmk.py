@@ -187,6 +187,29 @@ def setup_environment(args, nmk_dir, tmux_version):
         logging.debug('set LC_ALL = ' + UNICODE_NAME)
 
 
+def setup_zsh(args, nmk_dir):
+    has_local_zsh = path.exists(path.join(nmk_dir, 'local', 'bin', 'zsh'))
+
+    # Some linux distribution global zprofile contains a line that will source everything
+    # from /etc/profile. And they do reset $PATH completely.
+    # It makes PATH set by nmk unusable
+    bad_global_rcs = any((
+        path.exists('/etc/alpine-release'),
+        path.exists('/etc/arch-release'),
+    ))
+
+    no_global_rcs = all((
+        args.autofix,
+        bad_global_rcs,
+        not has_local_zsh,
+    ))
+
+    if no_global_rcs:
+        logging.debug('ignore zsh global configuration')
+
+    env['NMK_ZSH_GLOBAL_RCS'] = "0" if no_global_rcs else "1"
+
+
 def setup_prefer_editor():
     prefer_editors = ('nvim', 'vim')
     if 'EDITOR' not in env:
@@ -290,6 +313,7 @@ def main():
     tmux_version = get_tmux_version()
     setup_terminal(args=args)
     setup_environment(args=args, nmk_dir=nmk_dir, tmux_version=tmux_version)
+    setup_zsh(args=args, nmk_dir=nmk_dir)
     setup_prefer_editor()
     if args.debug:
         end_pid = get_process_id()
