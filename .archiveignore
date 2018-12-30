@@ -9,7 +9,9 @@
 ./vim/bundle/vim-multiple-cursors/assets
 ./zsh/plugins/zsh-syntax-highlighting/images
 # our directories
-./hack
+./docker
+./docs
+./ms
 ./project
 ./src
 ./tools
@@ -20,8 +22,5 @@
 ./etc/build
 ./package.json
 ./settings.js
-./tmux/*.js
-./tmux/*.njk
 ./vim/update-plugins
 ./yarn.lock
-./zsh/*.js

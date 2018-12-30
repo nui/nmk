@@ -7,7 +7,7 @@ import os
 import subprocess
 import sys
 import tempfile
-from os import environ as env
+from os import environ
 from os import path
 
 import argparse
@@ -37,12 +37,12 @@ def build_parser():
     parser.add_argument('-L', '--socket',
                         dest='socket',
                         default='nmk',
-                        help='set tmux socket name')
+                        help='use a different tmux socket name')
     parser.add_argument('-l', '--login',
                         dest='login',
                         action='store_true',
                         default=False,
-                        help='Start login shell instead of tmux')
+                        help='start a login shell')
     parser.add_argument('-u', '--unicode',
                         dest='unicode',
                         action='store_true',
@@ -90,6 +90,13 @@ if PY26:
 else:
     check_output = subprocess.check_output
 
+MY_TEMP_ENV = set()
+
+
+def tempenv(name, value):
+    MY_TEMP_ENV.add(name)
+    environ[name] = value
+
 
 def get_process_id():
     output = check_output(('sh', '-c', 'echo $$'))
@@ -114,14 +121,16 @@ def setup_path(nmk_dir):
     Setup PATH environment.
       - prepend NMK_DIR/bin and NMK_DIR/local/bin
     """
-    paths = [
-                path.join(nmk_dir, 'bin'),
-                path.join(nmk_dir, 'local', 'bin')
-            ] + env['PATH'].split(os.pathsep)
+    nmk_paths = [
+        path.join(nmk_dir, 'bin'),
+        path.join(nmk_dir, 'local', 'bin')
+    ]
+    paths = nmk_paths + [p for p in environ['PATH'].split(os.pathsep) if p not in nmk_paths]
+
     for i, p in enumerate(paths, start=1):
         logging.debug('path[{0:02d}]:{1}'.format(i, p))
-    env['PATH'] = os.pathsep.join(paths)
-    logging.debug('PATH:' + env['PATH'])
+    environ['PATH'] = os.pathsep.join(paths)
+    logging.debug('PATH:' + environ['PATH'])
 
 
 def check_dependencies():
@@ -138,11 +147,11 @@ def parse_cgroup(cgroup_file):
             yield control_group
 
 
-def is_inside_docker():
+def is_inside_container():
     cgroup_file = '/proc/1/cgroup'
     if path.exists(cgroup_file):
         control_groups = parse_cgroup(cgroup_file)
-        in_docker = all((g != '/' for g in control_groups))
+        in_docker = any((g.startswith('/docker') for g in control_groups))
     else:
         in_docker = False
         logging.error("Couldn't read {0}".format(cgroup_file))
@@ -150,40 +159,44 @@ def is_inside_docker():
 
 
 def setup_terminal(args):
+    is_container = is_inside_container()
     support_256color = any((
         args.force256color,
-        env.get('TERM') in ('cygwin', 'gnome-256color', 'putty', 'screen-256color', 'xterm-256color'),
-        env.get('COLORTERM') in ('gnome-terminal', 'rxvt-xpm', 'xfce4-terminal'),
-        args.autofix and is_inside_docker(),
+        environ.get('TERM') in ('cygwin', 'gnome-256color', 'putty', 'screen-256color', 'xterm-256color'),
+        environ.get('COLORTERM') in ('gnome-terminal', 'rxvt-xpm', 'xfce4-terminal'),
+        args.autofix and is_container,
     ))
 
+    if is_container:
+        logging.debug('detect docker container')
+
     use_256color = not args.force8color and support_256color
-    env['NMK_TMUX_DEFAULT_TERMINAL'] = 'screen-256color' if use_256color else 'screen'
-    env['NMK_TMUX_256_COLOR'] = "1" if use_256color else "0"
+    tempenv('NMK_TMUX_DEFAULT_TERMINAL', 'screen-256color' if use_256color else 'screen')
+    tempenv('NMK_TMUX_256_COLOR', "1" if use_256color else "0")
 
 
 def setup_environment(args, nmk_dir, tmux_version):
     initvim = path.join(nmk_dir, 'vim/init.vim')
     zdotdir = path.join(nmk_dir, 'zsh')
 
-    env['NMK_DIR'] = nmk_dir
-    env['NMK_TMUX_DEFAULT_SHELL'] = find_executable('zsh')
-    env['NMK_TMUX_DETACH_ON_DESTROY'] = args.detach_on_destroy
-    env['NMK_TMUX_HISTORY'] = path.join(nmk_dir, 'tmux', '.tmux_history')
-    env['NMK_TMUX_VERSION'] = tmux_version
-    env['VIMINIT'] = 'source {0}'.format(initvim.replace(' ', r'\ '))
-    env['ZDOTDIR'] = zdotdir
+    environ['NMK_DIR'] = nmk_dir
+    tempenv('NMK_TMUX_DEFAULT_SHELL', find_executable('zsh'))
+    tempenv('NMK_TMUX_DETACH_ON_DESTROY', args.detach_on_destroy)
+    tempenv('NMK_TMUX_HISTORY', path.join(nmk_dir, 'tmux', '.tmux_history'))
+    environ['NMK_TMUX_VERSION'] = tmux_version
+    environ['VIMINIT'] = 'source {0}'.format(initvim.replace(' ', r'\ '))
+    environ['ZDOTDIR'] = zdotdir
 
-    if 'VIRTUAL_ENV' in env:
-        del env['VIRTUAL_ENV']
+    if 'VIRTUAL_ENV' in environ:
+        del environ['VIRTUAL_ENV']
         logging.debug('unset VIRTUAL_ENV')
 
-    if args.unicode or (args.autofix and 'LANG' not in env):
-        env['LANG'] = UNICODE_NAME
+    if args.unicode or (args.autofix and 'LANG' not in environ):
+        environ['LANG'] = UNICODE_NAME
         logging.debug('set LANG = ' + UNICODE_NAME)
 
     if args.force_unicode:
-        env['LC_ALL'] = UNICODE_NAME
+        environ['LC_ALL'] = UNICODE_NAME
         logging.debug('set LC_ALL = ' + UNICODE_NAME)
 
 
@@ -207,15 +220,16 @@ def setup_zsh(args, nmk_dir):
     if no_global_rcs:
         logging.debug('ignore zsh global configuration')
 
-    env['NMK_ZSH_GLOBAL_RCS'] = "0" if no_global_rcs else "1"
+    environ['NMK_ZSH_GLOBAL_RCS'] = "0" if no_global_rcs else "1"
 
 
 def setup_prefer_editor():
     prefer_editors = ('nvim', 'vim')
-    if 'EDITOR' not in env:
+    EDITOR = 'EDITOR'
+    if EDITOR not in environ:
         for prog in prefer_editors:
             if find_executable(prog):
-                env['EDITOR'] = prog
+                environ[EDITOR] = prog
                 logging.debug('set EDITOR = ' + prog)
                 break
 
@@ -225,13 +239,13 @@ def add_local_library(nmk_dir):
 
     local_lib_dir = path.join(nmk_dir, 'local', 'lib')
     if path.isdir(local_lib_dir):
-        library_path = env.get(LD_LIBRARY_PATH)
+        library_path = environ.get(LD_LIBRARY_PATH)
         library_paths = library_path.split(os.pathsep) if library_path else []
         if local_lib_dir not in library_paths:
             library_paths.insert(0, local_lib_dir)
-            env[LD_LIBRARY_PATH] = os.pathsep.join(library_paths)
+            environ[LD_LIBRARY_PATH] = os.pathsep.join(library_paths)
             logging.debug('prepend ' + local_lib_dir + ' to ' + LD_LIBRARY_PATH)
-            logging.debug(LD_LIBRARY_PATH + ' = ' + env[LD_LIBRARY_PATH])
+            logging.debug(LD_LIBRARY_PATH + ' = ' + environ[LD_LIBRARY_PATH])
 
 
 def get_tmux_version():
@@ -281,13 +295,15 @@ def exec_tmux(args, tmux_conf):
         if tmux_args:
             params += tuple(tmux_args)
         else:
-            if 'TMUX' in env and not args.inception:
+            if 'TMUX' in environ and not args.inception:
                 logging.error('add --inception to allow nested tmux sessions')
                 sys.exit(1)
             params += ('attach',)
     else:
         # start tmux server
         params += ('-f', tmux_conf) + tuple(tmux_args)
+    sys.stdout.flush()
+    sys.stderr.flush()
     execvp('tmux', params)
 
 
@@ -320,6 +336,8 @@ def main():
         logging.debug('created {0} processes during initialization'.format(end_pid - start_pid - 1))
     tmux_conf = path.relpath(get_tmux_conf(tmux_version, tmux_dir))
     if args.login:
+        for env in MY_TEMP_ENV:
+            del environ[env]
         start_login_shell(args=args, tmux_conf=tmux_conf)
     else:
         exec_tmux(args=args, tmux_conf=tmux_conf)
