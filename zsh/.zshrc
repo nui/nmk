@@ -257,22 +257,22 @@ _nmk_preexec_functions=()
     _nmk_preexec_functions+=_nmk-kubectl-preexec
 }
 
-_nmk-precmd() {
+_nmk_precmd() {
     local hook
     for hook in $_nmk_precmd_functions; do
         $hook
     done
 }
 
-_nmk-preexec() {
+_nmk_preexec() {
     local hook
     for hook in $_nmk_preexec_functions; do
         $hook
     done
 }
 
-add-zsh-hook precmd  _nmk-precmd
-add-zsh-hook preexec _nmk-preexec
+add-zsh-hook precmd  _nmk_precmd
+add-zsh-hook preexec _nmk_preexec
 # fix tmux and zsh corrupt after cat binary file
 # ref: https://unix.stackexchange.com/a/253369
 reset() {
