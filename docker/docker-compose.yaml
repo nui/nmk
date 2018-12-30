@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.python
-    image: nuimk/nmkpkg:centos-6.9
+    image: nuimk/nmkpkg:centos-6.10
     entrypoint: /bin/bash
   alpine:
     build:
