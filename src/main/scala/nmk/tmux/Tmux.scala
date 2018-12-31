@@ -1,25 +1,23 @@
 package nmk.tmux
 
 import javax.inject.{Inject, Singleton}
+import nmk.{JsonMapper, NmkConfig}
 import nmk.tmux.Version._
 
 import scala.collection.mutable.ListBuffer
+import scala.io.Source
 
 @Singleton
-class Tmux @Inject()() {
+class Tmux @Inject()(
+                      jsonMapper: JsonMapper
+                    ) {
 
   implicit class StringWithToConfig(s: String) {
     def toConfig: String = s.stripMargin.stripPrefix("\n").stripSuffix("\n")
   }
 
   private val Table = "F12"
-  private val TmuxSettingEnv = Seq(
-    "NMK_TMUX_256_COLOR",
-    "NMK_TMUX_DEFAULT_SHELL",
-    "NMK_TMUX_DEFAULT_TERMINAL",
-    "NMK_TMUX_DETACH_ON_DESTROY",
-    "NMK_TMUX_HISTORY",
-  )
+  private val TmuxSettingEnvs = listEnvs()
   private val CopyMode = "copy-mode -eu"
   private val Cwd = "#{pane_current_path}"
   private val NextPane = """select-pane -t :.+ \; display-panes"""
@@ -170,7 +168,7 @@ class Tmux @Inject()() {
     }
   }
 
-  private def unsetTmuxSettingEnv = TmuxSettingEnv.map("set-environment -gr " + _)
+  private def unsetTmuxSettingEnv = TmuxSettingEnvs.map("set-environment -gr " + _)
 
   private def section(name: String, r: ListBuffer[String])
                      (block: ListBuffer[String] => Unit): Unit = {
@@ -190,5 +188,11 @@ class Tmux @Inject()() {
     }
     result.insert(0, prefix)
     result.toString.substring(0, length)
+  }
+
+  private def listEnvs(): List[String] = {
+    val fileContents = Source.fromFile(sys.env("NMK_DIR") + "/nmkconfig.json").getLines().mkString
+    val nmkConfig = jsonMapper.mapper.readValue[NmkConfig](fileContents)
+    nmkConfig.tmuxSettingEnvs
   }
 }

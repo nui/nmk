@@ -2,6 +2,7 @@
 Run on Python 2.6.6 and later
 """
 
+import json
 import logging
 import os
 import subprocess
@@ -10,6 +11,7 @@ import tempfile
 import time
 from os import environ
 from os import path
+
 
 import argparse
 import six
@@ -91,13 +93,6 @@ if PY26:
 else:
     check_output = subprocess.check_output
 
-MY_TEMP_ENV = set()
-
-
-def tempenv(name, value):
-    MY_TEMP_ENV.add(name)
-    environ[name] = value
-
 
 def run_get_process_id():
     output = check_output(('sh', '-c', 'echo $$'))
@@ -172,8 +167,8 @@ def setup_terminal(args):
         logging.debug('detect docker container')
 
     use_256color = not args.force8color and support_256color
-    tempenv('NMK_TMUX_DEFAULT_TERMINAL', 'screen-256color' if use_256color else 'screen')
-    tempenv('NMK_TMUX_256_COLOR', "1" if use_256color else "0")
+    environ['NMK_TMUX_DEFAULT_TERMINAL'] = 'screen-256color' if use_256color else 'screen'
+    environ['NMK_TMUX_256_COLOR'] = "1" if use_256color else "0"
 
 
 def setup_environment(args, nmk_dir, tmux_version):
@@ -181,9 +176,9 @@ def setup_environment(args, nmk_dir, tmux_version):
     zdotdir = path.join(nmk_dir, 'zsh')
 
     environ['NMK_DIR'] = nmk_dir
-    tempenv('NMK_TMUX_DEFAULT_SHELL', find_executable('zsh'))
-    tempenv('NMK_TMUX_DETACH_ON_DESTROY', args.detach_on_destroy)
-    tempenv('NMK_TMUX_HISTORY', path.join(nmk_dir, 'tmux', '.tmux_history'))
+    environ['NMK_TMUX_DEFAULT_SHELL'] = find_executable('zsh')
+    environ['NMK_TMUX_DETACH_ON_DESTROY'] = args.detach_on_destroy
+    environ['NMK_TMUX_HISTORY'] = path.join(nmk_dir, 'tmux', '.tmux_history')
     environ['NMK_TMUX_VERSION'] = tmux_version
     environ['VIMINIT'] = 'source {0}'.format(initvim.replace(' ', r'\ '))
     environ['ZDOTDIR'] = zdotdir
@@ -320,6 +315,13 @@ def print_time_usage(start_time):
     logging.debug("nmk.py pre exec time = {0} seconds".format(time.time() - start_time))
 
 
+def clear_temp_env(nmk_dir):
+    with open(path.join(nmk_dir, 'nmkconfig.json'), 'rt') as f:
+        envs = json.loads(f.read())['tmuxSettingEnvs']
+        for env in envs:
+            del environ[env]
+
+
 def main():
     start_time = time.time()
     args = build_parser().parse_args()
@@ -342,8 +344,7 @@ def main():
         end_pid = run_get_process_id()
         logging.debug('created {0} processes during initialization'.format(end_pid - start_pid - 1))
     if args.login:
-        for env in MY_TEMP_ENV:
-            del environ[env]
+        clear_temp_env(nmk_dir=nmk_dir)
         start_login_shell(args=args, tmux_conf=tmux_conf, start_time=start_time)
     else:
         exec_tmux(args=args, tmux_conf=tmux_conf, start_time=start_time)
