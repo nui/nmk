@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from os import environ
 from os import path
 
@@ -98,7 +99,7 @@ def tempenv(name, value):
     environ[name] = value
 
 
-def get_process_id():
+def run_get_process_id():
     output = check_output(('sh', '-c', 'echo $$'))
     if isinstance(output, six.binary_type):
         output = output.decode()
@@ -274,51 +275,56 @@ def is_server_running(socket):
     return running
 
 
-def execvp(file, params):
-    logging.debug('os.execvp params: ' + str(params))
+def execvp(file, args):
+    logging.debug('os.execvp args: ' + str(args))
     sys.stdout.flush()
     sys.stderr.flush()
-    os.execvp(file, params)
+    os.execvp(file, args)
 
 
-def exec_tmux(args, tmux_conf):
-    params = ('tmux',)
+def exec_tmux(args, tmux_conf, start_time):
+    exec_args = ('tmux',)
     socket = args.socket
-    params += ('-L', socket)
+    exec_args += ('-L', socket)
     if args.force256color:
-        params += ('-2',)
+        exec_args += ('-2',)
     tmux_args = args.tmux_args[:]
     # If -- is used to separated between tmux and nmk parameters, don't send it to tmux
     if tmux_args and tmux_args[0] == '--':
         tmux_args.pop(0)
     if is_server_running(socket=socket):
         if tmux_args:
-            params += tuple(tmux_args)
+            exec_args += tuple(tmux_args)
         else:
             if 'TMUX' in environ and not args.inception:
                 logging.error('add --inception to allow nested tmux sessions')
                 sys.exit(1)
-            params += ('attach',)
+            exec_args += ('attach',)
     else:
         # start tmux server
-        params += ('-f', tmux_conf) + tuple(tmux_args)
-    sys.stdout.flush()
-    sys.stderr.flush()
-    execvp('tmux', params)
+        exec_args += ('-f', tmux_conf) + tuple(tmux_args)
+    print_time_usage(start_time)
+    execvp('tmux', exec_args)
 
 
-def start_login_shell(args, tmux_conf):
-    params = ('tmux',)
+def start_login_shell(args, tmux_conf, start_time):
+    exec_args = ('tmux',)
     if args.force256color:
-        params += ('-2',)
-    params += ('-f', tmux_conf, '-c', 'exec zsh -l')
-    execvp('tmux', params)
+        exec_args += ('-2',)
+    exec_args += ('-f', tmux_conf, '-c', 'exec zsh --login')
+    print_time_usage(start_time)
+    execvp('tmux', exec_args)
+
+
+def print_time_usage(start_time):
+    logging.debug("nmk.py pre exec time = {0} seconds".format(time.time() - start_time))
 
 
 def main():
+    start_time = time.time()
     args = build_parser().parse_args()
     if args.debug:
-        start_pid = get_process_id()
+        start_pid = run_get_process_id()
     setup_logging(debug=args.debug)
     python_info()
     nmk_dir = path.dirname(path.dirname(path.abspath(__file__)))
@@ -331,16 +337,16 @@ def main():
     setup_environment(args=args, nmk_dir=nmk_dir, tmux_version=tmux_version)
     setup_zsh(args=args, nmk_dir=nmk_dir)
     setup_prefer_editor()
-    if args.debug:
-        end_pid = get_process_id()
-        logging.debug('created {0} processes during initialization'.format(end_pid - start_pid - 1))
     tmux_conf = path.relpath(get_tmux_conf(tmux_version, tmux_dir))
+    if args.debug:
+        end_pid = run_get_process_id()
+        logging.debug('created {0} processes during initialization'.format(end_pid - start_pid - 1))
     if args.login:
         for env in MY_TEMP_ENV:
             del environ[env]
-        start_login_shell(args=args, tmux_conf=tmux_conf)
+        start_login_shell(args=args, tmux_conf=tmux_conf, start_time=start_time)
     else:
-        exec_tmux(args=args, tmux_conf=tmux_conf)
+        exec_tmux(args=args, tmux_conf=tmux_conf, start_time=start_time)
 
 
 if __name__ == '__main__':
