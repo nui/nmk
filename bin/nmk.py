@@ -316,7 +316,7 @@ def print_time_usage(start_time):
 
 
 def clear_temp_env(nmk_dir):
-    with open(path.join(nmk_dir, 'nmkconfig.json'), 'rt') as f:
+    with open(path.join(nmk_dir, 'config.json'), 'rt') as f:
         envs = json.loads(f.read())['tmuxSettingEnvs']
         for env in envs:
             del environ[env]

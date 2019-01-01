@@ -191,7 +191,7 @@ class Tmux @Inject()(
   }
 
   private def listEnvs(): List[String] = {
-    val fileContents = Source.fromFile(sys.env("NMK_DIR") + "/nmkconfig.json").getLines().mkString
+    val fileContents = Source.fromFile(sys.env("NMK_DIR") + "/config.json").getLines().mkString
     val nmkConfig = jsonMapper.mapper.readValue[NmkConfig](fileContents)
     nmkConfig.tmuxSettingEnvs
   }
