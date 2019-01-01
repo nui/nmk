@@ -228,7 +228,7 @@ alias ssenv=' eval $(tmux show-environment -s)'
     unfunction bind2maps
 }
 # see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
-function _nmk-fancy-ctrl-z {
+_nmk-fancy-ctrl-z() {
     if [[ ${#BUFFER} -eq 0 ]]; then
         bg
         zle redisplay
