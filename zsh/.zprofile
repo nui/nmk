@@ -1,7 +1,7 @@
 _nmk_setup_completion() {
     local completions_dir=$ZDOTDIR/completion
     local zshrc_extra_dir=$ZDOTDIR/zshrc.extra.d
-    (( ${+commands[kubectl]} )) && kubectl completion zsh > $zshrc_extra_dir/kubectl-completion.zsh
+    (( ${+commands[kubectl]} )) && kubectl completion zsh > $completions_dir/_kubectl
     (( ${+commands[rustup]} ))  && rustup completions zsh > $completions_dir/_rustup
 }
 
