@@ -100,10 +100,10 @@ alias help=run-help
             color_never='--color=never'
             ;;
     esac
-    alias la=" ls $color_auto $ls_options -lha"
-    alias lh=" ls $color_auto $ls_options -lh"
-    alias LH=" command ls $color_never $ls_options -lhF"
-    alias ls="ls $color_auto"
+    alias la=" \ls $color_auto $ls_options -lha"
+    alias lh=" \ls $color_auto $ls_options -lh"
+    alias LH=" \ls $color_never $ls_options -lhF"
+    alias ls="\ls $color_auto"
 }
 
 rf() {
