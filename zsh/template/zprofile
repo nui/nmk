@@ -5,7 +5,7 @@ export NMK_DEVELOPMENT=true
 export NMK_DIR=~/.nmk
 export VIMINIT='source $NMK_DIR/vim/init.vim'
 
-export NMK_PYTHON=/usr/bin/python3
+export NMK_PYTHON=/usr/bin/python
 # export GOPATH=~/go
 
 path=(
@@ -21,10 +21,20 @@ path=(
 
 # gpg-agent as ssh-agent
 (( ${+commands[gpg-connect-agent]} )) && [[ -n $DISPLAY ]] && {
-    # export SSH_AUTH_SOCK=~/.gnupg/S.gpg-agent.ssh # gpg <= 2.1.12
-    export SSH_AUTH_SOCK=/run/user/$UID/gnupg/S.gpg-agent.ssh # gpg > 2.1.12
-    echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null # fix pinentry and ssh problem in ubuntu 18.04
-    gpg-connect-agent /bye # start the agent if it is not running
+    case $OSTYPE in
+        linux*)
+            [[ -n $DISPLAY ]] && {
+                # export SSH_AUTH_SOCK=~/.gnupg/S.gpg-agent.ssh # gpg <= 2.1.12 & mac osx
+                export SSH_AUTH_SOCK=/run/user/$UID/gnupg/S.gpg-agent.ssh # gpg > 2.1.12
+                echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null # fix pinentry and ssh problem in ubuntu 18.04
+                gpg-connect-agent /bye # start the agent if it is not running
+            }
+            ;;
+        darwin*)
+            export SSH_AUTH_SOCK=~/.gnupg/S.gpg-agent.ssh
+            gpg-connect-agent /bye # start the agent if it is not running
+            ;;
+    esac
 }
 # Note for kubuntu
 #   comment out use-ssh-agent in /etc/X11/Xsession.options to disable default ssh-agent
