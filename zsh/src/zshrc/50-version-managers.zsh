@@ -12,19 +12,14 @@
     (( ${+commands[pyenv]} )) && {
         managers+=(pyenv)
         integer has_virtualenv
-        integer has_virtualenvwrapper
         typeset -a pyenv_commands
         pyenv_commands=$(pyenv commands)
         [[ ${pyenv_commands[(r)virtualenv]} == virtualenv ]] \
             && ((has_virtualenv = 1))
-        [[ ${pyenv_commands[(r)virtualenvwrapper]} == virtualenvwrapper ]] \
-            && ((has_virtualenvwrapper = 1))
         function init-pyenv {
             eval "$(pyenv init -)"
             if (( has_virtualenv )); then
                 eval "$(pyenv virtualenv-init -)"
-            elif (( has_virtualenvwrapper )); then
-                [[ $(pyenv version-name) != system* ]] && pyenv virtualenvwrapper
             fi
         }
     }
