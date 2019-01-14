@@ -150,7 +150,6 @@ def is_inside_container():
         in_docker = any((g.startswith('/docker') for g in control_groups))
     else:
         in_docker = False
-        logging.error("Couldn't read {0}".format(cgroup_file))
     return in_docker
 
 
