@@ -125,6 +125,9 @@ rf() {
     if (( ${+commands[xclip]} )) && xclip -o &> /dev/null; then
         list+='> >(xclip)'
         list+='> >(xclip -selection clipboard)'
+    # pipe to pbcopy if present
+    elif (( ${+commands[pbcopy]} )); then
+        list+='> >(pbcopy)'
     fi
     list+='; print' # add newline to output
     eval ${(j: :)list}
