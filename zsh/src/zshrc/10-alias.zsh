@@ -24,7 +24,7 @@ cde() {
 }
 
 alias cd=' cd'
-alias cp='cp --reflink=auto'
+[[ $OSTYPE == linux* ]] && alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
 alias help=run-help
 () {
@@ -35,13 +35,15 @@ alias help=run-help
     }
     local color_auto
     local color_never
-    if [[ $OSTYPE == freebsd* ]]; then
-        color_auto='-G'
-    else
-        # Assume gnu ls
-        color_auto='--color=auto'
-        color_never='--color=never'
-    fi
+    case $OSTYPE in
+        darwin* | freebsd*)
+            color_auto='-G'
+            ;;
+        linux*)
+            color_auto='--color=auto'
+            color_never='--color=never'
+            ;;
+    esac
     alias la=" ls $color_auto $ls_options -lha"
     alias lh=" ls $color_auto $ls_options -lh"
     alias LH=" ls $color_never $ls_options -lhF"
