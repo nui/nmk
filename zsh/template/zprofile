@@ -19,8 +19,8 @@ path=(
     # $GOPATH/bin
 )
 
-# gpg-agent as ssh-agent
-(( ${+commands[gpg-connect-agent]} )) && [[ -n $DISPLAY ]] && {
+# use gpg-agent as ssh-agent
+(( ${+commands[gpg-connect-agent]} )) && {
     case $OSTYPE in
         linux*)
             [[ -n $DISPLAY ]] && {
@@ -28,6 +28,8 @@ path=(
                 export SSH_AUTH_SOCK=/run/user/$UID/gnupg/S.gpg-agent.ssh # gpg > 2.1.12
                 echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null # fix pinentry and ssh problem in ubuntu 18.04
                 gpg-connect-agent /bye # start the agent if it is not running
+                # Note for kubuntu
+                #   comment out use-ssh-agent in /etc/X11/Xsession.options to disable default ssh-agent
             }
             ;;
         darwin*)
@@ -36,7 +38,5 @@ path=(
             ;;
     esac
 }
-# Note for kubuntu
-#   comment out use-ssh-agent in /etc/X11/Xsession.options to disable default ssh-agent
 
 # vi: ft=zsh
