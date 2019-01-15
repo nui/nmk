@@ -14,6 +14,8 @@
         PageUp     "${terminfo[kpp]}"
         PageDown   "${terminfo[knp]}"
         CtrlL      "^L"
+        CtrlR      "^R"
+        CtrlS      "^S"
     )
 
     bind2maps() {
@@ -36,6 +38,9 @@
         done
     }
 
+    # use emacs keybindings
+    bindkey -e
+
     if [[ -n $NMK_TMUX_VERSION ]]; then
         # PageUp to enter copy mode
         _nmk-tmux-copy-mode() tmux copy-mode -eu
@@ -56,6 +61,15 @@
     fi
     # PageDown do nothing
     bind2maps emacs             -- PageDown   redisplay
+    # Search backwards and forwards with a pattern
+    bind2maps emacs -- CtrlR history-incremental-pattern-search-backward
+    bind2maps emacs -- CtrlS history-incremental-pattern-search-forward
+    bindkey '^X^E' edit-command-line
+
+    # Fix Home, End, and Delete Key in build-from-source tmux
+    bind2maps emacs -- Home     beginning-of-line
+    bind2maps emacs -- End      end-of-line
+    bind2maps emacs -- Delete   delete-char
 
     unfunction bind2maps
 }

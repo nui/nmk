@@ -19,23 +19,9 @@ setopt SHARE_HISTORY
 # Release ^S for use in history-incremental-pattern-search-forward
 unsetopt FLOW_CONTROL
 
-# force emacs keybindings
-bindkey -e
-# Search backwards and forwards with a pattern
-bindkey '^R' history-incremental-pattern-search-backward
-bindkey '^S' history-incremental-pattern-search-forward
-
-bindkey '^X^E' edit-command-line
-
-# Fix Home, End, and Delete Key in build-from-source tmux
-bindkey ${terminfo[khome]} beginning-of-line
-bindkey ${terminfo[kend]}  end-of-line
-bindkey ${terminfo[kdch1]} delete-char
-
 HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=2500
 SAVEHIST=$HISTSIZE
-
 autoload -Uz compinit && compinit
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
@@ -168,6 +154,17 @@ export GIT_PAGER='less -+F -+X -c'
 # apply tmux session environment to running shell
 alias ssenv=' eval $(tmux show-environment -s)'
 
+# see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
+_nmk-fancy-ctrl-z() {
+    if [[ ${#BUFFER} -eq 0 ]]; then
+        bg
+        zle redisplay
+    else
+        zle push-input
+    fi
+}
+zle -N _nmk-fancy-ctrl-z
+bindkey '^Z' _nmk-fancy-ctrl-z
 () {
     # see /etc/zsh/zshrc
     local -A key
@@ -184,6 +181,8 @@ alias ssenv=' eval $(tmux show-environment -s)'
         PageUp     "${terminfo[kpp]}"
         PageDown   "${terminfo[knp]}"
         CtrlL      "^L"
+        CtrlR      "^R"
+        CtrlS      "^S"
     )
 
     bind2maps() {
@@ -206,6 +205,9 @@ alias ssenv=' eval $(tmux show-environment -s)'
         done
     }
 
+    # use emacs keybindings
+    bindkey -e
+
     if [[ -n $NMK_TMUX_VERSION ]]; then
         # PageUp to enter copy mode
         _nmk-tmux-copy-mode() tmux copy-mode -eu
@@ -226,20 +228,47 @@ alias ssenv=' eval $(tmux show-environment -s)'
     fi
     # PageDown do nothing
     bind2maps emacs             -- PageDown   redisplay
+    # Search backwards and forwards with a pattern
+    bind2maps emacs -- CtrlR history-incremental-pattern-search-backward
+    bind2maps emacs -- CtrlS history-incremental-pattern-search-forward
+    bindkey '^X^E' edit-command-line
+
+    # Fix Home, End, and Delete Key in build-from-source tmux
+    bind2maps emacs -- Home     beginning-of-line
+    bind2maps emacs -- End      end-of-line
+    bind2maps emacs -- Delete   delete-char
 
     unfunction bind2maps
 }
-# see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
-_nmk-fancy-ctrl-z() {
-    if [[ ${#BUFFER} -eq 0 ]]; then
-        bg
-        zle redisplay
-    else
-        zle push-input
+# fix tmux and zsh corrupt after cat binary file
+# ref: https://unix.stackexchange.com/a/253369
+reset() {
+    stty sane
+    printf '\033k\033\\\033]2;\007'
+    tput reset
+    if [[ -n $TMUX ]]; then
+        tmux set-window-option automatic-rename on
+        tmux refresh
     fi
 }
-zle -N _nmk-fancy-ctrl-z
-bindkey '^Z' _nmk-fancy-ctrl-z
+
+() {
+    local min_tmout=$(( 24*3600 ))
+    # if TMOUT is set on some environment, extend it to 24 hours
+    [[ $TMOUT = <-> ]] && (( $TMOUT <= $min_tmout )) && export TMOUT=$(( $min_tmout ))
+}
+
+# Don't display git branch symbol if terminal does not support 256 colors
+(( ${+commands[tput]} )) && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
+
+prompt horizontal
+
+# Hide user and host in prompt if NMK_DEVELOPMENT is true by default,
+# this is not apply to zsh in ssh session
+[[ $NMK_DEVELOPMENT == true && -z $SSH_TTY ]] && horizontal[userhost]=0
+
+# Change prompt color to yellow in remote session
+[[ -n $SSH_TTY ]] && horizontal[base_color]=magenta
 _nmk-kubectl-precmd() {
     if [[ -n $KUBECTL_CONTEXT ]]; then
         alias kubectl="kubectl --context=$KUBECTL_CONTEXT"
@@ -275,35 +304,6 @@ _nmk_preexec() {
 
 add-zsh-hook precmd  _nmk_precmd
 add-zsh-hook preexec _nmk_preexec
-# fix tmux and zsh corrupt after cat binary file
-# ref: https://unix.stackexchange.com/a/253369
-reset() {
-    stty sane
-    printf '\033k\033\\\033]2;\007'
-    tput reset
-    if [[ -n $TMUX ]]; then
-        tmux set-window-option automatic-rename on
-        tmux refresh
-    fi
-}
-
-() {
-    local min_tmout=$(( 24*3600 ))
-    # if TMOUT is set on some environment, extend it to 24 hours
-    [[ $TMOUT = <-> ]] && (( $TMOUT <= $min_tmout )) && export TMOUT=$(( $min_tmout ))
-}
-
-# Don't display git branch symbol if terminal does not support 256 colors
-(( ${+commands[tput]} )) && (( $(command tput colors) < 256 )) && horizontal_branch_symbol=
-
-prompt horizontal
-
-# Hide user and host in prompt if NMK_DEVELOPMENT is true by default,
-# this is not apply to zsh in ssh session
-[[ $NMK_DEVELOPMENT == true && -z $SSH_TTY ]] && horizontal[userhost]=0
-
-# Change prompt color to yellow in remote session
-[[ -n $SSH_TTY ]] && horizontal[base_color]=magenta
 # Detect & load version managers
 () {
     typeset -a managers
@@ -364,11 +364,11 @@ nmk() {
     fi
     $python $NMK_DIR/bin/nmk.py "$@"
 }
+typeset -U path
 () {
     local file
     for file ($ZDOTDIR/zshrc.extra.d/*.zsh(N)) {
         source $file
     }
 }
-typeset -U path
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
