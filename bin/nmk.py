@@ -22,7 +22,7 @@ else:
     from distutils.spawn import find_executable
 
 PY26 = sys.version_info[0:2] == (2, 6)
-UNICODE_NAME = 'C.UTF-8'
+UNICODE_NAME = 'en_US.UTF-8' if sys.platform == 'darwin' else 'C.UTF-8'
 
 
 def build_parser():

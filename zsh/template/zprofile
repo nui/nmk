@@ -19,6 +19,9 @@ path=(
     # $GOPATH/bin
 )
 
+# vim8 in mac osx need this
+[[ $OSTYPE == darwin* ]] && export LANG=en_US.UTF-8
+
 # use gpg-agent as ssh-agent
 (( ${+commands[gpg-connect-agent]} )) && {
     case $OSTYPE in
