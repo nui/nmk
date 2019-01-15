@@ -103,12 +103,9 @@ rf() {
 export GIT_PAGER='less -+F -+X -c'
 
 # vi = Vim without plugins
-(( ${+commands[vi]} )) && function vi {
-    local VIMINIT=
-    command vi "$@"
+(( ${+commands[vi]} )) && {
+    alias vi='env -u VIMINIT vi'
 }
-# unalias vi, because it can override previous vi function
-(( ${+aliases[vi]} )) && unalias vi
 
 [[ -n $EDITOR ]] && alias neo=$EDITOR
 
