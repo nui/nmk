@@ -12,3 +12,9 @@ services:
       dockerfile: Dockerfile.alpine
     image: nuimk/nmkpkg:alpine
 
+  bundle:
+    build:
+      context: .
+      dockerfile: Dockerfile.bundle
+    image: nuimk/nmkpkg:bundle
+
