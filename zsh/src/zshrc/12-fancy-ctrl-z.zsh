@@ -8,4 +8,3 @@ _nmk-fancy-ctrl-z() {
     fi
 }
 zle -N _nmk-fancy-ctrl-z
-bindkey '^Z' _nmk-fancy-ctrl-z

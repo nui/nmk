@@ -164,7 +164,6 @@ _nmk-fancy-ctrl-z() {
     fi
 }
 zle -N _nmk-fancy-ctrl-z
-bindkey '^Z' _nmk-fancy-ctrl-z
 () {
     # see /etc/zsh/zshrc
     local -A key
@@ -183,6 +182,7 @@ bindkey '^Z' _nmk-fancy-ctrl-z
         CtrlL      "^L"
         CtrlR      "^R"
         CtrlS      "^S"
+        CtrlZ      "^Z"
     )
 
     bind2maps() {
@@ -231,7 +231,9 @@ bindkey '^Z' _nmk-fancy-ctrl-z
     # Search backwards and forwards with a pattern
     bind2maps emacs -- CtrlR history-incremental-pattern-search-backward
     bind2maps emacs -- CtrlS history-incremental-pattern-search-forward
+
     bindkey '^X^E' edit-command-line
+    bind2maps emacs -- CtrlZ _nmk-fancy-ctrl-z
 
     # Fix Home, End, and Delete Key in build-from-source tmux
     bind2maps emacs -- Home     beginning-of-line
