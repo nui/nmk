@@ -18,7 +18,8 @@ class Tmux @Inject()(
 
   private val Table = "F12"
   private val TmuxSettingEnvs = listEnvs()
-  private val CopyMode = "copy-mode -eu"
+  private val CopyMode = "copy-mode -u"
+  private val CopyModeBottomExit = "copy-mode -eu"
   private val Cwd = "#{pane_current_path}"
   private val NextPane = """select-pane -t :.+ \; display-panes"""
   private val NoEnterCopyMode = "#{?pane_in_mode,1,}#{?alternate_on,1,}"
@@ -64,14 +65,14 @@ class Tmux @Inject()(
       // Fix mouse scrolling in 2.1 and later, https://github.com/tmux/tmux/issues/145
       r +=
         s"""
-           |bind-key -T root WheelUpPane if-shell -F "#{mouse_any_flag}" "send-keys -M" "if-shell -F '$NoEnterCopyMode' 'send-keys -M' '$CopyMode'"
+           |bind-key -T root WheelUpPane if-shell -F "#{mouse_any_flag}" "send-keys -M" "if-shell -F '$NoEnterCopyMode' 'send-keys -M' '$CopyModeBottomExit'"
            |""".toConfig
       // PageUp and PageDown special behaviors
       //  If the condition is match, PageUp should enter copy mode
       //  see https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/
       r +=
         s"""
-           |bind-key -T root PageUp if-shell -F "$NoEnterCopyMode" "send-keys PageUp" "$CopyMode"
+           |bind-key -T root PageUp if-shell -F "$NoEnterCopyMode" "send-keys PageUp" "$CopyModeBottomExit"
            |""".toConfig
       r ++= halfPageUpDown
     }
