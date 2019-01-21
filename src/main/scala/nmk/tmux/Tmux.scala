@@ -99,7 +99,7 @@ class Tmux @Inject()(
 
   private def options = {
     """
-      |set-option -g base-index 1
+      |set-option -g base-index 0
       |set-option -g default-shell "$NMK_TMUX_DEFAULT_SHELL"
       |set-option -g default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
       |set-option -g detach-on-destroy "$NMK_TMUX_DETACH_ON_DESTROY"
