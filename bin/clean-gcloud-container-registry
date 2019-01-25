@@ -8,8 +8,8 @@ PROJECT_ID=$1
 LOCATION=${2-asia.}
 BUCKET=gs://${LOCATION}artifacts.$PROJECT_ID.appspot.com
 
-print before
-gsutil du -hs $BUCKET
+# print before
+# gsutil du -hs $BUCKET
 
 delete_tags() {
     local image
@@ -36,6 +36,6 @@ for image in $IMAGES; do
     delete_tags $image ${TAGS[@]:3}
 done
 
-print after
-gsutil du -hs $BUCKET
+# print after
+# gsutil du -hs $BUCKET
 
