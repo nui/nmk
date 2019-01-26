@@ -313,7 +313,11 @@ add-zsh-hook preexec _nmk_preexec
     [[ -e $HOME/.nvm/nvm.sh ]] && {
         managers+=(nvm)
         function init-nvm {
-            source $HOME/.nvm/nvm.sh
+            local cmd
+            cmd='source $HOME/.nvm/nvm.sh'
+            # avoid calling `nvm use` again
+            (( $SHLVL > 1 )) && cmd+=' --no-use'
+            eval "$cmd"
         }
     }
     # Detect pyenv
@@ -325,9 +329,13 @@ add-zsh-hook preexec _nmk_preexec
         [[ ${pyenv_commands[(r)virtualenv]} == virtualenv ]] \
             && ((has_virtualenv = 1))
         function init-pyenv {
-            eval "$(pyenv init -)"
+            if (( $SHLVL > 1 )); then
+                eval "$(pyenv init - --no-rehash zsh)"
+            else
+                eval "$(pyenv init - zsh)"
+            fi
             if (( has_virtualenv )); then
-                eval "$(pyenv virtualenv-init -)"
+                eval "$(pyenv virtualenv-init - zsh)"
             fi
         }
     }
@@ -335,7 +343,11 @@ add-zsh-hook preexec _nmk_preexec
     (( ${+commands[rbenv]} )) && {
         managers+=(rbenv)
         function init-rbenv {
-            eval "$(rbenv init -)"
+            if (( $SHLVL > 1 )); then
+                eval "$(rbenv init - --no-rehash zsh)"
+            else
+                eval "$(rbenv init - zsh)"
+            fi
         }
     }
     # set default value if nmk_version_managers is unset
