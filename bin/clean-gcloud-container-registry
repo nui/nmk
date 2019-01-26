@@ -4,13 +4,6 @@ if (( $# == 0 )); then
     exit 1
 fi
 
-PROJECT_ID=$1
-LOCATION=${2-asia.}
-BUCKET=gs://${LOCATION}artifacts.$PROJECT_ID.appspot.com
-
-# print before
-# gsutil du -hs $BUCKET
-
 delete_tags() {
     local image
     image=$1
@@ -25,7 +18,7 @@ delete_tags() {
 }
 
 # set -x
-REPO=${LOCATION}gcr.io/$PROJECT_ID
+REPO=$1
 IMAGES=("${(@f)$(gcloud container images list --repository $REPO --limit=unlimited --format='get(name)')}")
 for image in $IMAGES; do
     # delete untagged
