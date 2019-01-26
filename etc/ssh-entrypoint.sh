@@ -9,13 +9,11 @@ if [ ! -x "$_LOGIN_SHELL" ]; then
     fi
 fi
 
-if [ -e /var/run/motd.dynamic ]; then
-    cat /var/run/motd.dynamic
-fi
-
-if [ -e /etc/motd ]; then
-    cat /etc/motd
-fi
+for motd in /var/run/motd.dynamic /etc/motd; do
+    if [ -e $motd ]; then
+        cat $motd
+    fi
+done
 
 # Make sure that byobu doesn't take over our login shell
 exec env BYOBU_DISABLE=1 $_LOGIN_SHELL -l -c 'exec ${NMK_DIR:-~/.nmk}/bin/nmk -l'
