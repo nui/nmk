@@ -1,6 +1,13 @@
 # zsh function implementation of main entrypoint
 nmk() {
-    local python=python
+    local python
+    local prog
+    for prog in python python3 python2; do
+        if (( ${+commands[$prog]} )); then
+            python=$prog
+            break
+        fi
+    done
     if [[ -n $NMK_PYTHON ]]; then
         if [[ ! -x $NMK_PYTHON ]]; then
             >&2 print -- "$NMK_PYTHON not found"
