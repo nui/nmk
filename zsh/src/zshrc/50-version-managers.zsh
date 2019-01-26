@@ -8,7 +8,7 @@
             local cmd
             cmd='source $HOME/.nvm/nvm.sh'
             # avoid calling `nvm use` again
-            (( $SHLVL > 1 )) && cmd+=' --no-use'
+            (( ${+NVM_BIN} )) && cmd+=' --no-use'
             eval "$cmd"
         }
     }
@@ -21,7 +21,7 @@
         [[ ${pyenv_commands[(r)virtualenv]} == virtualenv ]] \
             && ((has_virtualenv = 1))
         function init-pyenv {
-            if (( $SHLVL > 1 )); then
+            if (( ${+PYENV_SHELL} )); then
                 eval "$(pyenv init - --no-rehash zsh)"
             else
                 eval "$(pyenv init - zsh)"
@@ -35,7 +35,7 @@
     (( ${+commands[rbenv]} )) && {
         managers+=(rbenv)
         function init-rbenv {
-            if (( $SHLVL > 1 )); then
+            if (( ${+RBENV_SHELL} )); then
                 eval "$(rbenv init - --no-rehash zsh)"
             else
                 eval "$(rbenv init - zsh)"
