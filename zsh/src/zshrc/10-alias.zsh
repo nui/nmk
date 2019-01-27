@@ -50,40 +50,11 @@ alias help=run-help
     alias ls="\ls $color_auto"
 }
 
-rf() {
-    local -a list
-    local _path
-    # relative path
-    if (( ${+2} )); then
-        _path=$(realpath --relative-to=$2 -- $1)
-    # absolute path
-    else
-        _path=${1:a}
-    fi
-    list=('print -n -- $_path >&1')
-    # if running tmux session, load into tmux buffer
-    if [[ -n $TMUX ]]; then
-        list+='> >(tmux load-buffer -)'
-    fi
-    # if present and usable, also pipe to xclip
-    if (( ${+commands[xclip]} )) && xclip -o &> /dev/null; then
-        list+='> >(xclip)'
-        list+='> >(xclip -selection clipboard)'
-    # pipe to pbcopy if present
-    elif (( ${+commands[pbcopy]} )); then
-        list+='> >(pbcopy)'
-    fi
-    list+='; print' # add newline to output
-    eval ${(j: :)list}
-}
+autoload -Uz rf
 
 # Productive Git aliases and functions
 (( ${+commands[git]} )) && {
-    function git-reset-to-remote-branch {
-        git remote update --prune
-        git reset --hard $(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
-        git submodule update
-    }
+    autoload -Uz git-reset-to-remote-branch
     function grst {
         git tag -d $(git tag)
         git-reset-to-remote-branch

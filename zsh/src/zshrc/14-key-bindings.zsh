@@ -67,7 +67,9 @@
     bind2maps emacs -- CtrlS history-incremental-pattern-search-forward
 
     bindkey '^X^E' edit-command-line
-    bind2maps emacs -- CtrlZ _nmk-fancy-ctrl-z
+    autoload -Uz fancy-ctrl-z
+    zle -N fancy-ctrl-z
+    bind2maps emacs -- CtrlZ fancy-ctrl-z
 
     # Fix Home, End, and Delete Key in build-from-source tmux
     bind2maps emacs -- Home     beginning-of-line

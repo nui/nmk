@@ -92,40 +92,11 @@ alias help=run-help
     alias ls="\ls $color_auto"
 }
 
-rf() {
-    local -a list
-    local _path
-    # relative path
-    if (( ${+2} )); then
-        _path=$(realpath --relative-to=$2 -- $1)
-    # absolute path
-    else
-        _path=${1:a}
-    fi
-    list=('print -n -- $_path >&1')
-    # if running tmux session, load into tmux buffer
-    if [[ -n $TMUX ]]; then
-        list+='> >(tmux load-buffer -)'
-    fi
-    # if present and usable, also pipe to xclip
-    if (( ${+commands[xclip]} )) && xclip -o &> /dev/null; then
-        list+='> >(xclip)'
-        list+='> >(xclip -selection clipboard)'
-    # pipe to pbcopy if present
-    elif (( ${+commands[pbcopy]} )); then
-        list+='> >(pbcopy)'
-    fi
-    list+='; print' # add newline to output
-    eval ${(j: :)list}
-}
+autoload -Uz rf
 
 # Productive Git aliases and functions
 (( ${+commands[git]} )) && {
-    function git-reset-to-remote-branch {
-        git remote update --prune
-        git reset --hard $(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
-        git submodule update
-    }
+    autoload -Uz git-reset-to-remote-branch
     function grst {
         git tag -d $(git tag)
         git-reset-to-remote-branch
@@ -154,16 +125,6 @@ export GIT_PAGER='less -+F -+X -c'
 # apply tmux session environment to running shell
 alias ssenv=' eval $(tmux show-environment -s)'
 
-# see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
-_nmk-fancy-ctrl-z() {
-    if [[ ${#BUFFER} -eq 0 ]]; then
-        bg
-        zle redisplay
-    else
-        zle push-input
-    fi
-}
-zle -N _nmk-fancy-ctrl-z
 () {
     # see /etc/zsh/zshrc
     local -A key
@@ -233,7 +194,9 @@ zle -N _nmk-fancy-ctrl-z
     bind2maps emacs -- CtrlS history-incremental-pattern-search-forward
 
     bindkey '^X^E' edit-command-line
-    bind2maps emacs -- CtrlZ _nmk-fancy-ctrl-z
+    autoload -Uz fancy-ctrl-z
+    zle -N fancy-ctrl-z
+    bind2maps emacs -- CtrlZ fancy-ctrl-z
 
     # Fix Home, End, and Delete Key in build-from-source tmux
     bind2maps emacs -- Home     beginning-of-line
@@ -242,17 +205,7 @@ zle -N _nmk-fancy-ctrl-z
 
     unfunction bind2maps
 }
-# fix tmux and zsh corrupt after cat binary file
-# ref: https://unix.stackexchange.com/a/253369
-reset() {
-    stty sane
-    printf '\033k\033\\\033]2;\007'
-    tput reset
-    if [[ -n $TMUX ]]; then
-        tmux set-window-option automatic-rename on
-        tmux refresh
-    fi
-}
+autoload -Uz reset
 
 () {
     local min_tmout=$(( 24*3600 ))
@@ -365,26 +318,7 @@ add-zsh-hook preexec _nmk_preexec
     done
 }
 [[ -e /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
-# zsh function implementation of main entrypoint
-nmk() {
-    local python
-    local prog
-    for prog in python python3 python2; do
-        if (( ${+commands[$prog]} )); then
-            python=$prog
-            break
-        fi
-    done
-    if [[ -n $NMK_PYTHON ]]; then
-        if [[ ! -x $NMK_PYTHON ]]; then
-            >&2 print -- "$NMK_PYTHON not found"
-            >&2 print -- 'Please update $NMK_PYTHON'
-            return 1
-        fi
-        python=$NMK_PYTHON
-    fi
-    $python $NMK_DIR/bin/nmk.py "$@"
-}
+autoload -Uz nmk
 typeset -U path
 () {
     local file

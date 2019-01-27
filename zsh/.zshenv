@@ -3,6 +3,7 @@ if [[ $NMK_ZSH_GLOBAL_RCS == "0" ]]; then
 fi
 
 fpath=(
+    $ZDOTDIR/functions
     $ZDOTDIR/fpath
     # My completion
     $ZDOTDIR/completion

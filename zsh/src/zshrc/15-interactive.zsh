@@ -1,14 +1,4 @@
-# fix tmux and zsh corrupt after cat binary file
-# ref: https://unix.stackexchange.com/a/253369
-reset() {
-    stty sane
-    printf '\033k\033\\\033]2;\007'
-    tput reset
-    if [[ -n $TMUX ]]; then
-        tmux set-window-option automatic-rename on
-        tmux refresh
-    fi
-}
+autoload -Uz reset
 
 () {
     local min_tmout=$(( 24*3600 ))
