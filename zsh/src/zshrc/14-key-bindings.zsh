@@ -49,14 +49,8 @@
         bind2maps emacs         -- PageUp     _nmk-tmux-copy-mode
 
         # ^L to clear tmux history
-        bindkey -r ${key[CtrlL]}
-        _nmk-tmux-clear-history() {
-            tput reset
-            zle clear-screen
-            tmux clear-history
-        }
-        zle -N _nmk-tmux-clear-history
-        bind2maps emacs         -- CtrlL      _nmk-tmux-clear-history
+        autoload -Uz nmk-tmux-clear-history && zle -N nmk-tmux-clear-history
+        bind2maps emacs         -- CtrlL      nmk-tmux-clear-history
     else
         bind2maps emacs         -- PageUp     redisplay
     fi

@@ -1,0 +1,4 @@
+tput reset
+zle clear-screen
+tmux clear-history
+# vi: ft=zsh
