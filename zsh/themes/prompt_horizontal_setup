@@ -268,8 +268,8 @@ prompt_horizontal_setup() {
     zstyle ':vcs_info:git*' formats "$branch_symbol%b" 'x%R'
     zstyle ':vcs_info:git*' actionformats "$branch_symbol%b|%a" 'x%R'
 
-    # if vcs_info is not load properly, disable git integration
-    vcs_info 2>/dev/null || horizontal[git]=0
+    # disable git integration on alpine
+    [[ -e /etc/alpine-release ]] && horizontal[git]=0
 
     # disable auto updating PS1 by virtualenv
     VIRTUAL_ENV_DISABLE_PROMPT=1
