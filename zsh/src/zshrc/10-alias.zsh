@@ -1,27 +1,6 @@
 # Aliases and interactive shell configuration
-cdd() {
-    # Change pwd to directory in which $1 is located
-    if [[ ! -e $1 ]]; then
-        >&2 print -- '$1 does not exist'
-        return 1
-    fi
-    cd ${1:a:h}
-}
-
-cde() {
-    # Change current working directory to directory in which $1 is located,
-    # and execute the command.
-    if [[ ! -x $1 ]]; then
-        >&2 print -- '$1 is not executable'
-        return 1
-    fi
-    local prog=${1:a}
-    local target_dir=${prog:h}
-    pushd -q $target_dir
-    shift 1
-    $prog "$@"
-    popd -q
-}
+autoload -Uz cdd
+autoload -Uz cde
 
 alias cd=' cd'
 [[ $OSTYPE == linux* ]] && alias cp='cp --reflink=auto'
@@ -55,10 +34,7 @@ autoload -Uz rf
 # Productive Git aliases and functions
 (( ${+commands[git]} )) && {
     autoload -Uz git-reset-to-remote-branch
-    function grst {
-        git tag -d $(git tag)
-        git-reset-to-remote-branch
-    }
+    autoload -Uz grst
     alias gco=' git checkout'
     alias gd=' git diff'
     alias gds=' git diff --staged'

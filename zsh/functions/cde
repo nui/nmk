@@ -1,0 +1,13 @@
+# Change current working directory to directory in which $1 is located,
+# and execute the command.
+if [[ ! -x $1 ]]; then
+    >&2 print -- '$1 is not executable'
+    return 1
+fi
+local prog=${1:a}
+local target_dir=${prog:h}
+pushd -q $target_dir
+shift 1
+$prog "$@"
+popd -q
+# vi: ft=zsh

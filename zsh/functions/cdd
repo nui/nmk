@@ -1,0 +1,7 @@
+# Change pwd to directory in which $1 is located
+if [[ ! -e $1 ]]; then
+    >&2 print -- '$1 does not exist'
+    return 1
+fi
+cd ${1:a:h}
+# vi: ft=zsh

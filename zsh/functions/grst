@@ -1,0 +1,3 @@
+git tag -d $(git tag)
+git-reset-to-remote-branch
+vi: ft=zsh
