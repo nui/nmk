@@ -1,13 +1,6 @@
 FROM alpine
 
-RUN apk --update add \
-    coreutils \
-    curl \
-    git \
-    python3 \
-    tmux \
-    vim \
-    zsh
+RUN apk --update add coreutils git python3
 
 WORKDIR /root
 
