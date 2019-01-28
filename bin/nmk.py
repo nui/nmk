@@ -46,6 +46,9 @@ def build_parser():
                         action='store_true',
                         default=False,
                         help='start a login shell')
+    parser.add_argument('--local',
+                        dest='local',
+                        help='alternative local directory')
     parser.add_argument('-u', '--unicode',
                         dest='unicode',
                         action='store_true',
@@ -112,14 +115,15 @@ def python_info():
     logging.debug('python:sys.version\n' + sys.version)
 
 
-def setup_path(nmk_dir):
+def setup_path(args, nmk_dir):
     """
     Setup PATH environment.
       - prepend NMK_DIR/bin and NMK_DIR/local/bin
     """
+    local_dir = args.local if args.local else path.join(nmk_dir, 'local')
     nmk_paths = [
         path.join(nmk_dir, 'bin'),
-        path.join(nmk_dir, 'local', 'bin')
+        path.join(local_dir, 'bin')
     ]
     paths = nmk_paths + [p for p in environ['PATH'].split(os.pathsep) if p not in nmk_paths]
 
@@ -229,10 +233,11 @@ def setup_prefer_editor():
                 break
 
 
-def add_local_library(nmk_dir):
+def add_local_library(args, nmk_dir):
     LD_LIBRARY_PATH = 'LD_LIBRARY_PATH'
 
-    local_lib_dir = path.join(nmk_dir, 'local', 'lib')
+    local_dir = args.local if args.local else path.join(nmk_dir, 'local')
+    local_lib_dir = path.join(local_dir, 'lib')
     if path.isdir(local_lib_dir):
         library_path = environ.get(LD_LIBRARY_PATH)
         library_paths = library_path.split(os.pathsep) if library_path else []
@@ -330,8 +335,8 @@ def main():
     python_info()
     nmk_dir = path.dirname(path.dirname(path.abspath(__file__)))
     tmux_dir = path.join(nmk_dir, 'tmux')
-    add_local_library(nmk_dir=nmk_dir)
-    setup_path(nmk_dir=nmk_dir)
+    add_local_library(args=args, nmk_dir=nmk_dir)
+    setup_path(args=args, nmk_dir=nmk_dir)
     check_dependencies()
     tmux_version = get_tmux_version()
     setup_terminal(args=args)
