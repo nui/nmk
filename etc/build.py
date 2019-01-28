@@ -30,6 +30,9 @@ def build_parser():
                         action='store_true',
                         default=False,
                         help='create bundle for upload to github release')
+    parser.add_argument('--copy-to',
+                        dest='copy_to',
+                        help='copy build result to this directory')
     return parser
 
 
@@ -173,6 +176,11 @@ def upload(workdir):
         subprocess.run(prefix + (workdir.joinpath(file), f'gs://nmk.nuimk.com/{file}')).check_returncode()
 
 
+def copy_to(workdir, target):
+    for file in ('nmk.tar.gz', 'nmk.tar.gz.sha256'):
+        shutil.copy(workdir.joinpath(file), target)
+
+
 def sign_archive_and_open_explorer(workdir):
     for i in range(0, 3):
         try:
@@ -204,6 +212,8 @@ def main():
     generate_hash(archive)
     if args.upload:
         upload(tmp_dir)
+    if args.copy_to:
+        copy_to(workdir=tmp_dir, target=args.copy_to)
     if args.stable:
         sign_archive_and_open_explorer(tmp_dir)
     print(tmp_dir)
