@@ -174,8 +174,8 @@ alias ssenv=' eval $(tmux show-environment -s)'
 
     unfunction bind2maps
 }
-autoload -Uz reset
 autoload -Uz nmk
+autoload -Uz reset
 
 () {
     local min_tmout=$(( 24*3600 ))

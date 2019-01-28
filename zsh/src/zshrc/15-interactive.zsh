@@ -1,5 +1,5 @@
-autoload -Uz reset
 autoload -Uz nmk
+autoload -Uz reset
 
 () {
     local min_tmout=$(( 24*3600 ))
