@@ -1,0 +1,28 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - build
+    - -f
+    - docker/Dockerfile.builder
+    - -t
+    - builder
+    - .
+  timeout: 60s
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - run
+    - -v
+    - /workspace:/workspace
+    - builder
+    - --branch
+    - $BRANCH_NAME
+    - --copy-to
+    - /workspace
+  timeout: 60s
+artifacts:
+  objects:
+    location: "gs://nmk.nuimk.com"
+    paths:
+      - nmk.tar.gz
+      - nmk.tar.gz.sha256
+
