@@ -246,19 +246,24 @@ add-zsh-hook preexec _nmk_preexec
     # Detect pyenv
     (( ${+commands[pyenv]} )) && {
         managers+=(pyenv)
-        integer has_virtualenv
-        typeset -a pyenv_commands
-        pyenv_commands=$(pyenv commands)
-        [[ ${pyenv_commands[(r)virtualenv]} == virtualenv ]] \
-            && ((has_virtualenv = 1))
         function init-pyenv {
+            integer has_virtualenv
+            typeset -a pyenv_commands
+            pyenv_commands=($(pyenv commands))
+            [[ ${pyenv_commands[(r)virtualenv]} == virtualenv ]] \
+                && ((has_virtualenv = 1))
             if (( ${+PYENV_SHELL} )); then
                 eval "$(pyenv init - --no-rehash zsh)"
             else
                 eval "$(pyenv init - zsh)"
             fi
             if (( has_virtualenv )); then
-                eval "$(pyenv virtualenv-init - zsh)"
+                # see https://github.com/pyenv/pyenv-virtualenv#activate-virtualenv
+                # eval "$(pyenv virtualenv-init - zsh)"
+                function virtualenv-init {
+                    eval "$(pyenv virtualenv-init - zsh)"
+                    unfunction virtualenv-init
+                }
             fi
         }
     }
