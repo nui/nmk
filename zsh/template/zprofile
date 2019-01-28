@@ -1,10 +1,6 @@
 export EDITOR=nvim
 export NMK_DEVELOPMENT=true
 
-# We need below two lines to make vim/nvim outside tmux work
-export NMK_DIR=~/.nmk
-export VIMINIT='source $NMK_DIR/vim/init.vim'
-
 export NMK_PYTHON=/usr/bin/python
 # export GOPATH=~/go
 
