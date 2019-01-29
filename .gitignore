@@ -5,7 +5,6 @@
 .netrwhist
 target/
 /.cache/
-/local/
 /tmux/.tmux_history
 /vim/NERDTreeBookmarks
 /vim/bundle/

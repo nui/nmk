@@ -11,6 +11,7 @@ readonly tmp_dir=$(mktemp -d --suffix=.nmk-merge)
 readonly tmp_file=$(mktemp --suffix=.tar.xz)
 pushd $tmp_dir
 tar -xf $nmk
+mkdir .nmk/local
 cd .nmk/local
 tar -xf $nmkpkg
 cd $tmp_dir
