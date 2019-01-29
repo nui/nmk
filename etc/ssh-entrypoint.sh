@@ -15,11 +15,6 @@ for motd in /var/run/motd.dynamic /etc/motd; do
     fi
 done
 
-command -v tmux >/dev/null 2>&1 \
-    || [ -x "$HOME/.nmk/local/bin/tmux" ] \
-    || echo "not found tmux, is \$NMK_DIR/local setup correctly?" \
-    && exec $_LOGIN_SHELL -l
-
 # Make sure that byobu doesn't take over our login shell
 exec env BYOBU_DISABLE=1 $_LOGIN_SHELL -l -c 'exec ${NMK_DIR:-~/.nmk}/bin/nmk -l'
 # vi: ft=sh
