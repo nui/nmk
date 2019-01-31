@@ -1,5 +1,10 @@
 #!/usr/bin/env zsh
 
+(( ! ${+NMK_DIR} )) && {
+    print -- '$NMK_DIR is unset'
+    exit 1
+}
+
 setup_completion() {
     local completions_dir=$ZDOTDIR/completion
     (( ${+commands[kubectl]} )) && kubectl completion zsh > $completions_dir/_kubectl
@@ -7,8 +12,7 @@ setup_completion() {
 }
 
 precompile_nvm() {
-    local script=$HOME/.nvm/nvm.sh
-    [[ -e $script ]] && zcompile $script
+    [[ -d $NVM_DIR ]] && zcompile $NVM_DIR/nvm.sh
 }
 
 setup_completion
