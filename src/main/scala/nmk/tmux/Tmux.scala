@@ -46,9 +46,8 @@ class Tmux @Inject()(
       r += s"bind-key -n F4 next-window"
       r += s"bind-key -n F5 resize-pane -Z"
       r += s"bind-key -n F6 $chooseTree"
-      r += s"bind-key -n S-F2 $LastSession"
-      r += s"bind-key -n S-F3 $PrevSession"
-      r += s"bind-key -n S-F4 $NextSession"
+      for (n <- 1 to 12) r += s"bind-key -n S-F$n send-keys F$n"
+
     }
     section("F12 key table", r) { r =>
       r += s"bind-key F12 send-keys F12"
