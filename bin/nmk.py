@@ -204,6 +204,7 @@ def setup_zsh(args, nmk_dir):
     bad_global_rcs = any((
         path.exists('/etc/alpine-release'),
         path.exists('/etc/arch-release'),
+        sys.platform == 'darwin',
     ))
 
     no_global_rcs = all((
