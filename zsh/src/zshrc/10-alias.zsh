@@ -8,21 +8,16 @@ alias grep='grep --color=auto'
 alias help=run-help
 () {
     local -a ls_options
-    # Test if --group-directories-first exists
-    ls --group-directories-first --version &> /dev/null && {
-        ls_options+=--group-directories-first
-    }
     local color_auto
     local color_never
-    case $OSTYPE in
-        darwin* | freebsd*)
-            color_auto='-G'
-            ;;
-        linux*)
-            color_auto='--color=auto'
-            color_never='--color=never'
-            ;;
-    esac
+    # Detect ls version using --group-directories-first option
+    if ls --group-directories-first --version &> /dev/null; then
+        ls_options+=--group-directories-first
+        color_auto='--color=auto'
+        color_never='--color=never'
+    else
+        color_auto='-G'
+    fi
     alias la=" \ls $color_auto $ls_options -lha"
     alias lh=" \ls $color_auto $ls_options -lh"
     alias LH=" \ls $color_never $ls_options -lhF"
