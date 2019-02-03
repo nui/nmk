@@ -37,9 +37,8 @@ F4 -> Next window
 F5 -> Zoom pane
 F6 -> Choose tree
 
-Shift-F2 -> Last session
-Shift-F3 -> Previous session
-Shift-F4 -> Next session
+Shift+Fx  -> Function key
+F12 Fx    -> Function key
 
 F12 F12   -> detach
 F12 (1-9) -> Select window number x
