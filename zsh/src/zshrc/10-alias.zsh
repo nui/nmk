@@ -11,7 +11,7 @@ alias help=run-help
     local color_auto
     local color_never
     # Detect ls version using --group-directories-first option
-    if ls --group-directories-first --version &> /dev/null; then
+    if ls --group-directories-first &> /dev/null; then
         ls_options+=--group-directories-first
         color_auto='--color=auto'
         color_never='--color=never'
