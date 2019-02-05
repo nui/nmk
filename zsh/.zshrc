@@ -1,8 +1,6 @@
 () {
     local file
-    for file ($ZDOTDIR/zshrc.pre.d/*.zsh(N)) {
-        source $file
-    }
+    for file ($ZDOTDIR/zshrc.pre.d/*.zsh(N)) source $file
 }
 autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz promptinit && promptinit
@@ -297,8 +295,6 @@ add-zsh-hook preexec _nmk_preexec
 typeset -U path
 () {
     local file
-    for file ($ZDOTDIR/zshrc.extra.d/*.zsh(N)) {
-        source $file
-    }
+    for file ($ZDOTDIR/zshrc.extra.d/*.zsh(N)) source $file
 }
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
