@@ -12,6 +12,12 @@ services:
       dockerfile: Dockerfile.alpine
     image: nuimk/nmkpkg:alpine
 
+  pref:
+    build:
+      context: .
+      dockerfile: Dockerfile.pref
+    image: nuimk/nmkpkg:pref
+
   builder:
     build:
       context: .
