@@ -1,6 +1,0 @@
-#!/bin/sh
-
-PRE_FILE=$ZDOTDIR/zshrc.pre.d/nmk-disable-integration.zsh
-EXTRA_FILE=$ZDOTDIR/zshrc.extra.d/nmk-disable-integration.zsh
-
-rm -f $PRE_FILE $EXTRA_FILE
