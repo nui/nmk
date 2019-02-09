@@ -12,6 +12,7 @@ setopt SHARE_HISTORY
 
 # Release ^S for use in history-incremental-pattern-search-forward
 unsetopt FLOW_CONTROL
+stty -ixon # vim in remote ssh connection need this
 
 HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=2500
