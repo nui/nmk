@@ -1,0 +1,21 @@
+# vi: ft=systemd
+[Unit]
+Description=Google Dynamic DNS Updater
+
+[Service]
+Environment="NAME="
+Environment="INTERFACE="
+Environment="USERNAME="
+Environment="PASSWORD="
+Type=simple
+ExecStart=/usr/local/bin/google-ddns-updater.sh
+StandardInput=null
+StandardOutput=journal
+StandardError=journal
+Restart=on-failure
+StartLimitBurst=10
+StartLimitInterval=10s
+
+[Install]
+WantedBy=multi-user.target
+
