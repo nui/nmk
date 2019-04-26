@@ -24,6 +24,8 @@ object Version {
 
   case object V28 extends Version(2.8)
 
-  def supported = Iterator(V21, V22, V23, V25, V26, V27, V28)
+  case object V29 extends Version(2.9)
+
+  def supported = Iterator(V21, V22, V23, V25, V26, V27, V28, V29)
 
 }
