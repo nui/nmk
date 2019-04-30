@@ -194,6 +194,9 @@ prompt horizontal
 
 # Change prompt color to yellow in remote session
 [[ -n $SSH_TTY ]] && horizontal[base_color]=magenta
+_nmk_precmd_functions=()
+_nmk_preexec_functions=()
+
 _nmk-kubectl-precmd() {
     if [[ -n $KUBECTL_CONTEXT ]]; then
         alias kubectl="kubectl --context=$KUBECTL_CONTEXT"
@@ -206,11 +209,17 @@ _nmk-kubectl-preexec() {
     fi
 }
 
-_nmk_precmd_functions=()
-_nmk_preexec_functions=()
+_nmk-update-tmux-environment() {
+    [[ -n $SSH_AUTH_SOCK && ! -S $SSH_AUTH_SOCK ]] && eval $(tmux show-environment -s)
+}
+
 (( ${+commands[kubectl]} )) && {
     _nmk_precmd_functions+=_nmk-kubectl-precmd
     _nmk_preexec_functions+=_nmk-kubectl-preexec
+}
+
+[[ -n $TMUX && -S $SSH_AUTH_SOCK ]] && {
+    _nmk_preexec_functions+=_nmk-update-tmux-environment
 }
 
 _nmk_precmd() {
