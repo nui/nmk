@@ -22,7 +22,7 @@ _nmk-update-tmux-environment() {
     _nmk_preexec_functions+=_nmk-kubectl-preexec
 }
 
-[[ -n $TMUX && -S $SSH_AUTH_SOCK ]] && {
+[[ -n $TMUX && -n $SSH_CONNECTION && -S $SSH_AUTH_SOCK ]] && {
     _nmk_preexec_functions+=_nmk-update-tmux-environment
 }
 
