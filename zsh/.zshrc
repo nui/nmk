@@ -57,18 +57,34 @@ alias help=run-help
     local -a ls_options
     local color_auto
     local color_never
-    # Detect ls version using --group-directories-first option
-    if ls --group-directories-first &> /dev/null; then
+
+    local prog=ls
+    local version=gnu
+
+    case $OSTYPE in
+        linux*) ;;
+        darwin*)
+            if (( ${+commands[gls]} )); then
+                prog=gls
+            else
+                version=bsd
+            fi
+            ;;
+        freebsd*) version=bsd ;;
+    esac
+
+    if [[ $version == gnu ]]; then
         ls_options+=--group-directories-first
         color_auto='--color=auto'
         color_never='--color=never'
     else
         color_auto='-G'
     fi
-    alias la=" \ls $color_auto $ls_options -lha"
-    alias lh=" \ls $color_auto $ls_options -lh"
-    alias LH=" \ls $color_never $ls_options -lhF"
-    alias ls="\ls $color_auto"
+
+    alias la=" command $prog $color_auto $ls_options -lha"
+    alias lh=" command $prog $color_auto $ls_options -lh"
+    alias LH=" command $prog $color_never $ls_options -lhF"
+    alias ls="command $prog $color_auto"
 }
 
 autoload -Uz rf
