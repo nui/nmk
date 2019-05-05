@@ -1,5 +1,6 @@
 autoload -Uz nmk
 autoload -Uz reset
+autoload -Uz update-nmkpkg
 
 () {
     local min_tmout=$(( 24*3600 ))
