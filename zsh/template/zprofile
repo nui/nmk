@@ -2,7 +2,9 @@ export EDITOR=nvim
 export NMK_DEVELOPMENT=true
 
 export NMK_PYTHON=/usr/bin/python
-# export GOPATH=~/go
+export GOPATH=~/go
+export GOBIN=$GOPATH/bin
+export LIBVIRT_DEFAULT_URI="qemu:///system"
 
 path=(
     $NMK_DIR/bin
@@ -11,8 +13,8 @@ path=(
     ~/.pyenv/bin
     ~/.rbenv/bin
     ~/.opt/google-cloud-sdk/bin
-    # /usr/local/go/bin
-    # $GOPATH/bin
+    /usr/local/go/bin
+    $GOBIN
 )
 
 # vim8 in mac osx need this
