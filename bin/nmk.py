@@ -304,6 +304,8 @@ def exec_tmux(args, tmux_conf, start_time):
 
 def start_login_shell(args, tmux_conf, start_time):
     exec_args = ('tmux',)
+    socket = args.socket
+    exec_args += ('-L', socket)
     if args.force256color:
         exec_args += ('-2',)
     exec_args += ('-f', tmux_conf, '-c', 'exec zsh --login')
