@@ -248,8 +248,10 @@ prompt_horizontal_setup() {
     # horizontal_hostname=
     # horizontal_status_separator="%F{${horizontal[base_color]}} | %f"
 
-    # set title doesn't work on physical terminal
-    [[ $TTY == /dev/tty* ]] && horizontal[set_terminal_title]=0
+    # physical terminal doesn't support changing title
+    case $TERM in
+        linux*) horizontal[set_terminal_title]=0 ;;
+    esac
 
     # prevent percentage showing up
     # if output doesn't end with a newline
