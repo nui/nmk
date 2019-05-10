@@ -120,15 +120,17 @@ _horizontal_userhost() {
 prompt_horizontal_preexec() {
     typeset -g _horizontal_cmd_timestamp=$EPOCHSECONDS
     # shows the executed command in the title when a process is active
-    print -n -P -- "\e]0;"
-    print -n -r -- "$2"
-    print -n -P -- "\a"
+    ((${horizontal[set_terminal_title]})) && {
+        print -n -P -- "\e]0;"
+        print -n -r -- "$2"
+        print -n -P -- "\a"
+    }
 }
 
 prompt_horizontal_precmd() {
     _horizontal_reset_prompt
     # shows the hostname
-    print -Pn -- '\e]0;%M\a'
+    ((${horizontal[set_terminal_title]})) && print -Pn -- '\e]0;%M\a'
 
     local preprompt
     local rpreprompt
@@ -236,6 +238,7 @@ prompt_horizontal_setup() {
     : ${horizontal[timestamp]:=1}
     : ${horizontal[userhost]:=1}
     : ${horizontal[virtualenv]:=1}
+    : ${horizontal[set_terminal_title]:=1}
 
     : ${horizontal[show_exec_time_threshold]:=5}
     : ${horizontal[show_idle_time_threshold]:=300}
@@ -244,6 +247,9 @@ prompt_horizontal_setup() {
     # horizontal_branch_symbol=''
     # horizontal_hostname=
     # horizontal_status_separator="%F{${horizontal[base_color]}} | %f"
+
+    # set title doesn't work on physical terminal
+    [[ $TTY == /dev/tty* ]] && horizontal[set_terminal_title]=0
 
     # prevent percentage showing up
     # if output doesn't end with a newline
