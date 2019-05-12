@@ -5,17 +5,17 @@
 # functions
 #    - avoid function keyword
 #    - snake case
-#    - prefix function name with _horizontal_
+#    - prefix function name with prompt_horizontal_
 #    - store function result in FUNCNAME_result variable
 
 
 # Set a plaintext of $1 without formatting
-_horizontal_plaintext() {
+prompt_horizontal_plaintext() {
     readonly zero_length='%([BSUbfksu]|([FB]|){*})'
-    typeset -g _horizontal_plaintext_result=${(S%%)1//$~zero_length/}
+    typeset -g prompt_horizontal_plaintext_result=${(S%%)1//$~zero_length/}
 }
 
-_horizontal_reset_prompt() {
+prompt_horizontal_reset_prompt() {
     # face color
     readonly happy='green'
     readonly sad='red'
@@ -26,14 +26,14 @@ _horizontal_reset_prompt() {
         PROMPT="%F{${horizontal[base_color]}} '--%f%B>%(1j. %F{red}%j!%f.) %(?.%F{$happy}:%).%F{$sad}:()%b%f "
         # restore prompt highlighting if needed
         if ((${#ZSH_HIGHLIGHT_HIGHLIGHTERS} == 0)); then
-            ZSH_HIGHLIGHT_HIGHLIGHTERS=($_horizontal_orig_zsh_highlight_highlighters)
+            ZSH_HIGHLIGHT_HIGHLIGHTERS=($prompt_horizontal_orig_zsh_highlight_highlighters)
         fi
-        unset _horizontal_orig_zsh_highlight_highlighters
+        unset prompt_horizontal_orig_zsh_highlight_highlighters
     else
         PROMPT=" '-->%(1j. %j!.) %(?.:%).:() "
         # backup prompt highlighting
-        if ((${+_horizontal_orig_zsh_highlight_highlighters} == 0)); then
-            _horizontal_orig_zsh_highlight_highlighters=($ZSH_HIGHLIGHT_HIGHLIGHTERS)
+        if ((${+prompt_horizontal_orig_zsh_highlight_highlighters} == 0)); then
+            prompt_horizontal_orig_zsh_highlight_highlighters=($ZSH_HIGHLIGHT_HIGHLIGHTERS)
         fi
         # and disable it
         ZSH_HIGHLIGHT_HIGHLIGHTERS=()
@@ -44,32 +44,32 @@ _horizontal_reset_prompt() {
 # its length is equal to
 #   - $COLUMNS if length of $1 <= $COLUMNS
 #   - $COLUMNS * 2 if length of $1 > $COLUMNS
-_horizontal_gen_padding() {
-    _horizontal_plaintext "${(j::)@}"
-    integer prompt_length=$#_horizontal_plaintext_result
+prompt_horizontal_gen_padding() {
+    prompt_horizontal_plaintext "${(j::)@}"
+    integer prompt_length=$#prompt_horizontal_plaintext_result
     integer n=$((COLUMNS - prompt_length - 1))
     ((n < 0)) && n=$((COLUMNS * 2 - prompt_length))
     local IFS=${horizontal[fill_character]}
     if ((n > 0)); then
-        typeset -g _horizontal_gen_padding_result=${(l:$n:::)}
+        typeset -g prompt_horizontal_gen_padding_result=${(l:$n:::)}
     else
-        typeset -g _horizontal_gen_padding_result=
+        typeset -g prompt_horizontal_gen_padding_result=
     fi
 }
 
-_horizontal_join_status() {
+prompt_horizontal_join_status() {
     local separator=${horizontal_status_separator:-"%F{${horizontal[base_color]}} | %f"}
     local string
     local item
     for item in $@; do string+=$separator$item; done
     string=${string:${#separator}} # remove leading separator
-    typeset -g _horizontal_join_status_result=$string
+    typeset -g prompt_horizontal_join_status_result=$string
 }
 
 # Turn number of seconds into human readable format
 #   78555 => 21h 49m 15s
 #    2781 => 46m 21s
-_horizontal_human_time() {
+prompt_horizontal_human_time() {
     local result=""
     local total_seconds=$1
     local days=$((total_seconds / 60 / 60 / 24))
@@ -80,22 +80,22 @@ _horizontal_human_time() {
     ((hours > 0)) && result+="${hours}h "
     ((minutes > 0)) && result+="${minutes}m "
     result+="${seconds}s"
-    typeset -g _horizontal_human_time_result=$result
+    typeset -g prompt_horizontal_human_time_result=$result
 }
 
-_horizontal_exec_seconds() {
+prompt_horizontal_exec_seconds() {
     integer stop=$EPOCHSECONDS
-    integer start=${_horizontal_cmd_timestamp:-$stop}
-    typeset -g _horizontal_exec_seconds_result=$((stop-start))
+    integer start=${prompt_horizontal_cmd_timestamp:-$stop}
+    typeset -g prompt_horizontal_exec_seconds_result=$((stop-start))
 }
 
-_horizontal_idle_seconds() {
+prompt_horizontal_idle_seconds() {
     integer stop=$EPOCHSECONDS
-    integer start=${_horizontal_idle_timestamp:-$stop}
-    typeset -g _horizontal_idle_seconds_result=$((stop-start))
+    integer start=${prompt_horizontal_idle_timestamp:-$stop}
+    typeset -g prompt_horizontal_idle_seconds_result=$((stop-start))
 }
 
-_horizontal_git_dirty() {
+prompt_horizontal_git_dirty() {
     if ((${horizontal[git_untracked_dirty]})); then
         test -z "$(command git status --porcelain --ignore-submodules -unormal)"
     else
@@ -103,40 +103,56 @@ _horizontal_git_dirty() {
     fi
 
     if (($? == 0)); then
-        typeset -g _horizontal_git_dirty_result=
+        typeset -g prompt_horizontal_git_dirty_result=
     else
-        typeset -g _horizontal_git_dirty_result='*'
+        typeset -g prompt_horizontal_git_dirty_result='*'
     fi
 }
 
-_horizontal_userhost() {
+prompt_horizontal_userhost() {
     if [[ ${horizontal[userhost]} == 1 ]]; then
-        typeset -g _horizontal_userhost_result="%b%f%n|${horizontal_hostname:-%m}%f: "
+        typeset -g prompt_horizontal_userhost_result="%b%f%n|${horizontal_hostname:-%m}%f: "
     else
-        typeset -g _horizontal_userhost_result=
+        typeset -g prompt_horizontal_userhost_result=
     fi
+}
+
+
+prompt_horizontal_set_title() {
+    setopt localoptions noshwordsplit
+
+    # emacs terminal does not support settings the title
+    (( ${+EMACS} )) && return
+
+    (( ! ${horizontal[set_title]})) && return
+
+    local -a opts
+    case $1 in
+        expand-prompt) opts=(-P);;
+        ignore-escape) opts=(-r);;
+    esac
+
+    # Set title atomically in one print statement so that it works
+    # when XTRACE is enabled.
+    print -n $opts $'\e]0;'${2}$'\a'
 }
 
 prompt_horizontal_preexec() {
-    typeset -g _horizontal_cmd_timestamp=$EPOCHSECONDS
+    typeset -g prompt_horizontal_cmd_timestamp=$EPOCHSECONDS
     # shows the executed command in the title when a process is active
-    ((${horizontal[set_terminal_title]})) && {
-        print -n -P -- "\e]0;"
-        print -n -r -- "$2"
-        print -n -P -- "\a"
-    }
+    prompt_horizontal_set_title ignore-escape $2
 }
 
 prompt_horizontal_precmd() {
-    _horizontal_reset_prompt
+    prompt_horizontal_reset_prompt
     # shows the hostname
-    ((${horizontal[set_terminal_title]})) && print -Pn -- '\e]0;%M\a'
+    prompt_horizontal_set_title expand-prompt ${(%):-%M}
 
     local preprompt
     local rpreprompt
 
-    _horizontal_userhost
-    preprompt="%b%F{${horizontal[base_color]}}.-%B(${_horizontal_userhost_result}%B%F{yellow}%~%F{${horizontal[base_color]}})%b%F{${horizontal[base_color]}}-%f"
+    prompt_horizontal_userhost
+    preprompt="%b%F{${horizontal[base_color]}}.-%B(${prompt_horizontal_userhost_result}%B%F{yellow}%~%F{${horizontal[base_color]}})%b%F{${horizontal[base_color]}}-%f"
 
     ((${horizontal[status]})) && {
 
@@ -151,8 +167,8 @@ prompt_horizontal_precmd() {
 
         # git branch and dirty status
         ((${horizontal[git]})) && [[ -n $vcs_info_msg_0_ ]] && {
-            ((${horizontal[git_dirty]})) && _horizontal_git_dirty
-            git_info="${vcs_info_msg_0_}${_horizontal_git_dirty_result}"
+            ((${horizontal[git_dirty]})) && prompt_horizontal_git_dirty
+            git_info="${vcs_info_msg_0_}${prompt_horizontal_git_dirty_result}"
             [[ -n $git_info ]] && prompt_status+=$git_info
         }
 
@@ -164,24 +180,24 @@ prompt_horizontal_precmd() {
         # last command execute time
         ((${horizontal[exec_time]})) && {
             displayed_exec_time=0
-            _horizontal_exec_seconds
-            (($_horizontal_exec_seconds_result >= ${horizontal[show_exec_time_threshold]})) && {
+            prompt_horizontal_exec_seconds
+            (($prompt_horizontal_exec_seconds_result >= ${horizontal[show_exec_time_threshold]})) && {
                 displayed_exec_time=1
-                _horizontal_human_time $_horizontal_exec_seconds_result
-                prompt_status+="%F{yellow}$_horizontal_human_time_result%f"
+                prompt_horizontal_human_time $prompt_horizontal_exec_seconds_result
+                prompt_status+="%F{yellow}$prompt_horizontal_human_time_result%f"
             }
             ((! $displayed_exec_time)) && {
-                _horizontal_idle_seconds
-                (($_horizontal_idle_seconds_result >= ${horizontal[show_idle_time_threshold]})) && {
-                    _horizontal_human_time $_horizontal_idle_seconds_result
-                    prompt_status+="%F{blue}$_horizontal_human_time_result%f"
+                prompt_horizontal_idle_seconds
+                (($prompt_horizontal_idle_seconds_result >= ${horizontal[show_idle_time_threshold]})) && {
+                    prompt_horizontal_human_time $prompt_horizontal_idle_seconds_result
+                    prompt_status+="%F{blue}$prompt_horizontal_human_time_result%f"
                 }
             }
         }
 
         ((${horizontal[timestamp]})) && {
-            _horizontal_exec_seconds
-            (($_horizontal_exec_seconds_result >= ${horizontal[show_timestamp_threshold]})) && {
+            prompt_horizontal_exec_seconds
+            (($prompt_horizontal_exec_seconds_result >= ${horizontal[show_timestamp_threshold]})) && {
                 strftime -s timestamp '%D %R' $EPOCHSECONDS
                 rprompt_status+=$timestamp
             }
@@ -189,38 +205,38 @@ prompt_horizontal_precmd() {
 
         # put status to preprompt line
         ((${#prompt_status} > 0)) && {
-            _horizontal_join_status $prompt_status
-            preprompt+=" $_horizontal_join_status_result "
+            prompt_horizontal_join_status $prompt_status
+            preprompt+=" $prompt_horizontal_join_status_result "
         }
 
         # put rstatus to right of preprompt line
         ((${#rprompt_status} > 0)) && {
-            _horizontal_join_status $rprompt_status
-            rpreprompt+=" $_horizontal_join_status_result %F{${horizontal[base_color]}}-%f"
+            prompt_horizontal_join_status $rprompt_status
+            rpreprompt+=" $prompt_horizontal_join_status_result %F{${horizontal[base_color]}}-%f"
         }
     }
 
     # make a horizontal line
     ((${horizontal[hr]})) && {
-        _horizontal_gen_padding $preprompt $rpreprompt
-        preprompt+="%F{${horizontal[base_color]}}${_horizontal_gen_padding_result}%f$rpreprompt"
+        prompt_horizontal_gen_padding $preprompt $rpreprompt
+        preprompt+="%F{${horizontal[base_color]}}${prompt_horizontal_gen_padding_result}%f$rpreprompt"
     }
 
     # blank line before preprompt line
     ((${horizontal[cozy]})) && preprompt="\n$preprompt"
 
     ((${horizontal[color]} == 0)) && {
-        _horizontal_plaintext $preprompt
-        preprompt=$_horizontal_plaintext_result
+        prompt_horizontal_plaintext $preprompt
+        preprompt=$prompt_horizontal_plaintext_result
     }
 
     # print preprompt line
     print -P -- $preprompt
 
     # reset value since `preexec` isn't always triggered
-    unset _horizontal_cmd_timestamp
+    unset prompt_horizontal_cmd_timestamp
 
-    typeset -g _horizontal_idle_timestamp=$EPOCHSECONDS
+    typeset -g prompt_horizontal_idle_timestamp=$EPOCHSECONDS
 }
 
 prompt_horizontal_setup() {
@@ -238,7 +254,7 @@ prompt_horizontal_setup() {
     : ${horizontal[timestamp]:=1}
     : ${horizontal[userhost]:=1}
     : ${horizontal[virtualenv]:=1}
-    : ${horizontal[set_terminal_title]:=1}
+    : ${horizontal[set_title]:=1}
 
     : ${horizontal[show_exec_time_threshold]:=5}
     : ${horizontal[show_idle_time_threshold]:=300}
@@ -248,9 +264,9 @@ prompt_horizontal_setup() {
     # horizontal_hostname=
     # horizontal_status_separator="%F{${horizontal[base_color]}} | %f"
 
-    # physical terminal doesn't support changing title
-    case $TERM in
-        linux*) horizontal[set_terminal_title]=0 ;;
+    # Don't set title over serial console.
+    case $TTY in
+        /dev/tty[S0-9]*) horizontal[set_title]=0;;
     esac
 
     # prevent percentage showing up
