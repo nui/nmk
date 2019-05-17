@@ -171,7 +171,7 @@ def generate_hash(file):
 def upload(workdir):
     prefix = ('gsutil',
               '-h', 'Cache-Control:private, max-age=0, no-transform',
-              'cp', '-a', 'public-read')
+              'cp')
     for file in ('nmk.tar.gz', 'nmk.tar.gz.sha256'):
         subprocess.run(prefix + (workdir.joinpath(file), f'gs://nmk.nuimk.com/{file}')).check_returncode()
 
