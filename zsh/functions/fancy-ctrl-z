@@ -1,6 +1,13 @@
 # see http://superuser.com/questions/378018/how-can-i-do-ctrl-z-and-bg-in-one-keypress-to-make-process-continue-in-backgroun
+local -a no_continue_in_background
+no_continue_in_background=(vi vim nvim view)
+local match
 if [[ ${#BUFFER} -eq 0 ]]; then
-    bg
+    if [[ $(jobs -s %% 2>/dev/null) =~ '.*suspended[[:space:]]+([[:graph:]]+).*' ]]; then
+        if ! [[ ${no_continue_in_background[(r)${match[1]}]} ]]; then
+            bg
+        fi
+    fi
     zle redisplay
 else
     zle push-input
