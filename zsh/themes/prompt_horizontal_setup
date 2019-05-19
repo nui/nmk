@@ -84,10 +84,10 @@ prompt_horizontal_human_time() {
 	typeset -g prompt_horizontal_human_time_result=$result
 }
 
-prompt_horizontal_exec_seconds() {
+prompt_horizontal_check_cmd_exec_time() {
 	integer stop=$EPOCHSECONDS
 	integer start=${prompt_horizontal_cmd_timestamp:-$stop}
-	typeset -g prompt_horizontal_exec_seconds_result=$((stop-start))
+	typeset -g prompt_horizontal_check_cmd_exec_time_result=$((stop-start))
 }
 
 prompt_horizontal_idle_seconds() {
@@ -144,11 +144,7 @@ prompt_horizontal_preexec() {
 	prompt_horizontal_set_title ignore-escape $2
 }
 
-prompt_horizontal_precmd() {
-	prompt_horizontal_reset_prompt
-	# shows the hostname
-	prompt_horizontal_set_title expand-prompt ${(%):-%M}
-
+prompt_horizontal_preprompt_render() {
 	local preprompt
 	local rpreprompt
 
@@ -181,10 +177,9 @@ prompt_horizontal_precmd() {
 		# last command execute time
 		((${horizontal[exec_time]})) && {
 			displayed_exec_time=0
-			prompt_horizontal_exec_seconds
-			(($prompt_horizontal_exec_seconds_result >= ${horizontal[show_exec_time_threshold]})) && {
+			(($prompt_horizontal_check_cmd_exec_time_result >= ${horizontal[show_exec_time_threshold]})) && {
 				displayed_exec_time=1
-				prompt_horizontal_human_time $prompt_horizontal_exec_seconds_result
+				prompt_horizontal_human_time $prompt_horizontal_check_cmd_exec_time_result
 				prompt_status+="%F{yellow}$prompt_horizontal_human_time_result%f"
 			}
 			((! $displayed_exec_time)) && {
@@ -196,9 +191,9 @@ prompt_horizontal_precmd() {
 			}
 		}
 
+		# cmd start time in rprompt
 		((${horizontal[timestamp]})) && {
-			prompt_horizontal_exec_seconds
-			(($prompt_horizontal_exec_seconds_result >= ${horizontal[show_timestamp_threshold]})) && {
+			(($prompt_horizontal_check_cmd_exec_time_result >= ${horizontal[show_timestamp_threshold]})) && {
 				strftime -s timestamp '%D %R' $EPOCHSECONDS
 				rprompt_status+=$timestamp
 			}
@@ -223,20 +218,54 @@ prompt_horizontal_precmd() {
 		preprompt+="%F{${horizontal[base_color]}}${prompt_horizontal_gen_padding_result}%f$rpreprompt"
 	}
 
-	# blank line before preprompt line
-	((${horizontal[cozy]})) && preprompt="\n$preprompt"
-
 	((${horizontal[color]} == 0)) && {
 		prompt_horizontal_plaintext $preprompt
 		preprompt=$prompt_horizontal_plaintext_result
 	}
 
-	# print preprompt line
-	print -P -- $preprompt
+	local cleaned_ps1=$PROMPT
+	local -H MATCH MBEGIN MEND
+	if [[ $PROMPT = *$prompt_newline* ]]; then
+		# Remove everything from the prompt until the newline. This
+		# removes the preprompt and only the original PROMPT remains.
+		cleaned_ps1=${PROMPT##*${prompt_newline}}
+	fi
+	unset MATCH MBEGIN MEND
 
-	# reset value since `preexec` isn't always triggered
+	# Construct the new prompt with a clean preprompt.
+	local -ah ps1
+	ps1=(
+		$preprompt
+		$prompt_newline           # Separate preprompt and prompt.
+		$cleaned_ps1
+	)
+
+	PROMPT="${(j..)ps1}"
+
+	# Expand the prompt for future comparision.
+	local expanded_prompt
+	expanded_prompt="${(S%%)PROMPT}"
+
+	# blank line before preprompt line
+	((${horizontal[cozy]})) && print
+
+	if [[ $prompt_horizontal_last_prompt != $expanded_prompt ]]; then
+		# Redraw the prompt.
+		zle && zle .reset-prompt
+	fi
+
+	typeset -g prompt_horizontal_last_prompt=$expanded_prompt
+}
+
+prompt_horizontal_precmd() {
+	prompt_horizontal_reset_prompt
+	# shows the hostname
+	prompt_horizontal_set_title expand-prompt ${(%):-%M}
+	# check exec time and store it in a variable
+	prompt_horizontal_check_cmd_exec_time
 	unset prompt_horizontal_cmd_timestamp
 
+	prompt_horizontal_preprompt_render
 	typeset -g prompt_horizontal_idle_timestamp=$EPOCHSECONDS
 }
 
