@@ -8,8 +8,8 @@ services:
     entrypoint: /bin/bash
   alpine:
     build:
-      context: .
-      dockerfile: Dockerfile.alpine
+      context: ..
+      dockerfile: docker/Dockerfile.alpine
     image: nuimk/nmkpkg:alpine
 
   pref:
@@ -18,9 +18,20 @@ services:
       dockerfile: Dockerfile.pref
     image: nuimk/nmkpkg:pref
 
-  builder:
+  bundle:
     build:
       context: .
-      dockerfile: Dockerfile.builder
-    image: nuimk/nmkpkg:builder
+      dockerfile: Dockerfile.bundle
+    image: nuimk/nmkpkg:bundle
 
+  nmkgo:
+    build:
+      context: ..
+      dockerfile: docker/nmkgo/Dockerfile
+    image: nuimk/nmkpkg:nmkgo
+
+  nmkgo-alpine:
+    build:
+      context: ..
+      dockerfile: docker/nmkgo/Dockerfile.alpine
+    image: nuimk/nmkpkg:nmkgo-alpine

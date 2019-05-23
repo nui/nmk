@@ -190,7 +190,6 @@ alias ssenv=' eval $(tmux show-environment -s)'
 
     unfunction bind2maps
 }
-autoload -Uz nmk
 autoload -Uz reset
 autoload -Uz update-nmkpkg
 

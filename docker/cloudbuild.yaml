@@ -3,7 +3,7 @@ steps:
   args:
     - build
     - -f
-    - docker/Dockerfile.builder
+    - docker/Dockerfile.bundle
     - -t
     - builder
     - .

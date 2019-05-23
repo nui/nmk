@@ -1,5 +1,5 @@
 """
-Run on Python 2.6.6 and later
+Run on Python 2.7 and later
 """
 
 import json
@@ -7,11 +7,9 @@ import logging
 import os
 import subprocess
 import sys
-import tempfile
 import time
 from os import environ
 from os import path
-
 
 import argparse
 import six
@@ -21,7 +19,6 @@ if sys.version_info[0:2] >= (3, 3):
 else:
     from distutils.spawn import find_executable
 
-PY26 = sys.version_info[0:2] == (2, 6)
 UNICODE_NAME = 'en_US.UTF-8' if sys.platform == 'darwin' else 'C.UTF-8'
 
 
@@ -81,21 +78,8 @@ def build_parser():
     return parser
 
 
-if PY26:
-    def check_output(args):
-        """
-        Replacement of subprocess.check_output in python2.6
-        """
-        stdout = tempfile.TemporaryFile()
-        subprocess.call(args, stdout=stdout)
-        stdout.seek(0)
-        return stdout.read()
-else:
-    check_output = subprocess.check_output
-
-
 def run_get_process_id():
-    output = check_output(('sh', '-c', 'echo $$'))
+    output = subprocess.check_output(('sh', '-c', 'echo $$'))
     if isinstance(output, six.binary_type):
         output = output.decode()
     return int(output)
@@ -245,7 +229,7 @@ def add_local_library(nmk_dir):
 
 
 def get_tmux_version():
-    output = check_output(('tmux', '-V'))
+    output = subprocess.check_output(('tmux', '-V'))
     if isinstance(output, six.binary_type):
         output = output.decode()
     return output.split()[1]

@@ -1,6 +1,15 @@
 #!/bin/sh
 
 nmk_dir=$(CDPATH= cd -- "$(dirname -- "$(dirname -- "$0")")" && pwd)
+
+if [ -n "$NMK_ENTRYPOINT" ]; then
+    exec "$NMK_ENTRYPOINT" "$@"
+fi
+
+if command -v nmk.go >/dev/null 2>&1; then
+    exec nmk.go "$@"
+fi
+
 script=$nmk_dir/bin/nmk.py
 
 for python in "$NMK_PYTHON" python3 python; do

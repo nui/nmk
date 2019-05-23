@@ -1,0 +1,50 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - build
+    - -f
+    - docker/nmkgo/Dockerfile
+    - -t
+    - builder
+    - .
+  timeout: 180s
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - build
+    - -f
+    - docker/nmkgo/Dockerfile.alpine
+    - -t
+    - builder-alpine
+    - .
+  timeout: 180s
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - run
+    - -v
+    - /workspace:/workspace
+    - builder
+    - sh
+    - -c
+    - cp /go/build/* /workspace
+  timeout: 60s
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - run
+    - -v
+    - /workspace:/workspace
+    - builder-alpine
+    - sh
+    - -c
+    - cp /go/build/* /workspace
+  timeout: 60s
+artifacts:
+  objects:
+    location: "gs://nmk.nuimk.com/nmkgo"
+    paths:
+      - nmk-alpine-amd64
+      - nmk-darwin-amd64
+      - nmk-freebsd-amd64
+      - nmk-linux-amd64
+      - nmk-linux-arm
+      - nmk-linux-arm64
+

@@ -1,4 +1,3 @@
-autoload -Uz nmk
 autoload -Uz reset
 autoload -Uz update-nmkpkg
 

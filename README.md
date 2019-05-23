@@ -25,7 +25,20 @@ sudo apt install vim-nox
     curl -sSL https://storage.googleapis.com/nmk.nuimk.com/nmk.tar.gz | tar -C ~ -xzf -
     or
     curl -sSL nmk.nuimk.com/nmk.tar.gz | tar -C ~ -xzf -
+
+# optional, install nmk.go
+    curl -o ~/.nmk/bin/nmk.go -sSL https://storage.googleapis.com/nmk.nuimk.com/nmkgo/nmk-linux-amd64
+    chmod +x ~/.nmk/bin/nmk.go
 ```
+
+## Binary entrypoint
+
+If python is not install on target system, use following binary to start tmux
+
+- [Linux](https://storage.googleapis.com/nmk.nuimk.com/nmkgo/nmk-linux-amd64)
+- [Mac](https://storage.googleapis.com/nmk.nuimk.com/nmkgo/nmk-darwin-amd64)
+- [Alpine](https://storage.googleapis.com/nmk.nuimk.com/nmkgo/nmk-alpine-amd64)
+- [FreeBSD](https://storage.googleapis.com/nmk.nuimk.com/nmkgo/nmk-freebsd-amd64)
 
 
 ## Tmux navigation
