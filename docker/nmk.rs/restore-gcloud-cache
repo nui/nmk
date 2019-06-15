@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+tar -C $CARGO_HOME -xf cargo-registry.tar.gz
+tar -C nmk.rs -xf target.tar.gz

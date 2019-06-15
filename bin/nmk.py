@@ -69,6 +69,11 @@ def build_parser():
                         action='store_true',
                         default=False,
                         help='allow tmux nested sessions')
+    parser.add_argument('--usage',
+                        dest='usage',
+                        action='store_true',
+                        default=False,
+                        help='print usage time')
     parser.add_argument('-d', '--debug',
                         dest='debug',
                         action='store_true',
@@ -282,7 +287,7 @@ def exec_tmux(args, tmux_conf, start_time):
     else:
         # start tmux server
         exec_args += ('-f', tmux_conf) + tuple(tmux_args)
-    print_time_usage(start_time)
+    print_time_usage(args, start_time)
     execvp('tmux', exec_args)
 
 
@@ -293,12 +298,15 @@ def start_login_shell(args, tmux_conf, start_time):
     if args.force256color:
         exec_args += ('-2',)
     exec_args += ('-f', tmux_conf, '-c', 'exec zsh --login')
-    print_time_usage(start_time)
+    print_time_usage(args, start_time)
     execvp('tmux', exec_args)
 
 
-def print_time_usage(start_time):
-    logging.debug("nmk.py pre exec time = {0} seconds".format(time.time() - start_time))
+def print_time_usage(args, start_time):
+    if args.usage:
+        six.print_("{0}".format((time.time() - start_time) * 1000))
+    else:
+        logging.debug("nmk.py pre exec time = {0} seconds".format(time.time() - start_time))
 
 
 def clear_temp_env(nmk_dir):

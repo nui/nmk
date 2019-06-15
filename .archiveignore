@@ -13,8 +13,9 @@ zsh/plugins/zsh-syntax-highlighting/images
 # our directories
 docker
 docs
-go
 ms
+nmk.go
+nmk.rs
 project
 src
 tools

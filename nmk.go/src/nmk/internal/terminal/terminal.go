@@ -17,7 +17,7 @@ func is256Term() bool {
 func is256ColorTerm() bool {
 	colorTerms := []string{"gnome-terminal", "rxvt-xpm", "xfce4-terminal"}
 	sort.Strings(colorTerms)
-	ColorTerm := os.Getenv("TERM")
+	ColorTerm := os.Getenv("COLORTERM")
 	i := sort.SearchStrings(colorTerms, ColorTerm)
 	return i < len(colorTerms) && colorTerms[i] == ColorTerm
 }

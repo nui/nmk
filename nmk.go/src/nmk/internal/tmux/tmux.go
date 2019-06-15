@@ -58,9 +58,13 @@ func FindTmux() string {
 	return prog
 }
 
-func PrintUsageTime(startTime time.Time) {
+func PrintUsageTime(arg *nmk.Arg, startTime time.Time) {
 	t := time.Now().Sub(startTime)
-	logrus.Debugf("pre syscall.Exec time %s", t)
+	if arg.Usage {
+		fmt.Printf("%d\n", t / 1E6)
+	} else {
+		logrus.Debugf("usage time %s", t)
+	}
 }
 
 func LoginShell(arg *nmk.Arg, conf string, startTime time.Time) {
@@ -69,7 +73,7 @@ func LoginShell(arg *nmk.Arg, conf string, startTime time.Time) {
 		execArgs = append(execArgs, "-2")
 	}
 	execArgs = append(execArgs, "-f", conf, "-c", "exec zsh --login")
-	PrintUsageTime(startTime)
+	PrintUsageTime(arg, startTime)
 	logrus.Debugf("exec args: %s", strings.Join(execArgs, " "))
 	if err := syscall.Exec(FindTmux(), execArgs, os.Environ()); err != nil {
 		logrus.Fatal(err)
@@ -99,7 +103,7 @@ func Exec(arg *nmk.Arg, conf string, startTime time.Time, args cli.Args) {
 		execArgs = append(execArgs, "-f", conf)
 		execArgs = append(execArgs, tmuxArgs...)
 	}
-	PrintUsageTime(startTime)
+	PrintUsageTime(arg, startTime)
 	envs := os.Environ()
 	logrus.Debugf("exec args: %s", strings.Join(execArgs, " "))
 	if err := syscall.Exec(FindTmux(), execArgs, envs); err != nil {

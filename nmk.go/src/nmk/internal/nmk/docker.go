@@ -13,8 +13,10 @@ func IsDockerCgroup(s string) bool {
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		cgroup := ParseCgroupLine(line)
-		if strings.HasPrefix(cgroup[2], "/docker") {
+		parts := ParseCgroupLine(line)
+		controlGroup := parts[2]
+		if strings.HasPrefix(controlGroup, "/docker") ||
+			strings.HasPrefix(controlGroup, "/kube") {
 			docker = true
 			break
 		}

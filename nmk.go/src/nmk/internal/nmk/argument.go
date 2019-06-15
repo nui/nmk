@@ -16,6 +16,7 @@ type Arg struct {
 	AutoFix         bool
 	Inception       bool
 	Debug           bool
+	Usage           bool
 }
 
 func GetFlagArg(unicodeName string) ([]cli.Flag, *Arg) {
@@ -71,6 +72,11 @@ func GetFlagArg(unicodeName string) ([]cli.Flag, *Arg) {
 			Name:        "debug, d",
 			Usage:       "print debug log",
 			Destination: &arg.Debug,
+		},
+		cli.BoolFlag{
+			Name:        "usage",
+			Usage:       "print usage time",
+			Destination: &arg.Usage,
 		},
 	}
 	return flags, &arg

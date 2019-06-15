@@ -2,21 +2,17 @@
 
 nmk_dir=$(CDPATH= cd -- "$(dirname -- "$(dirname -- "$0")")" && pwd)
 
-if [ -n "$NMK_ENTRYPOINT" ]; then
+if [ -e "$NMK_ENTRYPOINT" ]; then
     exec "$NMK_ENTRYPOINT" "$@"
 fi
 
-if command -v nmk.go >/dev/null 2>&1; then
-    exec nmk.go "$@"
-fi
-
-script=$nmk_dir/bin/nmk.py
-
-for python in "$NMK_PYTHON" python3 python; do
-    # Call binary to determine python existence
-    # Check binary existence doesn't work because pyenv provide python shims.
-    [ -n "$python" ] && "$python" --version > /dev/null 2>&1 && exec "$python" "$script" "$@"
+for launcher in nmk.rs nmk.go; do
+    if command -v $launcher >/dev/null 2>&1; then
+        exec $launcher "$@"
+    fi
+    if [ -x "$nmk_dir/bin/$launcher" ]; then
+        exec "$nmk_dir/bin/$launcher" "$@"
+    fi
 done
 
->&2 echo "Error: Python not found"
-exit 1
+exec python "$nmk_dir/bin/nmk.py" "$@"

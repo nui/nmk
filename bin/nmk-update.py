@@ -2,6 +2,7 @@
 Run on Python 2.6.6 and later
 """
 
+import gzip
 import json
 import logging
 import os
@@ -186,6 +187,37 @@ def download_and_install(archive_url):
     archive_file.close()
 
 
+def download_launcher(url):
+    rq = request.urlopen(url)
+    tf = NamedTemporaryFile()
+    start = time.time()
+    tf.write(rq.read())
+    end = time.time()
+    tf.flush()
+    logging.debug('Downloaded in {0:.2f} s'.format(end - start))
+    logging.debug('Downloaded data to ' + tf.name)
+    return tf
+
+
+def install_launcher(archive_file):
+    os.chdir(NMK_DIR)
+    launcher_path = path.join(NMK_DIR, 'bin', 'nmk.rs')
+    with open(launcher_path, 'wb') as f:
+        archive_file.seek(0)
+        f.write(gzip.open(archive_file.name, 'rb').read())
+        f.close()
+        subprocess.call(['chmod', '+x', launcher_path])
+        logging.info('updated nmk.rs')
+
+
+def download_and_install_launcher(archive_url):
+    logging.info('Downloading ' + archive_url)
+    archive_file = download_launcher(archive_url)
+
+    install_launcher(archive_file)
+    archive_file.close()
+
+
 def install(archive_file):
     os.chdir(NMK_DIR)
     logging.debug('Uninstalling')
@@ -237,6 +269,7 @@ def update_from_remote(args):
     resource.save_to_cache()
     other_resource.clear_cache()
     logging.info('Done')
+    download_and_install_launcher('https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk.rs-amd64-linux-musl.gz')
 
 
 def prevent_run_on_git():

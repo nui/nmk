@@ -35,10 +35,9 @@ sudo apt install vim-nox
 
 If python is not install on target system, use following binary to start tmux
 
-- [Linux](https://storage.googleapis.com/nmk.nuimk.com/nmkgo/nmk-linux-amd64)
-- [Mac](https://storage.googleapis.com/nmk.nuimk.com/nmkgo/nmk-darwin-amd64)
-- [Alpine](https://storage.googleapis.com/nmk.nuimk.com/nmkgo/nmk-alpine-amd64)
-- [FreeBSD](https://storage.googleapis.com/nmk.nuimk.com/nmkgo/nmk-freebsd-amd64)
+- [Linux](https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk.rs-amd64-linux-musl.gz)
+- [Mac](https://storage.googleapis.com/nmk.nuimk.com/nmk.go/nmk.go-amd64-darwin)
+- [FreeBSD](https://storage.googleapis.com/nmk.nuimk.com/nmk.go/nmk.go-amd64-freebsd)
 
 
 ## Tmux navigation

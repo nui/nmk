@@ -3,7 +3,7 @@ steps:
   args:
     - build
     - -f
-    - docker/nmkgo/Dockerfile
+    - docker/nmk.go/Dockerfile
     - -t
     - builder
     - .
@@ -12,7 +12,7 @@ steps:
   args:
     - build
     - -f
-    - docker/nmkgo/Dockerfile.alpine
+    - docker/nmk.go/Dockerfile.alpine
     - -t
     - builder-alpine
     - .
@@ -39,12 +39,12 @@ steps:
   timeout: 60s
 artifacts:
   objects:
-    location: "gs://nmk.nuimk.com/nmkgo"
+    location: "gs://nmk.nuimk.com/nmk.go"
     paths:
-      - nmk-alpine-amd64
-      - nmk-darwin-amd64
-      - nmk-freebsd-amd64
-      - nmk-linux-amd64
-      - nmk-linux-arm
-      - nmk-linux-arm64
+      - nmk.go-amd64-darwin
+      - nmk.go-amd64-freebsd
+      - nmk.go-amd64-linux
+      - nmk.go-amd64-linux-musl
+      - nmk.go-arm-linux
+      - nmk.go-arm64-linux
 

@@ -3,11 +3,9 @@
 nmk_dir=$(CDPATH= cd -- "$(dirname -- "$(dirname -- "$0")")" && pwd)
 script=$nmk_dir/bin/nmk-update.py
 
-for python in "$NMK_PYTHON" python3 python; do
+# support both python and python3
+for python in python3 python; do
     # Call binary to determine python existence
     # Check binary existence doesn't work because pyenv provide python shims.
     [ -n "$python" ] && "$python" --version > /dev/null 2>&1 && exec "$python" "$script" "$@"
 done
-
->&2 echo "Error: Python not found"
-exit 1

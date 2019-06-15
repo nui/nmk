@@ -1,0 +1,12 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - build
+    - -f
+    - docker/nmk.rs/Dockerfile
+    - -t
+    - 'gcr.io/$PROJECT_ID/nmk.rs'
+    - .
+  timeout: 120s
+images:
+  - 'gcr.io/$PROJECT_ID/nmk.rs'
