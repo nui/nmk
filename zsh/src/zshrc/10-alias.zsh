@@ -70,3 +70,6 @@ export GIT_PAGER='less -+F -+X -c'
 # apply tmux session environment to running shell
 alias ssenv=' eval $(tmux show-environment -s)'
 
+# reset nvidia gpu
+alias gpu-reload="sudo rmmod nvidia_uvm ; sudo modprobe nvidia_uvm"
+
