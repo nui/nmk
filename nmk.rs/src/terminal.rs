@@ -1,62 +1,71 @@
 use std::env;
-use std::ffi::OsStr;
+use std::ffi::OsString;
 
 use crate::argument::Argument;
 use crate::container;
 use crate::core::*;
 
-fn is_256_term<T: AsRef<OsStr>>(term: T) -> bool {
-    let arr: [&str; 5] = [
+fn is_vec_contains_term(vec: Vec<&str>, term: Option<OsString>) -> bool {
+    term.and_then(|x| x.into_string().ok())
+        .map_or(false, |s| vec.contains(&s.as_str()))
+}
+
+fn is_256_term(term: Option<OsString>) -> bool {
+    let terms = vec![
         "cygwin",
         "gnome-256color",
         "putty",
         "screen-256color",
         "xterm-256color",
     ];
-    arr.contains(&term.as_ref().to_str().unwrap_or_default())
+    is_vec_contains_term(terms, term)
 }
 
-fn is_256_colorterm<T: AsRef<OsStr>>(term: T) -> bool {
-    let arr: [&str; 3] = ["gnome-terminal", "rxvt-xpm", "xfce4-terminal"];
-    arr.contains(&term.as_ref().to_str().unwrap_or_default())
+fn is_256_colorterm(term: Option<OsString>) -> bool {
+    let terms = vec!["gnome-terminal", "rxvt-xpm", "xfce4-terminal"];
+    is_vec_contains_term(terms, term)
 }
 
 fn support_256_color(arg: &Argument) -> bool {
     arg.force256color
-        || is_256_term(env::var_os("TERM").unwrap_or_default())
-        || is_256_colorterm(env::var_os("COLORTERM").unwrap_or_default())
+        || is_256_term(env::var_os("TERM"))
+        || is_256_colorterm(env::var_os("COLORTERM"))
         || (arg.autofix && container::check_container())
 }
 
 pub fn setup(arg: &Argument) {
     let color = support_256_color(arg);
     set_env("NMK_TMUX_DEFAULT_TERMINAL", if color { "screen-256color" } else { "screen" });
-    set_env("NMK_TMUX_256_COLOR", bit_str(color));
+    set_env("NMK_TMUX_256_COLOR", one_hot!(color));
 }
 
 #[cfg(test)]
 mod tests {
-    use std::ffi::OsString;
-
     use super::*;
+
+    fn input(i: &str) -> Option<OsString> {
+        Some(OsString::from(i))
+    }
 
     #[test]
     fn test_is_256_term() {
-        assert_eq!(is_256_term(OsString::from("cygwin")), true);
-        assert_eq!(is_256_term(OsString::from("gnome-256color")), true);
-        assert_eq!(is_256_term(OsString::from("putty")), true);
-        assert_eq!(is_256_term(OsString::from("screen-256color")), true);
-        assert_eq!(is_256_term(OsString::from("xterm-256color")), true);
-        assert_eq!(is_256_term(OsString::from("linux")), false);
-        assert_eq!(is_256_term(OsString::from("")), false);
+        assert!(is_256_term(input("cygwin")));
+        assert!(is_256_term(input("gnome-256color")));
+        assert!(is_256_term(input("putty")));
+        assert!(is_256_term(input("screen-256color")));
+        assert!(is_256_term(input("xterm-256color")));
+        assert!(!is_256_term(input("linux")));
+        assert!(!is_256_term(input("")));
+        assert!(!is_256_term(None));
     }
 
     #[test]
     fn test_is_256_colorterm() {
-        assert_eq!(is_256_colorterm(OsString::from("gnome-terminal")), true);
-        assert_eq!(is_256_colorterm(OsString::from("rxvt-xpm")), true);
-        assert_eq!(is_256_colorterm(OsString::from("xfce4-terminal")), true);
-        assert_eq!(is_256_colorterm(OsString::from("unknown")), false);
-        assert_eq!(is_256_term(OsString::from("")), false);
+        assert!(is_256_colorterm(input("gnome-terminal")));
+        assert!(is_256_colorterm(input("rxvt-xpm")));
+        assert!(is_256_colorterm(input("xfce4-terminal")));
+        assert!(!is_256_colorterm(input("unknown")));
+        assert!(!is_256_colorterm(input("")));
+        assert!(!is_256_colorterm(None));
     }
 }

@@ -1,14 +1,12 @@
-use std::collections::VecDeque;
-
-use clap::{App, Arg, ArgMatches};
+use clap::{App, Arg, ArgMatches, Values};
 
 use crate::time::{human_time, seconds_since_build};
 
 #[derive(Debug)]
-pub struct Argument {
+pub struct Argument<'a> {
+    arg: ArgMatches<'a>,
     pub force256color: bool,
     pub force8color: bool,
-    pub socket: String,
     pub login: bool,
     pub unicode: bool,
     pub force_unicode: bool,
@@ -17,7 +15,34 @@ pub struct Argument {
     pub inception: bool,
     pub debug: bool,
     pub usage: bool,
-    pub tmux_args: VecDeque<String>,
+}
+
+impl<'a> From<ArgMatches<'a>> for Argument<'a> {
+    fn from(m: ArgMatches<'a>) -> Self {
+        Argument {
+            force256color: m.is_present(FORCE_256_COLOR),
+            force8color: m.is_present(FORCE_8_COLOR),
+            login: m.is_present(LOGIN),
+            unicode: m.is_present(UNICODE),
+            force_unicode: m.is_present(FORCE_UNICODE),
+            detach_on_destroy: m.is_present(DETACH_ON_DESTROY),
+            autofix: !m.is_present(NO_AUTOFIX),
+            inception: m.is_present(INCEPTION),
+            debug: m.is_present(DEBUG),
+            usage: m.is_present(USAGE),
+            arg: m,
+        }
+    }
+}
+
+impl<'a> Argument<'a> {
+    pub fn tmux_args(&self) -> Values {
+        self.arg.values_of(TMUX_ARG).unwrap_or_default()
+    }
+
+    pub fn socket(&self) -> &str {
+        self.arg.value_of(SOCKET).unwrap()
+    }
 }
 
 const FORCE_256_COLOR: &str = "FORCE_256_COLOR";
@@ -35,16 +60,13 @@ const USAGE: &str = "USAGE";
 
 fn get_version() -> Option<String> {
     option_env!("SHORT_SHA").map(|short_sha| match seconds_since_build() {
-        Some(seconds) => {
-            let formatted = human_time(seconds);
-            format!("#{} ({} since last build)", short_sha, formatted)
-        }
+        Some(secs) => format!("#{} ({} since last build)", short_sha, human_time(secs)),
         None => short_sha.to_string(),
     })
 }
 
-fn create_matches<'a>(unicode: &str) -> ArgMatches<'a> {
-    let version = get_version().unwrap_or(String::new());
+pub fn parse(unicode: &str) -> Argument {
+    let version = get_version().unwrap_or_default();
     App::new("nmk.rs")
         .version(version.as_str())
         .about("An entrypoint for nmk")
@@ -102,26 +124,5 @@ fn create_matches<'a>(unicode: &str) -> ArgMatches<'a> {
         )
         .arg(Arg::with_name(TMUX_ARG).multiple(true))
         .get_matches()
-}
-
-pub fn parse(unicode: &str) -> Argument {
-    let m = create_matches(unicode);
-    Argument {
-        force256color: m.is_present(FORCE_256_COLOR),
-        force8color: m.is_present(FORCE_8_COLOR),
-        socket: m.value_of(SOCKET).unwrap().to_string(),
-        login: m.is_present(LOGIN),
-        unicode: m.is_present(UNICODE),
-        force_unicode: m.is_present(FORCE_UNICODE),
-        detach_on_destroy: m.is_present(DETACH_ON_DESTROY),
-        autofix: !m.is_present(NO_AUTOFIX),
-        inception: m.is_present(INCEPTION),
-        debug: m.is_present(DEBUG),
-        usage: m.is_present(USAGE),
-        tmux_args: m
-            .values_of(TMUX_ARG)
-            .unwrap_or_default()
-            .map(|x| x.to_string())
-            .collect(),
-    }
+        .into()
 }

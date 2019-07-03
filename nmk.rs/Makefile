@@ -1,4 +1,3 @@
-ALPINE_TARGET := x86_64-unknown-linux-musl
 BIN_NAME := nmkrs
 RELEASE_BIN := release/$(BIN_NAME)
 DIST_DIR ?= dist
@@ -7,12 +6,20 @@ BUILD_ENV := EPOCHSECONDS=$(EPOCHSECONDS)
 
 BUILD := $(BUILD_ENV) cargo build
 
+ALPINE_TARGET := x86_64-unknown-linux-musl
+ALPINE_BIN := target/$(ALPINE_TARGET)/$(RELEASE_BIN)
+ALPINE_OUT := $(DIST_DIR)/nmk.rs-amd64-linux-musl
+
 all: build
 
 build:
 	$(BUILD)
 
-multiarch:
+x86_alpine:
 	$(BUILD) --release --target $(ALPINE_TARGET)
-	cp target/$(ALPINE_TARGET)/$(RELEASE_BIN) $(DIST_DIR)/nmk.rs-amd64-linux-musl
-	gzip -k $(DIST_DIR)/nmk.rs-amd64-linux-musl
+	cp $(ALPINE_BIN) $(ALPINE_OUT)
+	strip $(ALPINE_OUT)
+	gzip -k $(ALPINE_OUT)
+
+multiarch: x86_alpine
+

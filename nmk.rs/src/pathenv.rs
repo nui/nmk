@@ -1,31 +1,50 @@
 use std::collections::{HashSet, VecDeque};
 use std::env;
 use std::ffi::{OsStr, OsString};
+use std::iter::Filter;
 use std::path::PathBuf;
+
+use nix::NixPath;
 
 pub struct UniquePath {
     vec: VecDeque<PathBuf>,
 }
 
+pub struct Iter<'a, T: Iterator<Item=&'a PathBuf>> {
+    filter: Filter<T, fn(&&PathBuf) -> bool>,
+    set: HashSet<&'a PathBuf>,
+}
+
+impl<'a, T: Iterator<Item=&'a PathBuf>> From<T> for Iter<'a, T> {
+    fn from(iter: T) -> Self {
+        Self {
+            filter: iter.filter(|p: &&PathBuf| p.len() > 0),
+            set: HashSet::new(),
+        }
+    }
+}
+
+impl<'a, T: Iterator<Item=&'a PathBuf>> Iterator for Iter<'a, T> {
+    type Item = &'a PathBuf;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let set = &self.set;
+        self.filter
+            .find(|&x| !set.contains(x))
+            .map(|x| {
+                self.set.insert(x);
+                x
+            })
+    }
+}
+
 impl UniquePath {
     pub fn make(&self) -> OsString {
-        return env::join_paths(self.unique().iter()).expect("join unique path error");
+        return env::join_paths(self.unique()).expect("join unique path error");
     }
 
-    pub fn unique(&self) -> Vec<PathBuf> {
-        let mut vec = Vec::new();
-        let mut set = HashSet::new();
-        let valid_path = |p: &&PathBuf| {
-            let str_opt = p.to_str();
-            str_opt.is_some() && str_opt.unwrap().len() > 0
-        };
-        for p in self.vec.iter().filter(valid_path) {
-            if !set.contains(p) {
-                set.insert(p.to_path_buf());
-                vec.push(p.to_path_buf());
-            }
-        }
-        vec
+    pub fn unique(&self) -> impl Iterator<Item=&PathBuf> {
+        Iter::from(self.vec.iter())
     }
 
     pub fn push_front<T: Into<PathBuf>>(&mut self, path: T) {

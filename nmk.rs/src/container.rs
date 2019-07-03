@@ -3,22 +3,22 @@ use std::process::exit;
 use crate::platform;
 
 #[allow(dead_code)]
-struct CGroup {
-    hierarchy_id: String,
-    subsystems: String,
-    control_group: String,
+struct CGroup<'a> {
+    hierarchy_id: &'a str,
+    subsystems: &'a str,
+    control_group: &'a str,
 }
 
-const CGROUP_DELIMITER: &str = ":";
-
-impl CGroup {
-    fn parse(s: &str) -> Self {
-        const INVALID: &str = "invalid cgroup line";
-        let mut sp = s.split(CGROUP_DELIMITER);
-        Self {
-            hierarchy_id: sp.next().expect(INVALID).to_string(),
-            subsystems: sp.next().expect(INVALID).to_string(),
-            control_group: sp.next().expect(INVALID).to_string(),
+impl<'a> CGroup<'a> {
+    pub fn parse(line: &'a str) -> Option<Self> {
+        let mut iter = line.split(":");
+        match (iter.next(), iter.next(), iter.next()) {
+            (Some(hierarchy_id), Some(subsystems), Some(control_group)) => Some(Self {
+                hierarchy_id,
+                subsystems,
+                control_group,
+            }),
+            _ => None
         }
     }
 
@@ -28,17 +28,12 @@ impl CGroup {
 }
 
 fn is_container(s: &str) -> bool {
-    let mut container = false;
-    for line in s.split("\n") {
-        if !line.contains(CGROUP_DELIMITER) {
-            continue;
+    s.split("\n").any(|line| {
+        match CGroup::parse(line) {
+            Some(cg) => cg.is_container(),
+            None => false,
         }
-        if CGroup::parse(line).is_container() {
-            container = true;
-            break;
-        };
-    }
-    return container;
+    })
 }
 
 pub fn check_container() -> bool {
@@ -58,11 +53,11 @@ mod tests {
 
     #[test]
     fn test_cgroup_parse() {
-        let actual = CGroup::parse(&"12:cpu,cpuacct:/".to_string());
+        let actual = CGroup::parse("12:cpu,cpuacct:/").unwrap();
         let expect = CGroup {
-            hierarchy_id: "12".to_string(),
-            subsystems: "cpu,cpuacct".to_string(),
-            control_group: "/".to_string(),
+            hierarchy_id: "12",
+            subsystems: "cpu,cpuacct",
+            control_group: "/",
         };
         assert_eq!(actual.hierarchy_id, expect.hierarchy_id);
         assert_eq!(actual.subsystems, expect.subsystems);
@@ -85,8 +80,8 @@ mod tests {
         12:hugetlb:/kubepods/besteffort/poda00e29fd-7bbd-11e9-8679-fa163ea7e3b8/c4b1403f3d9c7ce261be851df71d9a9773c53419075ccda39ae8fe6a39fd2eb1
 11:cpuset:/kubepods/besteffort/poda00e29fd-7bbd-11e9-8679-fa163ea7e3b8/c4b1403f3d9c7ce261be851df71d9a9773c53419075ccda39ae8fe6a39fd2eb1"#;
 
-        assert_eq!(is_container(&docker_cgroup), true);
-        assert_eq!(is_container(&init_cgroup), false);
-        assert_eq!(is_container(&k8s_cgroup), true);
+        assert!(is_container(docker_cgroup));
+        assert!(!is_container(init_cgroup));
+        assert!(is_container(k8s_cgroup));
     }
 }

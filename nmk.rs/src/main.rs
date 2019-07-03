@@ -11,6 +11,7 @@ use crate::tmux::Tmux;
 mod argument;
 mod config;
 mod container;
+#[macro_use]
 mod core;
 mod nmk;
 mod pathenv;
@@ -33,7 +34,7 @@ fn setup_path(arg: &Argument, nmk_dir: &PathBuf) {
     p.push_front(nmk_dir.join("local").join("bin"));
     p.push_front(nmk_dir.join("bin"));
     if arg.debug {
-        for (i, path) in p.unique().iter().enumerate() {
+        for (i, path) in p.unique().enumerate() {
             debug!("PATH[{}]={:?}", i + 1, path);
         }
     }
@@ -46,8 +47,13 @@ fn setup_environment(arg: &Argument, nmk_dir: &PathBuf, tmux: &Tmux, unicode_nam
     set_env("NMK_DIR", nmk_dir);
 
     tmux.setup(arg);
-    let init_vim_source = format!("source {}", init_vim.to_string_lossy().replace(" ", "\\ "));
-    set_env("VIMINIT", init_vim_source);
+    if let Some(path) = init_vim
+        .to_str()
+        .map(|s|
+            s.to_string().replace(" ", r"\ ")
+        ) {
+        set_env("VIMINIT", format!("source {}", path));
+    }
     set_env("ZDOTDIR", zdotdir);
 
     env::remove_var("VIRTUAL_ENV");
@@ -61,28 +67,23 @@ fn setup_environment(arg: &Argument, nmk_dir: &PathBuf, tmux: &Tmux, unicode_nam
         set_env("LC_ALL", unicode_name);
     }
 
-    match env::current_exe() {
-        Ok(p) => set_env("NMK_ENTRYPOINT", p),
-        Err(e) => panic!(e),
-    }
+    set_env("NMK_ENTRYPOINT", env::current_exe().unwrap());
 }
 
 fn setup_prefer_editor() {
     const EDITOR: &str = "EDITOR";
     if env::var_os(EDITOR).is_none() {
-        for &editor in ["nvim", "vim"].iter() {
-            if which::which(editor).is_ok() {
-                set_env(EDITOR, editor);
-                debug!("using {} as prefer editor", editor);
-                break;
-            }
+        let mut editors = ["nvim", "vim"].iter();
+        if let Some(editor) = editors.find(|bin| which::which(bin).is_ok()) {
+            set_env(EDITOR, editor);
+            debug!("using {} as prefer editor", editor);
         }
     }
 }
 
 fn unset_temp_env(config: config::Config) {
-    for i in config.tmux_setting_envs {
-        env::remove_var(i);
+    for name in config.tmux_setting_envs {
+        env::remove_var(name);
     }
 }
 
@@ -90,7 +91,7 @@ fn main() {
     let start = std::time::Instant::now();
     let unicode_name = get_unicode();
     let arg = argument::parse(unicode_name);
-    let verbosity = if arg.debug { 3 } else { 0 };
+    let verbosity = if arg.debug { 3 } else { 1 };
     stderrlog::new()
         .module(module_path!())
         .verbosity(verbosity)

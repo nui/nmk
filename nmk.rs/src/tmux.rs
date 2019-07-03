@@ -1,7 +1,7 @@
 use std::env;
 use std::ffi::CString;
 use std::path::PathBuf;
-use std::process::{exit, Command};
+use std::process::{Command, exit, Stdio};
 use std::time::Instant;
 
 use crate::argument::Argument;
@@ -62,7 +62,7 @@ impl<'a> Tmux<'a> {
 
     pub fn setup(&self, arg: &Argument) {
         set_env("NMK_TMUX_DEFAULT_SHELL", which::which("zsh").expect("zsh not found"));
-        set_env("NMK_TMUX_DETACH_ON_DESTROY", if arg.detach_on_destroy { "on" } else { "off" });
+        set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.nmk_dir.join("tmux").join(".tmux_history"));
         set_env("NMK_TMUX_VERSION", &self.version);
     }
@@ -81,7 +81,7 @@ impl<'a> Tmux<'a> {
 
         vec.push(self.bin.as_str());
         vec.push("-L");
-        vec.push(&arg.socket);
+        vec.push(arg.socket());
         if arg.force256color {
             vec.push("-2");
         }
@@ -90,7 +90,7 @@ impl<'a> Tmux<'a> {
         vec.push(config.to_str().unwrap());
         vec.push("-c");
         vec.push("exec zsh --login");
-        let exec_args: Vec<_> = vec.into_iter().map(|x| CString::new(x).unwrap()).collect();
+        let exec_args: Vec<_> = vec.into_iter().flat_map(|x| CString::new(x)).collect();
         let exec_name = CString::new(self.bin.as_bytes()).unwrap();
         debug!("{:#?}", exec_name);
         debug!("{:#?}", exec_args);
@@ -107,16 +107,15 @@ impl<'a> Tmux<'a> {
         let config = self.conf();
         vec.push(self.bin.as_str());
         vec.push("-L");
-        let socket = arg.socket.as_str();
+        let socket = arg.socket();
         vec.push(socket);
         if arg.force256color {
             vec.push("-2");
         }
+        let tmux_args = arg.tmux_args();
         if is_running(socket) {
-            if arg.tmux_args.len() > 0 {
-                for i in arg.tmux_args.iter() {
-                    vec.push(i);
-                }
+            if tmux_args.len() > 0 {
+                vec.extend(tmux_args);
             } else {
                 if env::var_os("TMUX").is_some() && !arg.inception {
                     warn!("add --inception to allow nested tmux sessions");
@@ -127,9 +126,9 @@ impl<'a> Tmux<'a> {
         } else {
             vec.push("-f");
             vec.push(config.to_str().unwrap());
-            vec.extend(arg.tmux_args.iter().map(|x| x.as_str()));
+            vec.extend(tmux_args);
         }
-        let exec_args: Vec<_> = vec.iter().map(|&x| CString::new(x).unwrap()).collect();
+        let exec_args: Vec<_> = vec.into_iter().flat_map(|x| CString::new(x)).collect();
         let exec_name = CString::new(self.bin.as_bytes()).unwrap();
         debug!("{:#?}", exec_name);
         debug!("{:#?}", exec_args);
@@ -143,12 +142,15 @@ impl<'a> Tmux<'a> {
 }
 
 pub fn is_running(socket: &str) -> bool {
-    let cmd = Command::new(TMUX)
+    let running = Command::new(TMUX)
         .arg("-L")
         .arg(socket)
         .arg("list-sessions")
-        .output();
-    let running = cmd.is_ok() && cmd.unwrap().status.success();
+        .stderr(Stdio::null())
+        .stdout(Stdio::null())
+        .status()
+        .map(|o| o.success())
+        .unwrap_or_default();
     debug!("server {} running", if running { "is" } else { "is not" });
     running
 }
@@ -156,7 +158,7 @@ pub fn is_running(socket: &str) -> bool {
 pub fn dir(nmk_dir: &PathBuf) -> PathBuf {
     let path = nmk_dir.join("tmux");
     if !path.exists() {
-        panic!(format!("{} doesn't exist", path.to_str().unwrap_or_default()));
+        panic!("{:?} doesn't exist", path);
     }
     path
 }

@@ -12,7 +12,7 @@ pub fn human_time(secs: i64) -> String {
     let hours = secs / 60 / 60 % 24;
     let minutes = secs / 60 % 60;
     let seconds = secs % 60;
-    let mut result: Vec<String> = Vec::new();
+    let mut result: Vec<String> = Vec::with_capacity(4);
     if secs >= DAY_SECS {
         result.push(format!("{}d", days));
     }
@@ -26,22 +26,19 @@ pub fn human_time(secs: i64) -> String {
     result
         .into_iter()
         .take(2)
-        .collect::<Vec<String>>()
+        .collect::<Vec<_>>()
         .join(" ")
 }
 
 pub fn seconds_since_build() -> Option<i64> {
-    let mut result = None;
-    if let Some(t) = option_env!("EPOCHSECONDS") {
-        if let Ok(build_time) = t.parse::<i64>() {
-            let now = SystemTime::now()
+    option_env!("EPOCHSECONDS")
+        .and_then(|t| t.parse::<i64>().ok())
+        .and_then(|build_time| {
+            SystemTime::now()
                 .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs() as i64;
-            result = Some(now - build_time);
-        }
-    }
-    result
+                .ok()
+                .map(|x| x.as_secs() as i64 - build_time)
+        })
 }
 
 #[cfg(test)]

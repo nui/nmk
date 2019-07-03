@@ -22,5 +22,5 @@ pub fn setup(arg: &Argument, nmk_dir: &PathBuf) {
     if !global_rcs {
         debug!("ignore zsh global rcs");
     }
-    set_env("NMK_ZSH_GLOBAL_RCS", bit_str(global_rcs));
+    set_env("NMK_ZSH_GLOBAL_RCS", one_hot!(global_rcs));
 }
