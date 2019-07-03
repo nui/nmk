@@ -1,12 +1,13 @@
 export EDITOR=nvim
 export NMK_DEVELOPMENT=true
 
-export NMK_PYTHON=/usr/bin/python
 export GOPATH=~/go
 export GOBIN=$GOPATH/bin
 export LIBVIRT_DEFAULT_URI="qemu:///system"
+export ANDROID_HOME=~/Android/Sdk
 
 path=(
+    ~/bin
     $NMK_DIR/bin
     $path
     ~/.cargo/bin
@@ -15,6 +16,10 @@ path=(
     ~/.opt/google-cloud-sdk/bin
     /usr/local/go/bin
     $GOBIN
+    $ANDROID_HOME/emulator
+    $ANDROID_HOME/tools
+    $ANDROID_HOME/tools/bin
+    $ANDROID_HOME/platform-tools
 )
 
 # vim8 in mac osx need this
