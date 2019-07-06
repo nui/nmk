@@ -18,32 +18,11 @@ pub struct Tmux<'a> {
 
 impl<'a> Tmux<'a> {
     pub fn new(nmk_dir: &PathBuf, tmux_dir: PathBuf) -> Tmux {
-        let mut version: String;
-
-        if let Ok(o) = Command::new(TMUX).arg("-V").output() {
-            if !o.status.success() {
-                match o.status.code() {
-                    Some(i) => error!("tmux exit with status: {}", i),
-                    None => error!("terminated by signal"),
-                };
-                exit(1);
-            }
-            let res = String::from_utf8_lossy(&o.stdout);
-            let sp: Vec<_> = res.trim().split(" ").collect();
-            if sp.len() != 2 {
-                error!("can't find tmux version from: {}", res);
-                exit(1);
-            }
-            version = String::from(sp[1]);
-        } else {
-            error!("{} not found", TMUX);
-            exit(1);
-        }
         Tmux {
             nmk_dir,
             tmux_dir,
             bin: which::which(TMUX).unwrap().to_str().unwrap().to_string(),
-            version,
+            version: Tmux::call_check_version(),
         }
     }
 
@@ -73,6 +52,26 @@ impl<'a> Tmux<'a> {
             println!("{}", before_exec);
         } else {
             debug!("usage time: {}ms", before_exec);
+        }
+    }
+
+    fn call_check_version() -> String {
+        if let Ok(o) = Command::new(TMUX).arg("-V").output() {
+            if !o.status.success() {
+                match o.status.code() {
+                    Some(i) => error!("tmux exit with status: {}", i),
+                    None => error!("terminated by signal"),
+                };
+                exit(1);
+            }
+            let version_output = String::from_utf8(o.stdout)
+                .expect("tmux version output contain non utf-8");
+            version_output.trim().split(" ")
+                .nth(1).expect(&format!("bad output: {}", version_output))
+                .to_string()
+        } else {
+            error!("{} not found", TMUX);
+            exit(1);
         }
     }
 
