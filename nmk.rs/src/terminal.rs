@@ -30,7 +30,7 @@ fn support_256_color(arg: &Argument) -> bool {
     arg.force256color
         || is_256_term(env::var_os("TERM"))
         || is_256_colorterm(env::var_os("COLORTERM"))
-        || (arg.autofix && container::check_container())
+        || (arg.autofix && container::detect_container())
 }
 
 pub fn setup(arg: &Argument) {

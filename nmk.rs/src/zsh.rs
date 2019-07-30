@@ -12,8 +12,8 @@ pub fn use_global_rcs(arg: &Argument, nmk_dir: &PathBuf) -> bool {
     // Some linux distribution global zprofile contains a line that will source everything
     // from /etc/profile. And they do reset $PATH completely.
     // It makes PATH set by nmk unusable
-    let bad = is_alpine() || is_arch() || is_mac();
-    let no_global_rcs = arg.autofix && bad && !has_local_zsh(nmk_dir);
+    let hostile = is_alpine() || is_arch() || is_mac();
+    let no_global_rcs = arg.autofix && hostile && !has_local_zsh(nmk_dir);
     !no_global_rcs
 }
 

@@ -29,14 +29,13 @@ impl<'a> CGroup<'a> {
 
 fn is_container(s: &str) -> bool {
     s.split("\n").any(|line| {
-        match CGroup::parse(line) {
-            Some(cg) => cg.is_container(),
-            None => false,
-        }
+        CGroup::parse(line)
+            .map(|cg| cg.is_container())
+            .unwrap_or_default()
     })
 }
 
-pub fn check_container() -> bool {
+pub fn detect_container() -> bool {
     if platform::is_mac() {
         return false;
     }
@@ -44,7 +43,7 @@ pub fn check_container() -> bool {
         error!("Cannot open cgroup file");
         exit(1);
     });
-    return is_container(contents.as_str());
+    return is_container(&contents);
 }
 
 #[cfg(test)]
@@ -70,18 +69,15 @@ mod tests {
 12:cpu,cpuacct:/docker/c6fa62a9938149f6098fd0cdaffc9cdf0f526f25d97b5f6e2a4cc1fccc7f7ce1
 11:perf_event:/docker/c6fa62a9938149f6098fd0cdaffc9cdf0f526f25d97b5f6e2a4cc1fccc7f7ce1
 10:rdma:/"#;
-
+        assert!(is_container(docker_cgroup));
         let init_cgroup = r#"
 12:cpu,cpuacct:/
 11:perf_event:/
 0::/init.scope"#;
-
-        let k8s_cgroup = r#"
-        12:hugetlb:/kubepods/besteffort/poda00e29fd-7bbd-11e9-8679-fa163ea7e3b8/c4b1403f3d9c7ce261be851df71d9a9773c53419075ccda39ae8fe6a39fd2eb1
-11:cpuset:/kubepods/besteffort/poda00e29fd-7bbd-11e9-8679-fa163ea7e3b8/c4b1403f3d9c7ce261be851df71d9a9773c53419075ccda39ae8fe6a39fd2eb1"#;
-
-        assert!(is_container(docker_cgroup));
         assert!(!is_container(init_cgroup));
+        let k8s_cgroup = r#"
+12:hugetlb:/kubepods/besteffort/poda00e29fd-7bbd-11e9-8679-fa163ea7e3b8/c4b1403f3d9c7ce261be851df71d9a9773c53419075ccda39ae8fe6a39fd2eb1
+11:cpuset:/kubepods/besteffort/poda00e29fd-7bbd-11e9-8679-fa163ea7e3b8/c4b1403f3d9c7ce261be851df71d9a9773c53419075ccda39ae8fe6a39fd2eb1"#;
         assert!(is_container(k8s_cgroup));
     }
 }

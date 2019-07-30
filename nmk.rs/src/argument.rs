@@ -67,17 +67,18 @@ fn get_version() -> Option<String> {
 
 pub fn parse(unicode: &str) -> Argument {
     let version = get_version().unwrap_or_default();
-    App::new("nmk.rs")
+    const NAME: &str = "nmk.rs";
+    App::new(NAME)
+        .bin_name(NAME)
         .version(version.as_str())
         .about("An entrypoint for nmk")
-        .author("Narongwet Mongkonsatcha")
         .arg(Arg::with_name(FORCE_256_COLOR)
             .short("2")
             .help("Assume the terminal supports 256 colours")
         )
         .arg(Arg::with_name(FORCE_8_COLOR)
             .short("8")
-            .help("Assume the terminal supports 8 colours")
+            .help("Force 8 colours terminal")
         )
         .arg(Arg::with_name(SOCKET)
             .short("L")
