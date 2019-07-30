@@ -6,6 +6,12 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - run
+    - 'gcr.io/$PROJECT_ID/nmk.rs'
+    - rustup
+    - show
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - run
     - -v=/workspace:/workspace
     - -v=/workspace/cargo-registry:/usr/local/cargo/registry
     - --workdir=/workspace
