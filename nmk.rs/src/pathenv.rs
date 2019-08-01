@@ -10,12 +10,13 @@ pub struct UniquePath {
     vec: VecDeque<PathBuf>,
 }
 
-pub struct Iter<'a, T: Iterator<Item=&'a PathBuf>> {
+pub struct Iter<'a, T> {
     filter: Filter<T, fn(&&PathBuf) -> bool>,
     set: HashSet<&'a PathBuf>,
 }
 
-impl<'a, T: Iterator<Item=&'a PathBuf>> From<T> for Iter<'a, T> {
+impl<'a, T> From<T> for Iter<'a, T> where
+    T: Iterator<Item=&'a PathBuf> {
     fn from(iter: T) -> Self {
         Self {
             filter: iter.filter(|p: &&PathBuf| p.len() > 0),
@@ -24,7 +25,8 @@ impl<'a, T: Iterator<Item=&'a PathBuf>> From<T> for Iter<'a, T> {
     }
 }
 
-impl<'a, T: Iterator<Item=&'a PathBuf>> Iterator for Iter<'a, T> {
+impl<'a, T> Iterator for Iter<'a, T>
+    where T: Iterator<Item=&'a PathBuf> {
     type Item = &'a PathBuf;
 
     fn next(&mut self) -> Option<Self::Item> {
