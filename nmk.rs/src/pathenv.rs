@@ -1,52 +1,43 @@
-use std::collections::{HashSet, VecDeque};
+use std::collections::VecDeque;
 use std::env;
 use std::ffi::{OsStr, OsString};
-use std::iter::Filter;
 use std::path::PathBuf;
 
+use indexmap::IndexSet;
 use nix::NixPath;
 
-pub struct UniquePath {
+pub struct PathVec {
     vec: VecDeque<PathBuf>,
 }
 
-pub struct Iter<'a, T> {
-    filter: Filter<T, fn(&&PathBuf) -> bool>,
-    set: HashSet<&'a PathBuf>,
-}
-
-impl<'a, T> From<T> for Iter<'a, T> where
-    T: Iterator<Item=&'a PathBuf> {
-    fn from(iter: T) -> Self {
-        Self {
-            filter: iter.filter(|p: &&PathBuf| p.len() > 0),
-            set: HashSet::new(),
-        }
-    }
-}
-
-impl<'a, T> Iterator for Iter<'a, T>
-    where T: Iterator<Item=&'a PathBuf> {
-    type Item = &'a PathBuf;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let set = &self.set;
-        self.filter
-            .find(|&x| !set.contains(x))
-            .map(|x| {
-                self.set.insert(x);
-                x
-            })
-    }
-}
-
-impl UniquePath {
+impl PathVec {
     pub fn make(&self) -> OsString {
         return env::join_paths(self.unique()).expect("join unique path error");
     }
 
-    pub fn unique(&self) -> impl Iterator<Item=&PathBuf> {
-        Iter::from(self.vec.iter())
+    pub fn iter(&self) -> std::collections::vec_deque::Iter<PathBuf> {
+        self.vec.iter()
+    }
+
+    pub fn unique(&self) -> Self {
+        let vec = self.vec.iter().map(|x| x.to_owned())
+            .collect::<IndexSet<_>>()
+            .into_iter().filter(|x| x.len() > 0)
+            .collect::<VecDeque<_>>();
+        Self {
+            vec
+        }
+    }
+
+    pub fn no_version_managers(&self) -> Self {
+        let vec = self.vec.clone().into_iter().filter(|x| {
+            let skip = x.ends_with(".pyenv/shims")
+                || x.ends_with(".rbenv/shims");
+            !skip
+        }).collect::<VecDeque<_>>();
+        Self {
+            vec
+        }
     }
 
     pub fn push_front<T: Into<PathBuf>>(&mut self, path: T) {
@@ -72,6 +63,15 @@ impl UniquePath {
     }
 }
 
+impl IntoIterator for PathVec {
+    type Item = PathBuf;
+    type IntoIter = std::collections::vec_deque::IntoIter<PathBuf>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.vec.into_iter()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
@@ -83,39 +83,45 @@ mod tests {
     #[test]
     fn test() {
         // no item
-        let ps = UniquePath::parse(OsString::from(""));
+        let ps = PathVec::parse(OsString::from(""));
         let actual = ps.make();
         assert_eq!(actual, "");
 
         // no item add one to front
-        let mut ps = UniquePath::parse(OsString::from(""));
+        let mut ps = PathVec::parse(OsString::from(""));
         ps.push_front(FOO.to_string());
         let actual = ps.make();
         assert_eq!(actual, FOO);
 
         // no item add one to back
-        let mut ps = UniquePath::parse(OsString::from(""));
+        let mut ps = PathVec::parse(OsString::from(""));
         ps.push_back(FOO.to_string());
         let actual = ps.make();
         assert_eq!(actual, FOO);
 
         // one item
-        let ps = UniquePath::parse(OsString::from(FOO));
+        let ps = PathVec::parse(OsString::from(FOO));
         let actual = ps.make();
         assert_eq!(actual, FOO);
 
         // two items
         let input = OsString::from(format!("{}:{}", FOO, BAR));
-        let ps = UniquePath::parse(&input);
+        let ps = PathVec::parse(&input);
         let actual = ps.make();
         assert_eq!(actual, input);
 
         // move order correctly
         let input = OsString::from("/a:/b:/c");
-        let mut ps = UniquePath::parse(&input);
+        let mut ps = PathVec::parse(&input);
         ps.push_front("/c".to_string());
         let actual = ps.make();
         let expect = OsString::from("/c:/a:/b");
         assert_eq!(actual, expect);
+
+        // remove pyenv, rbenv, and node path
+        let input = OsString::from("/a:/home/.pyenv/shims:/home/.rbenv/shims");
+        let mut ps = PathVec::parse(&input).no_version_managers();
+        let actual = ps.make();
+        assert_eq!(actual, OsString::from("/a"))
     }
 }

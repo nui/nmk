@@ -30,11 +30,12 @@ fn get_unicode() -> &'static str {
 
 fn setup_path(arg: &Argument, nmk_dir: &PathBuf) {
     const PATH: &str = "PATH";
-    let mut p = pathenv::UniquePath::parse(env::var_os(PATH).expect("$PATH not found"));
+    let mut p = pathenv::PathVec::parse(env::var_os(PATH).expect("$PATH not found"));
     p.push_front(nmk_dir.join("local").join("bin"));
     p.push_front(nmk_dir.join("bin"));
+    p = p.unique().no_version_managers();
     if arg.debug {
-        for (i, path) in p.unique().enumerate() {
+        for (i, path) in p.iter().enumerate() {
             debug!("PATH[{}]={:?}", i + 1, path);
         }
     }

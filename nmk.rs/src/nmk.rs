@@ -1,7 +1,7 @@
 use std::env;
 use std::path::PathBuf;
 
-use crate::pathenv::UniquePath;
+use crate::pathenv::PathVec;
 
 pub fn add_local_library(nmk_dir: &PathBuf) {
     const LD: &str = "LD_LIBRARY_PATH";
@@ -11,9 +11,9 @@ pub fn add_local_library(nmk_dir: &PathBuf) {
         let mut ps = match env::var_os(LD) {
             Some(path) => {
                 debug!("{}: {:?}", LD, path);
-                UniquePath::parse(path)
+                PathVec::parse(path)
             }
-            None => UniquePath::new(),
+            None => PathVec::new(),
         };
         ps.push_front(local_lib_dir);
         let next_ld = ps.make();
