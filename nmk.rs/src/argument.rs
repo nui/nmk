@@ -59,10 +59,11 @@ const TMUX_ARG: &str = "TMUX_ARG";
 const USAGE: &str = "USAGE";
 
 fn get_version() -> Option<String> {
-    option_env!("SHORT_SHA").map(|short_sha| match seconds_since_build() {
-        Some(secs) => format!("#{} ({} since last build)", short_sha, human_time(secs)),
-        None => short_sha.to_string(),
-    })
+    match (seconds_since_build(), option_env!("SHORT_SHA")) {
+        (Some(secs), Some(sha)) => Some(format!("#{} ({} since last build)", sha, human_time(secs))),
+        (Some(secs), None) => Some(format!("({} since last build)", human_time(secs))),
+        _ => None,
+    }
 }
 
 pub fn parse(unicode: &str) -> Argument {
