@@ -126,7 +126,7 @@ func SetupEnvironment(arg *nmk.Arg, nmkDir string, tmuxVersion string, unicodeNa
 	if exe, err := os.Executable(); err != nil {
 		logrus.Fatal(err)
 	} else {
-		Setenv("NMK_ENTRYPOINT", exe)
+		Setenv("NMK_BIN", exe)
 	}
 }
 

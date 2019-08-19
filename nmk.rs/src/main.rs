@@ -68,7 +68,7 @@ fn setup_environment(arg: &Argument, nmk_dir: &PathBuf, tmux: &Tmux, unicode_nam
         set_env("LC_ALL", unicode_name);
     }
 
-    set_env("NMK_ENTRYPOINT", env::current_exe().unwrap());
+    set_env("NMK_BIN", env::current_exe().unwrap());
 }
 
 fn setup_prefer_editor() {

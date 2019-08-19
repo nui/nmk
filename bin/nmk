@@ -2,8 +2,8 @@
 
 nmk_dir=$(CDPATH= cd -- "$(dirname -- "$(dirname -- "$0")")" && pwd)
 
-if [ -e "$NMK_ENTRYPOINT" ]; then
-    exec "$NMK_ENTRYPOINT" "$@"
+if [ -e "$NMK_BIN" ]; then
+    exec "$NMK_BIN" "$@"
 fi
 
 for launcher in nmk.rs nmk.go; do
