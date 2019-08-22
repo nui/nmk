@@ -15,6 +15,7 @@ pub struct Argument<'a> {
     pub inception: bool,
     pub debug: bool,
     pub usage: bool,
+    pub ssh: bool,
 }
 
 impl<'a> From<ArgMatches<'a>> for Argument<'a> {
@@ -30,6 +31,7 @@ impl<'a> From<ArgMatches<'a>> for Argument<'a> {
             inception: m.is_present(INCEPTION),
             debug: m.is_present(DEBUG),
             usage: m.is_present(USAGE),
+            ssh: m.is_present(SSH),
             arg: m,
         }
     }
@@ -57,6 +59,7 @@ const INCEPTION: &str = "INCEPTION";
 const DEBUG: &str = "DEBUG";
 const TMUX_ARG: &str = "TMUX_ARG";
 const USAGE: &str = "USAGE";
+const SSH: &str = "SSH";
 
 fn get_version() -> Option<String> {
     match (seconds_since_build(), option_env!("SHORT_SHA")) {
@@ -68,9 +71,7 @@ fn get_version() -> Option<String> {
 
 pub fn parse(unicode: &str) -> Argument {
     let version = get_version().unwrap_or_default();
-    const NAME: &str = "nmk.rs";
-    App::new(NAME)
-        .bin_name(NAME)
+    App::new("nmk")
         .version(version.as_str())
         .about("An entrypoint for nmk")
         .arg(Arg::with_name(FORCE_256_COLOR)
@@ -85,14 +86,14 @@ pub fn parse(unicode: &str) -> Argument {
             .short("L")
             .long("socket")
             .default_value("nmk")
-            .value_name("SOCKET")
+            .value_name("NAME")
             .takes_value(true)
             .help("Use a different tmux socket name")
         )
         .arg(Arg::with_name(LOGIN)
             .short("l")
             .long("login")
-            .help("Start login shell")
+            .help("Start zsh login shell")
         )
         .arg(Arg::with_name(UNICODE)
             .short("u")
@@ -123,6 +124,9 @@ pub fn parse(unicode: &str) -> Argument {
         .arg(Arg::with_name(USAGE)
             .long("usage")
             .help("Print usage time")
+        )
+        .arg(Arg::with_name(SSH)
+            .long("ssh")
         )
         .arg(Arg::with_name(TMUX_ARG).multiple(true))
         .get_matches()

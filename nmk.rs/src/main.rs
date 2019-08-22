@@ -2,6 +2,7 @@
 extern crate log;
 
 use std::env;
+use std::fs::File;
 use std::path::PathBuf;
 
 use crate::argument::Argument;
@@ -88,6 +89,18 @@ fn unset_temp_env(config: config::Config) {
     }
 }
 
+fn display_motd() {
+    let mut stdout = std::io::stdout();
+    vec!["/var/run/motd.dynamic", "/etc/motd"]
+        .into_iter()
+        .map(|p| PathBuf::from(p))
+        .filter(|p| p.exists())
+        .flat_map(|p| File::open(p))
+        .for_each(|mut f| {
+            let _ = std::io::copy(&mut f, &mut stdout);
+        });
+}
+
 fn main() {
     let start = std::time::Instant::now();
     let unicode_name = get_unicode();
@@ -99,6 +112,10 @@ fn main() {
         .init()
         .expect("Cannot setup logger");
     debug!("{:#?}", arg);
+
+    if arg.ssh {
+        display_motd();
+    }
 
     let nmk_dir = nmk::dir();
     let tmux_dir = tmux::dir(&nmk_dir);

@@ -1,4 +1,4 @@
-BIN_NAME := nmkrs
+BIN_NAME := nmk
 RELEASE_BIN := release/$(BIN_NAME)
 DIST_DIR ?= dist
 EPOCHSECONDS := $(shell date +%s)

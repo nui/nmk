@@ -89,7 +89,7 @@ impl<'a> Tmux<'a> {
         vec.push(config.to_str().unwrap());
         vec.push("-c");
         vec.push("exec zsh --login");
-        let exec_args: Vec<_> = vec.into_iter().flat_map(|x| CString::new(x)).collect();
+        let exec_args: Vec<_> = vec.into_iter().flat_map(CString::new).collect();
         let exec_name = CString::new(self.bin.as_bytes()).unwrap();
         debug!("{:#?}", exec_name);
         debug!("{:#?}", exec_args);
@@ -127,7 +127,7 @@ impl<'a> Tmux<'a> {
             vec.push(config.to_str().unwrap());
             vec.extend(tmux_args);
         }
-        let exec_args: Vec<_> = vec.into_iter().flat_map(|x| CString::new(x)).collect();
+        let exec_args: Vec<_> = vec.into_iter().flat_map(CString::new).collect();
         let exec_name = CString::new(self.bin.as_bytes()).unwrap();
         debug!("{:#?}", exec_name);
         debug!("{:#?}", exec_args);

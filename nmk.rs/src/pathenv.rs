@@ -44,6 +44,7 @@ impl PathVec {
         self.vec.push_front(path.into())
     }
 
+    #[allow(dead_code)]
     pub fn push_back<T: Into<PathBuf>>(&mut self, path: T) {
         self.vec.push_back(path.into())
     }

@@ -128,13 +128,13 @@ def download_launcher(url):
 
 def install_launcher(archive_file):
     os.chdir(NMK_DIR)
-    launcher_path = path.join(NMK_DIR, 'bin', 'nmk.rs')
+    launcher_path = path.join(NMK_DIR, 'bin', 'nmk')
     with open(launcher_path, 'wb') as f:
         archive_file.seek(0)
         f.write(gzip.open(archive_file.name, 'rb').read())
         f.close()
         subprocess.call(['chmod', '+x', launcher_path])
-        logging.info('updated nmk.rs')
+        logging.info('updated nmk')
 
 
 def download_and_install_launcher(archive_url):
