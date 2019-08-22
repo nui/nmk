@@ -78,7 +78,7 @@ impl<'a> Tmux<'a> {
     pub fn login_shell(&self, arg: Argument, start: Instant) -> ! {
         let mut vec = Vec::new();
 
-        vec.push(self.bin.as_str());
+        vec.push(TMUX);
         vec.push("-L");
         vec.push(arg.socket());
         if arg.force256color {
@@ -94,7 +94,7 @@ impl<'a> Tmux<'a> {
         debug!("{:#?}", exec_name);
         debug!("{:#?}", exec_args);
         self.print_usage_time(&arg, &start);
-        if nix::unistd::execvp(&exec_name, &exec_args).is_err() {
+        if nix::unistd::execv(&exec_name, &exec_args).is_err() {
             error!("Can't start login shell")
         }
         // this code is never reach if exec success
@@ -104,7 +104,7 @@ impl<'a> Tmux<'a> {
     pub fn exec(&self, arg: Argument, start: Instant) -> ! {
         let mut vec = Vec::new();
         let config = self.conf();
-        vec.push(self.bin.as_str());
+        vec.push(TMUX);
         vec.push("-L");
         let socket = arg.socket();
         vec.push(socket);
@@ -132,7 +132,7 @@ impl<'a> Tmux<'a> {
         debug!("{:#?}", exec_name);
         debug!("{:#?}", exec_args);
         self.print_usage_time(&arg, &start);
-        if nix::unistd::execvp(&exec_name, &exec_args).is_err() {
+        if nix::unistd::execv(&exec_name, &exec_args).is_err() {
             error!("Can't start tmux")
         }
         // this code is never reach if exec success
