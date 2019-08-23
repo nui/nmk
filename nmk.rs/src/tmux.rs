@@ -111,6 +111,9 @@ impl<'a> Tmux<'a> {
         if arg.force256color {
             vec.push("-2");
         }
+        if arg.unicode || arg.force8color {
+            vec.push("-u");
+        }
         let tmux_args = arg.tmux_args();
         if is_running(socket) {
             if tmux_args.len() > 0 {
