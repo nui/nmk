@@ -1,4 +1,5 @@
 use std::env;
+use std::fs::File;
 use std::path::PathBuf;
 
 use crate::pathenv::PathVec;
@@ -34,4 +35,16 @@ pub fn dir() -> PathBuf {
         panic!(format!("{:?} doesn't exist", path));
     }
     path
+}
+
+pub fn display_motd() {
+    let mut stdout = std::io::stdout();
+    vec!["/var/run/motd.dynamic", "/etc/motd"]
+        .into_iter()
+        .map(|p| PathBuf::from(p))
+        .filter(|p| p.exists())
+        .flat_map(|p| File::open(p))
+        .for_each(|mut f| {
+            let _ = std::io::copy(&mut f, &mut stdout);
+        });
 }
