@@ -15,7 +15,7 @@ impl PathVec {
         return env::join_paths(self.unique()).expect("join unique path error");
     }
 
-    pub fn iter(&self) -> std::collections::vec_deque::Iter<PathBuf> {
+    pub fn iter(&self) -> impl Iterator<Item=&PathBuf> {
         self.vec.iter()
     }
 
@@ -31,9 +31,7 @@ impl PathVec {
 
     pub fn no_version_managers(&self) -> Self {
         let vec = self.vec.clone().into_iter().filter(|x| {
-            let skip = x.ends_with(".pyenv/shims")
-                || x.ends_with(".rbenv/shims");
-            !skip
+            !x.ends_with(".pyenv/shims") && !x.ends_with(".rbenv/shims")
         }).collect::<VecDeque<_>>();
         Self {
             vec
