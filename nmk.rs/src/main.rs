@@ -82,8 +82,8 @@ fn setup_prefer_editor() {
     }
 }
 
-fn unset_temp_env(config: config::Config) {
-    for name in config.tmux_setting_envs {
+fn unset_temp_env(config: &config::Config) {
+    for name in config.tmux_setting_envs.iter() {
         env::remove_var(name);
     }
 }
@@ -118,7 +118,8 @@ fn main() {
     zsh::setup(&arg, &nmk_dir);
     setup_prefer_editor();
     if arg.login {
-        unset_temp_env(config::load(&nmk_dir));
+        let config = config::load(&nmk_dir);
+        unset_temp_env(&config);
         tmux.login_shell(arg, start);
     } else {
         tmux.exec(arg, start);
