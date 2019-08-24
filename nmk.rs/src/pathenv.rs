@@ -12,7 +12,7 @@ pub struct PathVec {
 
 impl PathVec {
     pub fn make(&self) -> OsString {
-        return env::join_paths(self.unique()).expect("join unique path error");
+        return env::join_paths(self.unique()).expect("join path error");
     }
 
     pub fn iter(&self) -> impl Iterator<Item=&PathBuf> {
@@ -32,7 +32,7 @@ impl PathVec {
     pub fn no_version_managers(&self) -> Self {
         let vec = self.vec.clone().into_iter().filter(|x| {
             !x.ends_with(".pyenv/shims") && !x.ends_with(".rbenv/shims")
-        }).collect::<VecDeque<_>>();
+        }).collect();
         Self {
             vec
         }
