@@ -1,10 +1,10 @@
 use std::collections::VecDeque;
 use std::env;
 use std::ffi::{OsStr, OsString};
+use std::iter::FromIterator;
 use std::path::PathBuf;
 
 use indexmap::IndexSet;
-use nix::NixPath;
 
 pub struct PathVec {
     vec: VecDeque<PathBuf>,
@@ -20,13 +20,10 @@ impl PathVec {
     }
 
     pub fn unique(&self) -> Self {
-        let vec = self.vec.iter().map(|x| x.to_owned())
+        self.vec.clone().into_iter()
             .collect::<IndexSet<_>>()
-            .into_iter().filter(|x| x.len() > 0)
-            .collect::<VecDeque<_>>();
-        Self {
-            vec
-        }
+            .into_iter()
+            .collect()
     }
 
     pub fn no_version_managers(&self) -> Self {
@@ -49,8 +46,11 @@ impl PathVec {
 
     pub fn parse<T: AsRef<OsStr>>(input: T) -> Self {
         let mut vec = VecDeque::new();
-        for s in env::split_paths(input.as_ref()) {
-            vec.push_back(s);
+        let unparsed = input.as_ref();
+        if !unparsed.is_empty() {
+            for p in env::split_paths(unparsed) {
+                vec.push_back(p);
+            }
         }
         Self { vec }
     }
@@ -58,6 +58,14 @@ impl PathVec {
     pub fn new() -> Self {
         Self {
             vec: VecDeque::new(),
+        }
+    }
+}
+
+impl FromIterator<PathBuf> for PathVec {
+    fn from_iter<T: IntoIterator<Item=PathBuf>>(iter: T) -> Self {
+        Self {
+            vec: iter.into_iter().collect()
         }
     }
 }
@@ -119,7 +127,7 @@ mod tests {
 
         // remove pyenv, rbenv, and node path
         let input = OsString::from("/a:/home/.pyenv/shims:/home/.rbenv/shims");
-        let mut ps = PathVec::parse(&input).no_version_managers();
+        let ps = PathVec::parse(&input).no_version_managers();
         let actual = ps.make();
         assert_eq!(actual, OsString::from("/a"))
     }
