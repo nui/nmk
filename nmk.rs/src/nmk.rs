@@ -2,6 +2,7 @@ use std::env;
 use std::fs::File;
 use std::path::PathBuf;
 
+use crate::core::set_env;
 use crate::pathenv::PathVec;
 
 pub fn add_local_library(nmk_dir: &PathBuf) {
@@ -18,8 +19,7 @@ pub fn add_local_library(nmk_dir: &PathBuf) {
         };
         ps.push_front(local_lib_dir);
         let next_ld = ps.make();
-        debug!("{}: {:?}", LD, &next_ld);
-        env::set_var(LD, next_ld);
+        set_env(LD, next_ld);
     }
 }
 

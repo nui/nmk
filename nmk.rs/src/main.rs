@@ -3,6 +3,7 @@ extern crate log;
 
 use std::env;
 use std::path::PathBuf;
+use log::Level::Debug;
 
 use crate::argument::Argument;
 use crate::core::*;
@@ -28,18 +29,18 @@ fn get_unicode() -> &'static str {
     }
 }
 
-fn setup_path(arg: &Argument, nmk_dir: &PathBuf) {
+fn setup_path(nmk_dir: &PathBuf) {
     const PATH: &str = "PATH";
     let mut p = pathenv::PathVec::parse(env::var_os(PATH).expect("$PATH not found"));
     p.push_front(nmk_dir.join("local").join("bin"));
     p.push_front(nmk_dir.join("bin"));
     p = p.unique().no_version_managers();
-    if arg.debug {
+    if log_enabled!(Debug) {
         for (i, path) in p.iter().enumerate() {
             debug!("{}[{}]={:?}", PATH, i + 1, path);
         }
     }
-    env::set_var(PATH, p.make());
+    set_env(PATH, p.make());
 }
 
 fn setup_environment(arg: &Argument, nmk_dir: &PathBuf, tmux: &Tmux, unicode_name: &str) {
@@ -83,9 +84,8 @@ fn setup_prefer_editor() {
 }
 
 fn unset_temp_env(config: &config::Config) {
-    for name in config.tmux_setting_envs.iter() {
-        env::remove_var(name);
-    }
+    config.tmux_setting_envs.iter()
+        .for_each(env::remove_var)
 }
 
 fn main() {
@@ -106,9 +106,9 @@ fn main() {
 
     let nmk_dir = nmk::dir();
     let tmux_dir = tmux::dir(&nmk_dir);
-    debug!("nmk_dir: {:?}, tmux_dir: {:?}", nmk_dir, tmux_dir);
+    debug!("nmk_dir={:?}", nmk_dir);
     nmk::add_local_library(&nmk_dir);
-    setup_path(&arg, &nmk_dir);
+    setup_path(&nmk_dir);
 
     let tmux = Tmux::new(&nmk_dir, tmux_dir);
     debug!("using tmux version {}", tmux.version());
@@ -119,7 +119,7 @@ fn main() {
     setup_prefer_editor();
     if arg.login {
         let config = config::load(&nmk_dir);
-        unset_temp_env(&config);
+        unset_temp_env(&config); // TODO: check if this is necessary
         tmux.login_shell(arg, start);
     } else {
         tmux.exec(arg, start);
