@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+#[allow(dead_code)]
 #[derive(Debug, PartialEq, Clone)]
 pub enum PlatformType {
     Unknown,
