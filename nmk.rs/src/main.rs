@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate lazy_static;
 
 use std::env;
 use std::path::PathBuf;
@@ -22,11 +24,13 @@ mod time;
 mod tmux;
 mod zsh;
 
-fn get_unicode() -> &'static str {
-    match platform::get() {
-        platform::PlatformType::OSX => "en_US.UTF-8",
-        _ => "C.UTF-8",
-    }
+lazy_static! {
+    static ref UNICODE: &'static str = {
+        match platform::get() {
+            platform::PlatformType::OSX => "en_US.UTF-8",
+            _ => "C.UTF-8",
+        }
+    };
 }
 
 fn setup_path(nmk_dir: &PathBuf) {
@@ -90,7 +94,7 @@ fn unset_temp_env(config: &config::Config) {
 
 fn main() {
     let start = std::time::Instant::now();
-    let unicode_name = get_unicode();
+    let unicode_name: &str = *UNICODE;
     let arg = argument::parse(unicode_name);
     let verbosity = if arg.debug { 3 } else { 1 };
     stderrlog::new()
