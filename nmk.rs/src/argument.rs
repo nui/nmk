@@ -6,10 +6,7 @@ use crate::time::{human_time, seconds_since_build};
 pub struct Argument<'a> {
     arg: ArgMatches<'a>,
     pub force256color: bool,
-    pub force8color: bool,
     pub login: bool,
-    pub unicode: bool,
-    pub force_unicode: bool,
     pub detach_on_destroy: bool,
     pub autofix: bool,
     pub inception: bool,
@@ -22,10 +19,7 @@ impl<'a> From<ArgMatches<'a>> for Argument<'a> {
     fn from(m: ArgMatches<'a>) -> Self {
         Argument {
             force256color: m.is_present(FORCE_256_COLOR),
-            force8color: m.is_present(FORCE_8_COLOR),
             login: m.is_present(LOGIN),
-            unicode: m.is_present(UNICODE),
-            force_unicode: m.is_present(FORCE_UNICODE),
             detach_on_destroy: m.is_present(DETACH_ON_DESTROY),
             autofix: !m.is_present(NO_AUTOFIX),
             inception: m.is_present(INCEPTION),
@@ -48,11 +42,8 @@ impl<'a> Argument<'a> {
 }
 
 const FORCE_256_COLOR: &str = "FORCE_256_COLOR";
-const FORCE_8_COLOR: &str = "FORCE_8_COLOR";
 const SOCKET: &str = "SOCKET";
 const LOGIN: &str = "LOGIN";
-const UNICODE: &str = "UNICODE";
-const FORCE_UNICODE: &str = "FORCE_UNICODE";
 const DETACH_ON_DESTROY: &str = "DETACH_ON_DESTROY";
 const NO_AUTOFIX: &str = "NO_AUTOFIX";
 const INCEPTION: &str = "INCEPTION";
@@ -69,7 +60,7 @@ fn get_version() -> Option<String> {
     }
 }
 
-pub fn parse(unicode: &str) -> Argument {
+pub fn parse() -> Argument<'static> {
     let version = get_version().unwrap_or_default();
     App::new("nmk")
         .version(version.as_str())
@@ -77,10 +68,6 @@ pub fn parse(unicode: &str) -> Argument {
         .arg(Arg::with_name(FORCE_256_COLOR)
             .short("2")
             .help("Assume the terminal supports 256 colours")
-        )
-        .arg(Arg::with_name(FORCE_8_COLOR)
-            .short("8")
-            .help("Force 8 colours terminal")
         )
         .arg(Arg::with_name(SOCKET)
             .short("L")
@@ -94,15 +81,6 @@ pub fn parse(unicode: &str) -> Argument {
             .short("l")
             .long("login")
             .help("Start zsh login shell")
-        )
-        .arg(Arg::with_name(UNICODE)
-            .short("u")
-            .long("unicode")
-            .help(format!("LANG={}", unicode).as_str())
-        )
-        .arg(Arg::with_name(FORCE_UNICODE)
-            .long("force-unicode")
-            .help(format!("LC_ALL={}", unicode).as_str())
         )
         .arg(Arg::with_name(DETACH_ON_DESTROY)
             .long("detach-on-destroy")

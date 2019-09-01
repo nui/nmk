@@ -1,10 +1,9 @@
 #[macro_use]
 extern crate log;
-#[macro_use]
-extern crate lazy_static;
 
 use std::env;
 use std::path::PathBuf;
+
 use log::Level::Debug;
 
 use crate::argument::Argument;
@@ -24,15 +23,6 @@ mod time;
 mod tmux;
 mod zsh;
 
-lazy_static! {
-    static ref UNICODE: &'static str = {
-        match platform::get() {
-            platform::PlatformType::OSX => "en_US.UTF-8",
-            _ => "C.UTF-8",
-        }
-    };
-}
-
 fn setup_path(nmk_dir: &PathBuf) {
     const PATH: &str = "PATH";
     let mut p = pathenv::PathVec::parse(env::var_os(PATH).expect("$PATH not found"));
@@ -47,7 +37,7 @@ fn setup_path(nmk_dir: &PathBuf) {
     set_env(PATH, p.make());
 }
 
-fn setup_environment(arg: &Argument, nmk_dir: &PathBuf, tmux: &Tmux, unicode_name: &str) {
+fn setup_environment(arg: &Argument, nmk_dir: &PathBuf, tmux: &Tmux) {
     let init_vim = nmk_dir.join("vim").join("init.vim");
     let zdotdir = nmk_dir.join("zsh");
     set_env("NMK_DIR", nmk_dir);
@@ -63,15 +53,6 @@ fn setup_environment(arg: &Argument, nmk_dir: &PathBuf, tmux: &Tmux, unicode_nam
     set_env("ZDOTDIR", zdotdir);
 
     env::remove_var("VIRTUAL_ENV");
-    const LANG: &str = "LANG";
-    let lang_defined = || env::var_os(LANG).is_some();
-    if arg.unicode || (arg.autofix && !lang_defined()) {
-        set_env(LANG, unicode_name);
-    }
-
-    if arg.force_unicode {
-        set_env("LC_ALL", unicode_name);
-    }
 
     set_env("NMK_BIN", env::current_exe().unwrap());
 }
@@ -94,8 +75,7 @@ fn unset_temp_env(config: &config::Config) {
 
 fn main() {
     let start = std::time::Instant::now();
-    let unicode_name: &str = *UNICODE;
-    let arg = argument::parse(unicode_name);
+    let arg = argument::parse();
     let verbosity = if arg.debug { 3 } else { 1 };
     stderrlog::new()
         .module(module_path!())
@@ -118,7 +98,7 @@ fn main() {
     debug!("using tmux version {}", tmux.version());
 
     terminal::setup(&arg);
-    setup_environment(&arg, &nmk_dir, &tmux, unicode_name);
+    setup_environment(&arg, &nmk_dir, &tmux);
     zsh::setup(&arg, &nmk_dir);
     setup_prefer_editor();
     if arg.login {
