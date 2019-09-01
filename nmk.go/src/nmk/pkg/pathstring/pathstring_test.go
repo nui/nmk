@@ -15,16 +15,21 @@ func TestPathString(t *testing.T) {
 		//baz := "/baz"
 		Convey("empty path", func() {
 			Convey("Make() should return empty string", func() {
-				sp := New("")
+				sp := Parse("")
 				So(sp.Make(), ShouldEqual, "")
 			})
 			Convey("Prepend one item should return as is", func() {
-				sp := New("")
+				sp := Parse("")
 				sp.Prepend(foo)
 				So(sp.Make(), ShouldEqual, foo)
 			})
+			Convey("Append one item should return as is", func() {
+				sp := Parse("")
+				sp.Append(foo)
+				So(sp.Make(), ShouldEqual, foo)
+			})
 			Convey("Prepend two items should return correct order", func() {
-				sp := New("")
+				sp := Parse("")
 				sp.Prepend(foo).Prepend(bar)
 				expect := bar + string(os.PathListSeparator) + foo
 				So(sp.Make(), ShouldEqual, expect)
@@ -35,12 +40,12 @@ func TestPathString(t *testing.T) {
 				parts := []string{foo, bar}
 				joinedPath := strings.Join(parts, string(os.PathListSeparator))
 				Convey("Prepend existing should not swap order", func() {
-					sp := New(joinedPath)
+					sp := Parse(joinedPath)
 					sp.Prepend(foo)
 					So(sp.Make(), ShouldEqual, joinedPath)
 				})
 				Convey("Prepend existing should swap order", func() {
-					sp := New(joinedPath)
+					sp := Parse(joinedPath)
 					sp.Prepend(bar)
 					expected := strings.Join([]string{bar, foo}, string(os.PathListSeparator))
 					So(sp.Make(), ShouldEqual, expected)

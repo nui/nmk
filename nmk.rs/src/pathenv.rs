@@ -90,21 +90,29 @@ mod tests {
     #[test]
     fn test() {
         // no item
-        let ps = PathVec::parse(OsString::from(""));
+        let ps = PathVec::parse(OsString::new());
         let actual = ps.make();
         assert_eq!(actual, "");
 
         // no item add one to front
-        let mut ps = PathVec::parse(OsString::from(""));
+        let mut ps = PathVec::parse(OsString::new());
         ps.push_front(FOO.to_string());
         let actual = ps.make();
         assert_eq!(actual, FOO);
 
         // no item add one to back
-        let mut ps = PathVec::parse(OsString::from(""));
+        let mut ps = PathVec::parse(OsString::new());
         ps.push_back(FOO.to_string());
         let actual = ps.make();
         assert_eq!(actual, FOO);
+
+        // no item add two items to back
+        let mut ps = PathVec::parse(OsString::new());
+        ps.push_back(FOO.to_string());
+        ps.push_back(BAR.to_string());
+        let actual = ps.make();
+        let expected = OsString::from(format!("{}:{}", FOO, BAR));
+        assert_eq!(actual, expected);
 
         // one item
         let ps = PathVec::parse(OsString::from(FOO));

@@ -1,36 +1,28 @@
 package nmk
 
 import (
-	"fmt"
 	"github.com/urfave/cli"
 )
 
 type Arg struct {
 	Force256color   bool
-	Force8color     bool
-	Socket          string
 	Login           bool
-	Unicode         bool
-	ForceUnicode    bool
+	Socket          string
 	DetachOnDestroy bool
 	AutoFix         bool
 	Inception       bool
 	Debug           bool
 	Usage           bool
+	Ssh             bool
 }
 
-func GetFlagArg(unicodeName string) ([]cli.Flag, *Arg) {
+func GetFlagArg() ([]cli.Flag, *Arg) {
 	arg := Arg{}
 	flags := []cli.Flag{
 		cli.BoolFlag{
 			Name:        "2",
 			Usage:       "Assume the terminal supports 256 colours",
 			Destination: &arg.Force256color,
-		},
-		cli.BoolFlag{
-			Name:        "8",
-			Usage:       "Assume the terminal supports 8 colours",
-			Destination: &arg.Force8color,
 		},
 		cli.StringFlag{
 			Name:        "socket, L",
@@ -42,16 +34,6 @@ func GetFlagArg(unicodeName string) ([]cli.Flag, *Arg) {
 			Name:        "login, l",
 			Usage:       "start a login shell",
 			Destination: &arg.Login,
-		},
-		cli.BoolFlag{
-			Name:        "unicode, u",
-			Usage:       fmt.Sprintf("export LANG=%s", unicodeName),
-			Destination: &arg.Unicode,
-		},
-		cli.BoolFlag{
-			Name:        "force-unicode",
-			Usage:       fmt.Sprintf("export LC_ALL=%s", unicodeName),
-			Destination: &arg.ForceUnicode,
 		},
 		cli.BoolFlag{
 			Name:        "detach-on-destroy",
@@ -72,6 +54,10 @@ func GetFlagArg(unicodeName string) ([]cli.Flag, *Arg) {
 			Name:        "debug, d",
 			Usage:       "print debug log",
 			Destination: &arg.Debug,
+		},
+		cli.BoolFlag{
+			Name:        "ssh",
+			Destination: &arg.Ssh,
 		},
 		cli.BoolFlag{
 			Name:        "usage",

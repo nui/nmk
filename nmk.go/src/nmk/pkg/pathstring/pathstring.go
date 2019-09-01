@@ -11,7 +11,7 @@ type PathString struct {
 	l *list.List
 }
 
-func New(input string) *PathString {
+func Parse(input string) *PathString {
 	return new(PathString).Init(input)
 }
 

@@ -13,7 +13,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 )
@@ -34,7 +33,7 @@ func AddLocalLibrary(nmkDir string) {
 	if _, err := os.Stat(localLibDir); err == nil {
 		before := os.Getenv(LD)
 		logrus.Debugf("before %s=%s", LD, before)
-		sp := pathstring.New(before)
+		sp := pathstring.Parse(before)
 		sp.Prepend(localLibDir)
 		after := sp.Make()
 		logrus.Debugf("after %s=%s", LD, after)
@@ -66,7 +65,7 @@ func CheckDependencies() {
 
 func SetupPath(arg *nmk.Arg, nmkDir string) {
 	const PATH = "PATH"
-	sp := pathstring.New(os.Getenv(PATH))
+	sp := pathstring.Parse(os.Getenv(PATH))
 	sp.Prepend(path.Join(nmkDir, "local", "bin"))
 	sp.Prepend(path.Join(nmkDir, "bin"))
 	nextPath := sp.Make()
@@ -89,7 +88,7 @@ func SetupTerminal(arg *nmk.Arg) {
 	Setenv("NMK_TMUX_256_COLOR", flag)
 }
 
-func SetupEnvironment(arg *nmk.Arg, nmkDir string, tmuxVersion string, unicodeName string) {
+func SetupEnvironment(arg *nmk.Arg, nmkDir string, tmuxVersion string) {
 	initVim := path.Join(nmkDir, "vim", "init.vim")
 	zdotdir := path.Join(nmkDir, "zsh")
 	Setenv("NMK_DIR", nmkDir)
@@ -111,17 +110,6 @@ func SetupEnvironment(arg *nmk.Arg, nmkDir string, tmuxVersion string, unicodeNa
 	Setenv("ZDOTDIR", zdotdir)
 
 	_ = os.Unsetenv("VIRTUAL_ENV")
-
-	const Lang = "LANG"
-	_, foundLang := os.LookupEnv(Lang)
-
-	if arg.Unicode || (arg.AutoFix && !foundLang) {
-		Setenv(Lang, unicodeName)
-	}
-
-	if arg.ForceUnicode {
-		Setenv("LC_ALL", unicodeName)
-	}
 
 	if exe, err := os.Executable(); err != nil {
 		logrus.Fatal(err)
@@ -169,17 +157,12 @@ func ClearTempEnv(nmkDir string) {
 func main() {
 	startTime := time.Now()
 
-	UnicodeName := "C.UTF-8"
-	if runtime.GOOS == "darwin" {
-		UnicodeName = "en_US.UTF-8"
-	}
-
 	app := cli.NewApp()
-	app.Usage = "An entrypoint for nmk, See https://github.com/nuimk/nmk"
+	app.Usage = "An entrypoint for nmk"
 	app.Version = "1.0"
 
 	var arg *nmk.Arg
-	app.Flags, arg = nmk.GetFlagArg(UnicodeName)
+	app.Flags, arg = nmk.GetFlagArg()
 
 	app.Action = func(c *cli.Context) error {
 		startPid := 0
@@ -187,6 +170,10 @@ func main() {
 		if arg.Debug {
 			startPid = RunGetProcessId()
 			logrus.SetLevel(logrus.DebugLevel)
+		}
+
+		if arg.Ssh {
+			// TODO: Display MOTD
 		}
 
 		nmkDir := nmk.FindNmkDir()
@@ -199,7 +186,7 @@ func main() {
 		logrus.Debugf("using tmux %s", tmuxVersion)
 
 		SetupTerminal(arg)
-		SetupEnvironment(arg, nmkDir, tmuxVersion, UnicodeName)
+		SetupEnvironment(arg, nmkDir, tmuxVersion)
 		SetupZsh(arg, nmkDir)
 		SetupPreferEditor()
 
