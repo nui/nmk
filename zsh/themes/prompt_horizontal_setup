@@ -274,7 +274,7 @@ prompt_horizontal_setup() {
 	# Enable/Disable horizontal features
 	: ${horizontal[base_color]:=cyan}
 	: ${horizontal[color]:=1}
-	: ${horizontal[cozy]:=0}
+	: ${horizontal[cozy]:=1}
 	: ${horizontal[exec_time]:=1}
 	: ${horizontal[git]:=1}
 	: ${horizontal[git_dirty]:=1}
