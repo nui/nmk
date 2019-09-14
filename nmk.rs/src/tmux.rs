@@ -6,6 +6,7 @@ use std::time::Instant;
 
 use crate::argument::Argument;
 use crate::core::*;
+use crate::terminal;
 
 const TMUX: &str = "tmux";
 
@@ -17,7 +18,7 @@ pub struct Tmux<'a> {
 }
 
 impl<'a> Tmux<'a> {
-    pub fn new(nmk_dir: &PathBuf, tmux_dir: PathBuf) -> Tmux {
+    pub fn new(nmk_dir: &'a PathBuf, tmux_dir: PathBuf) -> Tmux {
         Tmux {
             nmk_dir,
             tmux_dir,
@@ -39,11 +40,14 @@ impl<'a> Tmux<'a> {
         conf_path
     }
 
-    pub fn setup(&self, arg: &Argument) {
+    pub fn setup_environment(&self, arg: &Argument) {
         set_env("NMK_TMUX_DEFAULT_SHELL", which::which("zsh").expect("zsh not found"));
         set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.nmk_dir.join("tmux").join(".tmux_history"));
         set_env("NMK_TMUX_VERSION", &self.version);
+        let color = terminal::support_256_color(arg);
+        set_env("NMK_TMUX_DEFAULT_TERMINAL", if color { "screen-256color" } else { "screen" });
+        set_env("NMK_TMUX_256_COLOR", one_hot!(color));
     }
 
     fn print_usage_time(&self, arg: &Argument, start: &Instant) {

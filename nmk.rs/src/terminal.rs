@@ -3,7 +3,6 @@ use std::ffi::OsString;
 
 use crate::argument::Argument;
 use crate::container;
-use crate::core::*;
 
 fn is_vec_contains_term(vec: Vec<&str>, term: Option<OsString>) -> bool {
     term.and_then(|x| x.into_string().ok())
@@ -26,17 +25,11 @@ fn is_256_colorterm(term: Option<OsString>) -> bool {
     is_vec_contains_term(terms, term)
 }
 
-fn support_256_color(arg: &Argument) -> bool {
+pub fn support_256_color(arg: &Argument) -> bool {
     arg.force256color
         || is_256_term(env::var_os("TERM"))
         || is_256_colorterm(env::var_os("COLORTERM"))
         || (arg.autofix && container::detect_container())
-}
-
-pub fn setup(arg: &Argument) {
-    let color = support_256_color(arg);
-    set_env("NMK_TMUX_DEFAULT_TERMINAL", if color { "screen-256color" } else { "screen" });
-    set_env("NMK_TMUX_256_COLOR", one_hot!(color));
 }
 
 #[cfg(test)]

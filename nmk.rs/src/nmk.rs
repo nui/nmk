@@ -2,10 +2,65 @@ use std::env;
 use std::fs::File;
 use std::path::PathBuf;
 
+use log::Level::Debug;
+
 use crate::core::set_env;
 use crate::pathenv::PathVec;
 
-pub fn add_local_library(nmk_dir: &PathBuf) {
+pub fn setup_logging(debug: bool) {
+    let verbosity = if debug { 3 } else { 1 };
+    stderrlog::new()
+        .module(module_path!())
+        .verbosity(verbosity)
+        .init()
+        .expect("Cannot setup logger");
+}
+
+pub fn setup_environment(nmk_dir: &PathBuf) {
+    let init_vim = nmk_dir.join("vim").join("init.vim");
+    let zdotdir = nmk_dir.join("zsh");
+    set_env("NMK_DIR", nmk_dir);
+
+    if let Some(path) = init_vim
+        .to_str()
+        .map(|s|
+            s.to_string().replace(" ", r"\ ")
+        ) {
+        set_env("VIMINIT", format!("source {}", path));
+    }
+    set_env("ZDOTDIR", zdotdir);
+
+    env::remove_var("VIRTUAL_ENV");
+
+    set_env("NMK_BIN", env::current_exe().unwrap());
+}
+
+pub fn setup_preferred_editor() {
+    const EDITOR: &str = "EDITOR";
+    if env::var_os(EDITOR).is_none() {
+        let mut editors = ["nvim", "vim"].iter();
+        if let Some(editor) = editors.find(|bin| which::which(bin).is_ok()) {
+            set_env(EDITOR, editor);
+            debug!("using {} as prefer editor", editor);
+        }
+    }
+}
+
+pub fn setup_path(nmk_dir: &PathBuf) {
+    const PATH: &str = "PATH";
+    let mut p = PathVec::parse(env::var_os(PATH).expect("$PATH not found"));
+    p.push_front(nmk_dir.join("local").join("bin"));
+    p.push_front(nmk_dir.join("bin"));
+    p = p.unique().no_version_managers();
+    if log_enabled!(Debug) {
+        for (i, path) in p.iter().enumerate() {
+            debug!("{}[{}]={:?}", PATH, i + 1, path);
+        }
+    }
+    set_env(PATH, p.make());
+}
+
+pub fn setup_ld_library_path(nmk_dir: &PathBuf) {
     const LD: &str = "LD_LIBRARY_PATH";
 
     let local_lib_dir = nmk_dir.join("local").join("lib");
@@ -37,14 +92,14 @@ pub fn dir() -> PathBuf {
     path
 }
 
-pub fn display_motd() {
+pub fn print_message_of_the_day() {
     let mut stdout = std::io::stdout();
-    vec!["/var/run/motd.dynamic", "/etc/motd"]
-        .into_iter()
-        .map(|p| PathBuf::from(p))
+    ["/var/run/motd.dynamic", "/etc/motd"]
+        .iter()
+        .map(PathBuf::from)
         .filter(|p| p.exists())
-        .flat_map(|p| File::open(p))
+        .flat_map(File::open)
         .for_each(|mut f| {
-            let _ = std::io::copy(&mut f, &mut stdout);
+            std::io::copy(&mut f, &mut stdout).expect("fail to print motd");
         });
 }
