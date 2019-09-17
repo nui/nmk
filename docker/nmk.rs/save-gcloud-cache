@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/sh
 
-tar -C $CARGO_HOME -caf cargo-registry.tar.gz registry
+tar -C /cargo-build-cache-dir -caf cargo-registry.tar.gz registry
 tar -C nmk.rs -caf target.tar.gz target

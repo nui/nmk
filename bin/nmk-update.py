@@ -5,6 +5,7 @@ Run on Python 2.6.6 and later
 import gzip
 import json
 import logging
+import platform
 import os
 import subprocess
 import time
@@ -163,6 +164,13 @@ def build_parser():
     return parser
 
 
+def select_launcher():
+    machine = platform.machine()
+    part = 'armv7-linux' if machine == 'armv7l' else 'amd64-linux-musl'
+    return 'https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk.rs-' + part + '.gz'
+
+
+
 def update_from_remote(args):
     resource = GoogleCloudStorageResource()
 
@@ -174,7 +182,7 @@ def update_from_remote(args):
     download_and_install(download_url)
     resource.save_to_cache()
     logging.info('Done')
-    download_and_install_launcher('https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk.rs-amd64-linux-musl.gz')
+    download_and_install_launcher(select_launcher())
 
 
 def prevent_run_on_git():

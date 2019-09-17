@@ -6,16 +6,10 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - run
-    - 'gcr.io/$PROJECT_ID/nmk.rs'
-    - rustup
-    - show
-- name: 'gcr.io/cloud-builders/docker'
-  args:
-    - run
     - -v=/workspace:/workspace
-    - -v=/workspace/cargo-registry:/usr/local/cargo/registry
+    - -v=/workspace/cargo-build-cache-dir:/cargo-build-cache-dir
     - --workdir=/workspace
-    - 'gcr.io/$PROJECT_ID/nmk.rs'
+    - debian
     - ./docker/nmk.rs/restore-gcloud-cache
   timeout: 60s
 - name: 'gcr.io/cloud-builders/docker'
@@ -24,19 +18,31 @@ steps:
     - -e
     - 'SHORT_SHA=$SHORT_SHA'
     - -v=/workspace:/workspace
-    - -v=/workspace/cargo-registry:/usr/local/cargo/registry
+    - -v=/workspace/cargo-build-cache-dir/registry:/usr/local/cargo/registry
     - --workdir=/workspace/nmk.rs
     - 'gcr.io/$PROJECT_ID/nmk.rs'
     - make
-    - multiarch
+    - amd64-alpine
+  timeout: 600s
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - run
+    - -e
+    - 'SHORT_SHA=$SHORT_SHA'
+    - -v=/workspace:/workspace
+    - -v=/workspace/cargo-build-cache-dir/registry:/root/.cargo/registry
+    - --workdir=/workspace/nmk.rs
+    - 'gcr.io/$PROJECT_ID/nmk.rs:armv7'
+    - make
+    - armv7
   timeout: 600s
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - run
     - -v=/workspace:/workspace
-    - -v=/workspace/cargo-registry:/usr/local/cargo/registry
+    - -v=/workspace/cargo-build-cache-dir:/cargo-build-cache-dir
     - --workdir=/workspace
-    - 'gcr.io/$PROJECT_ID/nmk.rs'
+    - debian
     - ./docker/nmk.rs/save-gcloud-cache
   timeout: 60s
 - name: gcr.io/cloud-builders/gsutil
@@ -48,4 +54,7 @@ artifacts:
     location: "gs://nmk.nuimk.com/nmk.rs"
     paths:
       - nmk.rs-amd64-linux-musl.gz
+      - nmk.rs-armv7-linux.gz
+options:
+  machineType: 'N1_HIGHCPU_8'
 

@@ -1,0 +1,11 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - build
+    - -f
+    - docker/nmk.rs/Dockerfile.armv7
+    - -t
+    - 'gcr.io/$PROJECT_ID/nmk.rs:armv7'
+    - docker/nmk.rs
+images:
+  - 'gcr.io/$PROJECT_ID/nmk.rs:armv7'
