@@ -4,7 +4,7 @@ DIST_DIR ?= dist
 EPOCHSECONDS := $(shell date +%s)
 BUILD_ENV := EPOCHSECONDS=$(EPOCHSECONDS)
 
-BUILD := $(BUILD_ENV) cargo build
+BUILD := env $(BUILD_ENV) cargo build
 
 ALPINE_TARGET := x86_64-unknown-linux-musl
 ALPINE_BIN := target/$(ALPINE_TARGET)/$(RELEASE_BIN)
@@ -19,6 +19,9 @@ arm:
 
 build:
 	$(BUILD)
+
+release:
+	$(BUILD) --release
 
 clean:
 	cargo clean
