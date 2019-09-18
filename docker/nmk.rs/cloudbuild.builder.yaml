@@ -6,7 +6,6 @@ steps:
     - docker/nmk.rs/Dockerfile
     - -t
     - 'gcr.io/$PROJECT_ID/nmk.rs'
-    - .
-  timeout: 120s
+    - docker/nmk.rs
 images:
   - 'gcr.io/$PROJECT_ID/nmk.rs'

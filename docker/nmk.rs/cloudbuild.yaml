@@ -18,24 +18,12 @@ steps:
     - -e
     - 'SHORT_SHA=$SHORT_SHA'
     - -v=/workspace:/workspace
-    - -v=/workspace/cargo-build-cache-dir/registry:/usr/local/cargo/registry
+    - -v=/workspace/cargo-build-cache-dir/registry:/root/.cargo/registry
     - --workdir=/workspace/nmk.rs
     - 'gcr.io/$PROJECT_ID/nmk.rs'
     - make
-    - amd64-alpine
-  timeout: 600s
-- name: 'gcr.io/cloud-builders/docker'
-  args:
-    - run
-    - -e
-    - 'SHORT_SHA=$SHORT_SHA'
-    - -v=/workspace:/workspace
-    - -v=/workspace/cargo-build-cache-dir/registry:/root/.cargo/registry
-    - --workdir=/workspace/nmk.rs
-    - 'gcr.io/$PROJECT_ID/nmk.rs:armv7'
-    - make
-    - armv7
-  timeout: 600s
+    - amd64-linux-musl
+    - armv7-linux
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - run
@@ -55,6 +43,5 @@ artifacts:
     paths:
       - nmk.rs-amd64-linux-musl.gz
       - nmk.rs-armv7-linux.gz
-options:
-  machineType: 'N1_HIGHCPU_8'
-
+# options:
+#   machineType: 'N1_HIGHCPU_8'
