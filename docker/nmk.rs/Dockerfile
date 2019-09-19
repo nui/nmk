@@ -22,3 +22,4 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no
 COPY cargo-config /root/.cargo/config
 
 ENV DIST_DIR=/workspace
+ENV PATH=/root/.cargo/bin:${PATH}

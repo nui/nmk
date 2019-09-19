@@ -20,19 +20,17 @@ impl PathVec {
     }
 
     pub fn unique(&self) -> Self {
-        self.vec.clone().into_iter()
+        self.vec.iter()
             .collect::<IndexSet<_>>()
             .into_iter()
+            .cloned()
             .collect()
     }
 
     pub fn no_version_managers(&self) -> Self {
-        let vec = self.vec.clone().into_iter().filter(|x| {
+        self.vec.iter().filter(|x| {
             !x.ends_with(".pyenv/shims") && !x.ends_with(".rbenv/shims")
-        }).collect();
-        Self {
-            vec
-        }
+        }).cloned().collect()
     }
 
     pub fn push_front<T: Into<PathBuf>>(&mut self, path: T) {
@@ -45,14 +43,12 @@ impl PathVec {
     }
 
     pub fn parse<T: AsRef<OsStr>>(input: T) -> Self {
-        let mut vec = VecDeque::new();
         let unparsed = input.as_ref();
         if !unparsed.is_empty() {
-            for p in env::split_paths(unparsed) {
-                vec.push_back(p);
-            }
+            env::split_paths(unparsed).collect()
+        } else {
+            Self::new()
         }
-        Self { vec }
     }
 
     pub fn new() -> Self {
@@ -138,5 +134,13 @@ mod tests {
         let ps = PathVec::parse(&input).no_version_managers();
         let actual = ps.make();
         assert_eq!(actual, OsString::from("/a"))
+    }
+
+    #[test]
+    fn test_unique() {
+        let input = OsString::from("/a:/b:/a");
+        let ps = PathVec::parse(&input);
+        let actual = ps.make();
+        assert_eq!(actual, OsString::from("/a:/b"))
     }
 }

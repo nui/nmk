@@ -8,7 +8,6 @@ RELEASE_BUILD_ENV := EPOCHSECONDS=$(EPOCHSECONDS) RUSTFLAGS="-C link-arg=-s"
 
 DEBUG_BUILD := $(DEBUG_BUILD_ENV) cargo build
 RELEASE_BUILD := $(RELEASE_BUILD_ENV) cargo build --release
-DOCKER_RELEASE_BUILD := PATH=/root/.cargo/bin:$(PATH) $(RELEASE_BUILD)
 
 AMD64_LINUX_MUSL_TARGET := x86_64-unknown-linux-musl
 AMD64_LINUX_MUSL_BIN := target/$(AMD64_LINUX_MUSL_TARGET)/$(RELEASE_BIN)
@@ -30,13 +29,16 @@ release:
 clean:
 	cargo clean
 
+test:
+	cargo test
+
 amd64-linux-musl:
-	$(DOCKER_RELEASE_BUILD) --target $(AMD64_LINUX_MUSL_TARGET)
+	$(RELEASE_BUILD) --target $(AMD64_LINUX_MUSL_TARGET)
 	cp $(AMD64_LINUX_MUSL_BIN) $(AMD64_LINUX_MUSL_OUT)
 	gzip -k $(AMD64_LINUX_MUSL_OUT)
 
 armv7-linux:
-	$(DOCKER_RELEASE_BUILD) --target $(ARMV7_LINUX_TARGET)
+	$(RELEASE_BUILD) --target $(ARMV7_LINUX_TARGET)
 	cp $(ARMV7_LINUX_BIN) $(ARMV7_LINUX_OUT)
 	gzip -k $(ARMV7_LINUX_OUT)
 

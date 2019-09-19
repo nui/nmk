@@ -11,7 +11,7 @@ steps:
     - --workdir=/workspace
     - debian
     - ./docker/nmk.rs/restore-gcloud-cache
-  timeout: 60s
+  timeout: 180s
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - run
@@ -22,8 +22,10 @@ steps:
     - --workdir=/workspace/nmk.rs
     - 'gcr.io/$PROJECT_ID/nmk.rs'
     - make
+    - test
     - amd64-linux-musl
     - armv7-linux
+  timeout: 1200s
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - run
@@ -32,7 +34,7 @@ steps:
     - --workdir=/workspace
     - debian
     - ./docker/nmk.rs/save-gcloud-cache
-  timeout: 60s
+  timeout: 180s
 - name: gcr.io/cloud-builders/gsutil
   args: ['cp', 'target.tar.gz', 'gs://nuimk-io-build-cache/nmk.rs/target.tar.gz']
 - name: gcr.io/cloud-builders/gsutil
@@ -43,5 +45,6 @@ artifacts:
     paths:
       - nmk.rs-amd64-linux-musl.gz
       - nmk.rs-armv7-linux.gz
+timeout: 1500s
 # options:
 #   machineType: 'N1_HIGHCPU_8'

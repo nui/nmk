@@ -1,5 +1,6 @@
 use std::env;
 use std::ffi::CString;
+use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
 use std::process::{Command, exit, Stdio};
 use std::time::Instant;
@@ -13,7 +14,7 @@ const TMUX: &str = "tmux";
 pub struct Tmux<'a> {
     nmk_dir: &'a PathBuf,
     tmux_dir: PathBuf,
-    bin: String,
+    bin: PathBuf,
     version: String,
 }
 
@@ -22,7 +23,7 @@ impl<'a> Tmux<'a> {
         Tmux {
             nmk_dir,
             tmux_dir,
-            bin: which::which(TMUX).unwrap().to_str().unwrap().to_string(),
+            bin: which::which(TMUX).expect("Cannot find tmux"),
             version: Tmux::call_check_version(),
         }
     }
@@ -94,7 +95,7 @@ impl<'a> Tmux<'a> {
         vec.push("-c");
         vec.push("exec zsh --login");
         let exec_args: Vec<_> = vec.into_iter().flat_map(CString::new).collect();
-        let exec_name = CString::new(self.bin.as_bytes()).unwrap();
+        let exec_name = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
         debug!("{:#?}", exec_name);
         debug!("{:#?}", exec_args);
         self.print_usage_time(&arg, &start);
@@ -132,7 +133,7 @@ impl<'a> Tmux<'a> {
             vec.extend(tmux_args);
         }
         let exec_args: Vec<_> = vec.into_iter().flat_map(CString::new).collect();
-        let exec_name = CString::new(self.bin.as_bytes()).unwrap();
+        let exec_name = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
         debug!("{:#?}", exec_name);
         debug!("{:#?}", exec_args);
         self.print_usage_time(&arg, &start);
