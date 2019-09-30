@@ -228,8 +228,12 @@ _nmk-kubectl-preexec() {
     fi
 }
 
-_nmk-update-tmux-environment() {
-    [[ -n $SSH_AUTH_SOCK && ! -S $SSH_AUTH_SOCK ]] && eval $(tmux show-environment -s)
+_nmk_update_ssh_socket_last_check=$EPOCHSECONDS
+_nmk-update-ssh-socket() {
+    [[ -n $SSH_AUTH_SOCK && ! -S $SSH_AUTH_SOCK ]] || (( $EPOCHSECONDS - $_nmk_update_ssh_socket_last_check > 300 )) && {
+        eval $(tmux show-environment -s)
+    }
+    _nmk_update_ssh_socket_last_check=$EPOCHSECONDS
 }
 
 (( ${+commands[kubectl]} )) && {
@@ -238,7 +242,7 @@ _nmk-update-tmux-environment() {
 }
 
 [[ -n $TMUX && -n $SSH_CONNECTION && -S $SSH_AUTH_SOCK ]] && {
-    _nmk_preexec_functions+=_nmk-update-tmux-environment
+    _nmk_precmd_functions+=_nmk-update-ssh-socket
 }
 
 _nmk_precmd() {
