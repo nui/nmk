@@ -44,7 +44,7 @@ impl<'a> Tmux<'a> {
     pub fn setup_environment(&self, arg: &Argument) {
         set_env("NMK_TMUX_DEFAULT_SHELL", which::which("zsh").expect("zsh not found"));
         set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
-        set_env("NMK_TMUX_HISTORY", self.nmk_dir.join("tmux").join(".tmux_history"));
+        set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
         set_env("NMK_TMUX_VERSION", &self.version);
         let color = terminal::support_256_color(arg);
         set_env("NMK_TMUX_DEFAULT_TERMINAL", if color { "screen-256color" } else { "screen" });
