@@ -12,4 +12,6 @@ for build_type in debug release; do
     check_exec "$HOME/.nmk/nmk.rs/target/$build_type/nmk"
 done
 
+check_exec "/usr/local/bin/nmk"
+
 exec $SHELL -l
