@@ -2,18 +2,17 @@ use std::env;
 use std::fs::File;
 use std::path::PathBuf;
 
-use log::Level::Debug;
-
+use simplelog::{CombinedLogger, TermLogger, LevelFilter, TerminalMode};
 use crate::core::set_env;
 use crate::pathenv::PathVec;
 
 pub fn setup_logging(debug: bool) {
-    let verbosity = if debug { 3 } else { 1 };
-    stderrlog::new()
-        .module(module_path!())
-        .verbosity(verbosity)
-        .init()
-        .expect("Cannot setup logger");
+    let log_level = if debug { LevelFilter::Debug } else { LevelFilter::Info };
+    CombinedLogger::init(
+        vec![
+            TermLogger::new(log_level, simplelog::Config::default(), TerminalMode::Mixed).unwrap()
+        ]
+    ).unwrap();
 }
 
 pub fn setup_environment(nmk_dir: &PathBuf) {
@@ -52,7 +51,7 @@ pub fn setup_path(nmk_dir: &PathBuf) {
     p.push_front(nmk_dir.join("local").join("bin"));
     p.push_front(nmk_dir.join("bin"));
     p = p.unique().no_version_managers();
-    if log_enabled!(Debug) {
+    if log_enabled!(log::Level::Debug) {
         for (i, path) in p.iter().enumerate() {
             debug!("{}[{}]={:?}", PATH, i + 1, path);
         }
