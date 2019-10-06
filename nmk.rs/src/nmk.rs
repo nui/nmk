@@ -2,15 +2,22 @@ use std::env;
 use std::fs::File;
 use std::path::PathBuf;
 
-use simplelog::{CombinedLogger, TermLogger, LevelFilter, TerminalMode};
+use simplelog::{CombinedLogger, LevelFilter, TerminalMode, TermLogger};
+
 use crate::core::set_env;
 use crate::pathenv::PathVec;
 
 pub fn setup_logging(debug: bool) {
     let log_level = if debug { LevelFilter::Debug } else { LevelFilter::Info };
+    let config = simplelog::ConfigBuilder::new()
+        .set_thread_level(LevelFilter::Trace)
+        .set_target_level(LevelFilter::Trace)
+        .build();
     CombinedLogger::init(
         vec![
-            TermLogger::new(log_level, simplelog::Config::default(), TerminalMode::Mixed).unwrap()
+            TermLogger::new(log_level,
+                            config,
+                            TerminalMode::Stderr).unwrap()
         ]
     ).unwrap();
 }

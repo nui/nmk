@@ -28,12 +28,11 @@ fn main() {
     }
 
     let nmk_dir = nmk::dir();
-    let tmux_dir = tmux::dir(&nmk_dir);
     debug!("nmk_dir={:?}", nmk_dir);
     nmk::setup_ld_library_path(&nmk_dir);
     nmk::setup_path(&nmk_dir);
 
-    let tmux = Tmux::new(&nmk_dir, tmux_dir);
+    let tmux = Tmux::new(&nmk_dir);
     debug!("using tmux version {}", tmux.version());
 
     nmk::setup_environment(&nmk_dir);

@@ -11,19 +11,19 @@ use crate::terminal;
 
 const TMUX: &str = "tmux";
 
-pub struct Tmux<'a> {
-    nmk_dir: &'a PathBuf,
+pub struct Tmux {
     tmux_dir: PathBuf,
     bin: PathBuf,
     version: String,
 }
 
-impl<'a> Tmux<'a> {
-    pub fn new(nmk_dir: &'a PathBuf, tmux_dir: PathBuf) -> Tmux {
+impl Tmux {
+    pub fn new(nmk_dir: &PathBuf) -> Tmux {
+        let tmux_dir = nmk_dir.join("tmux");
+        assert!(tmux_dir.is_dir());
         Tmux {
-            nmk_dir,
             tmux_dir,
-            bin: which::which(TMUX).expect("Cannot find tmux"),
+            bin: which::which(TMUX).expect("Cannot find tmux binary"),
             version: Tmux::call_check_version(),
         }
     }
@@ -117,7 +117,7 @@ impl<'a> Tmux<'a> {
             vec.push("-2");
         }
         let tmux_args = arg.tmux_args();
-        if is_running(socket) {
+        if is_server_running(socket) {
             if tmux_args.len() > 0 {
                 vec.extend(tmux_args);
             } else {
@@ -145,7 +145,7 @@ impl<'a> Tmux<'a> {
     }
 }
 
-pub fn is_running(socket: &str) -> bool {
+fn is_server_running(socket: &str) -> bool {
     let running = Command::new(TMUX)
         .arg("-L")
         .arg(socket)
@@ -157,12 +157,4 @@ pub fn is_running(socket: &str) -> bool {
         .unwrap_or_default();
     debug!("server {} running", if running { "is" } else { "is not" });
     running
-}
-
-pub fn dir(nmk_dir: &PathBuf) -> PathBuf {
-    let path = nmk_dir.join("tmux");
-    if !path.exists() {
-        panic!("{:?} doesn't exist", path);
-    }
-    path
 }
