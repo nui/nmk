@@ -28,11 +28,7 @@ impl<'a> CGroup<'a> {
 }
 
 fn is_container(s: &str) -> bool {
-    s.split("\n").any(|line| {
-        CGroup::parse(line)
-            .map(|cg| cg.is_container())
-            .unwrap_or_default()
-    })
+    s.lines().flat_map(CGroup::parse).any(|cg| cg.is_container())
 }
 
 pub fn detect_container() -> bool {
@@ -43,7 +39,7 @@ pub fn detect_container() -> bool {
         error!("Cannot open cgroup file");
         exit(1);
     });
-    return is_container(&contents);
+    is_container(&contents)
 }
 
 #[cfg(test)]
