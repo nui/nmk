@@ -2,7 +2,7 @@ use std::env;
 use std::fs::File;
 use std::path::PathBuf;
 
-use simplelog::{CombinedLogger, LevelFilter, TerminalMode, TermLogger};
+use simplelog::{LevelFilter, TerminalMode, TermLogger};
 
 use crate::core::set_env;
 use crate::pathenv::PathVec;
@@ -13,13 +13,9 @@ pub fn setup_logging(debug: bool) {
         .set_thread_level(LevelFilter::Trace)
         .set_target_level(LevelFilter::Trace)
         .build();
-    CombinedLogger::init(
-        vec![
-            TermLogger::new(log_level,
-                            config,
-                            TerminalMode::Stderr).unwrap()
-        ]
-    ).unwrap();
+    TermLogger::init(log_level,
+                     config,
+                     TerminalMode::Stderr).unwrap();
 }
 
 pub fn setup_environment(nmk_dir: &PathBuf) {
@@ -27,11 +23,8 @@ pub fn setup_environment(nmk_dir: &PathBuf) {
     let zdotdir = nmk_dir.join("zsh");
     set_env("NMK_DIR", nmk_dir);
 
-    if let Some(path) = init_vim
-        .to_str()
-        .map(|s|
-            s.to_string().replace(" ", r"\ ")
-        ) {
+    let quote_first_space = |s: &str| s.to_string().replace(" ", r"\ ");
+    if let Some(path) = init_vim.to_str().map(quote_first_space) {
         set_env("VIMINIT", format!("source {}", path));
     }
     set_env("ZDOTDIR", zdotdir);
@@ -43,11 +36,16 @@ pub fn setup_environment(nmk_dir: &PathBuf) {
 
 pub fn setup_preferred_editor() {
     const EDITOR: &str = "EDITOR";
-    if env::var_os(EDITOR).is_none() {
-        let mut editors = ["nvim", "vim"].iter();
-        if let Some(editor) = editors.find(|bin| which::which(bin).is_ok()) {
-            set_env(EDITOR, editor);
-            debug!("using {} as prefer editor", editor);
+    match env::var_os(EDITOR) {
+        Some(editor) => {
+            debug!("using {:?} as preferred editor", editor);
+        }
+        None => {
+            let mut editors = ["nvim", "vim"].iter();
+            if let Some(editor) = editors.find(|bin| which::which(bin).is_ok()) {
+                set_env(EDITOR, editor);
+                debug!("using {} as preferred editor", editor);
+            }
         }
     }
 }
