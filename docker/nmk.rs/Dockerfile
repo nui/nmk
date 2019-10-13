@@ -16,8 +16,9 @@ RUN apt-get -yq update \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path \
     && . /root/.cargo/env \
     && rustup target add \
+        # x86_64-unknown-linux-musl \
         armv7-unknown-linux-gnueabihf \
-        x86_64-unknown-linux-musl
+    && rustup show
 
 COPY cargo-config /root/.cargo/config
 
