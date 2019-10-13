@@ -1,5 +1,5 @@
 FROM ubuntu:14.04
-# use old version of glibc to ensure compatibility
+# use old version of glibc to ensure binary compatibility
 
 RUN apt-get -yq update \
     && apt-get -yq install \
@@ -10,14 +10,14 @@ RUN apt-get -yq update \
         git \
         make \
         musl-tools \
-        zsh
+        zsh \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path \
     && . /root/.cargo/env \
     && rustup target add \
         armv7-unknown-linux-gnueabihf \
-        x86_64-unknown-linux-musl \
-    && true
+        x86_64-unknown-linux-musl
 
 COPY cargo-config /root/.cargo/config
 

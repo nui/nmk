@@ -22,6 +22,7 @@ steps:
     - --workdir=/workspace/nmk.rs
     - 'gcr.io/$PROJECT_ID/nmk.rs'
     - make
+    - build-info
     - test
     - amd64-linux-musl
     - armv7-linux

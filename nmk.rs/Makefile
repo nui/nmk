@@ -32,6 +32,9 @@ clean:
 test:
 	cargo test
 
+build-info:
+	rustup show
+
 amd64-linux-musl:
 	$(RELEASE_BUILD) --target $(AMD64_LINUX_MUSL_TARGET)
 	cp $(AMD64_LINUX_MUSL_BIN) $(AMD64_LINUX_MUSL_OUT)
