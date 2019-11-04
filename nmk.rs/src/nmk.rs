@@ -2,7 +2,8 @@ use std::env;
 use std::fs::File;
 use std::path::PathBuf;
 
-use simplelog::{LevelFilter, TerminalMode, TermLogger};
+use log::LevelFilter;
+use simplelog::{TerminalMode, TermLogger};
 
 use crate::core::set_env;
 use crate::pathenv::PathVec;
