@@ -27,7 +27,7 @@ fn main() {
         nmk::print_message_of_the_day();
     }
 
-    let nmk_dir = nmk::dir();
+    let nmk_dir = nmk::nmk_dir();
     debug!("nmk_dir={:?}", nmk_dir);
     nmk::setup_ld_library_path(&nmk_dir);
     nmk::setup_path(&nmk_dir);

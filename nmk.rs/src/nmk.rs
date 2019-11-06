@@ -14,9 +14,10 @@ pub fn setup_logging(debug: bool) {
         .set_thread_level(LevelFilter::Trace)
         .set_target_level(LevelFilter::Trace)
         .build();
-    TermLogger::init(log_level,
-                     config,
-                     TerminalMode::Stderr).unwrap();
+    // setup log or silently ignore it
+    let _ = TermLogger::init(log_level,
+                             config,
+                             TerminalMode::Stderr);
 }
 
 pub fn setup_environment(nmk_dir: &PathBuf) {
@@ -32,7 +33,7 @@ pub fn setup_environment(nmk_dir: &PathBuf) {
 
     env::remove_var("VIRTUAL_ENV");
 
-    set_env("NMK_BIN", env::current_exe().unwrap());
+    set_env("NMK_BIN", env::current_exe().expect("fail to get full path to executable"));
 }
 
 pub fn setup_preferred_editor() {
@@ -83,7 +84,7 @@ pub fn setup_ld_library_path(nmk_dir: &PathBuf) {
     }
 }
 
-pub fn dir() -> PathBuf {
+pub fn nmk_dir() -> PathBuf {
     const NMK_DIR: &str = "NMK_DIR";
     let path = match env::var_os(NMK_DIR) {
         Some(s) => PathBuf::from(s),
@@ -91,9 +92,7 @@ pub fn dir() -> PathBuf {
             .expect("Can't find home directory")
             .join(".nmk"),
     };
-    if !path.exists() {
-        panic!(format!("{:?} doesn't exist", path));
-    }
+    assert!(path.exists(), "{:?} doesn't exist", path);
     path
 }
 
