@@ -2,7 +2,7 @@ use std::env;
 use std::ffi::CString;
 use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
-use std::process::{Command, exit, Stdio};
+use std::process::{Command, Stdio};
 use std::time::Instant;
 
 use crate::argument::Argument;
@@ -35,9 +35,7 @@ impl Tmux {
     fn conf(&self) -> PathBuf {
         let conf_file = format!("{}.conf", &self.version);
         let conf_path = self.tmux_dir.join(conf_file);
-        if !conf_path.exists() {
-            error!("tmux {} is not supported", &self.version)
-        }
+        assert!(conf_path.exists(), "tmux {} is not supported", &self.version);
         conf_path
     }
 
@@ -64,10 +62,9 @@ impl Tmux {
         if let Ok(o) = Command::new(TMUX).arg("-V").output() {
             if !o.status.success() {
                 match o.status.code() {
-                    Some(i) => error!("tmux exit with status: {}", i),
-                    None => error!("terminated by signal"),
+                    Some(i) => panic!("tmux exit with status: {}", i),
+                    None => panic!("terminated by signal"),
                 };
-                exit(1);
             }
             let version_output = String::from_utf8(o.stdout)
                 .expect("tmux version output contain non utf-8");
@@ -75,8 +72,7 @@ impl Tmux {
                 .nth(1).expect(&format!("bad output: {}", version_output))
                 .to_string()
         } else {
-            error!("{} not found", TMUX);
-            exit(1);
+            panic!("{} not found", TMUX);
         }
     }
 
@@ -112,8 +108,7 @@ impl Tmux {
                 vec.extend(tmux_args);
             } else {
                 if env::var_os("TMUX").is_some() && !arg.inception {
-                    warn!("add --inception to allow nested tmux sessions");
-                    exit(1);
+                    panic!("add --inception to allow nested tmux sessions");
                 }
                 vec.push("attach");
             }

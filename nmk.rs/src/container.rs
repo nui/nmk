@@ -1,5 +1,3 @@
-use std::process::exit;
-
 use crate::platform;
 
 #[allow(dead_code)]
@@ -35,10 +33,7 @@ pub fn detect_container() -> bool {
     if platform::is_mac() {
         return false;
     }
-    let contents = std::fs::read_to_string("/proc/1/cgroup").unwrap_or_else(|_| {
-        error!("Cannot open cgroup file");
-        exit(1);
-    });
+    let contents = std::fs::read_to_string("/proc/1/cgroup").expect("Cannot open cgroup file");
     is_container(&contents)
 }
 

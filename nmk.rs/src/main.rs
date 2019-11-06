@@ -4,7 +4,6 @@ extern crate log;
 use crate::tmux::Tmux;
 
 mod argument;
-mod config;
 mod container;
 #[macro_use]
 mod core;
