@@ -14,7 +14,7 @@ pub fn setup_logging(debug: bool) {
         .set_thread_level(LevelFilter::Trace)
         .set_target_level(LevelFilter::Trace)
         .build();
-    // setup log or silently ignore it
+    // silently ignore if error
     let _ = TermLogger::init(log_level,
                              config,
                              TerminalMode::Stderr);
@@ -96,7 +96,7 @@ pub fn nmk_dir() -> PathBuf {
     path
 }
 
-pub fn print_message_of_the_day() {
+pub fn display_message_of_the_day() {
     let mut stdout = std::io::stdout();
     ["/var/run/motd.dynamic", "/etc/motd"]
         .iter()

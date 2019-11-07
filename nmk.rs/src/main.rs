@@ -20,10 +20,9 @@ fn main() {
     let start = std::time::Instant::now();
     let arg = argument::parse();
     nmk::setup_logging(arg.debug);
-    debug!("{:#?}", arg);
 
     if arg.ssh {
-        nmk::print_message_of_the_day();
+        nmk::display_message_of_the_day();
     }
 
     let nmk_dir = nmk::nmk_dir();
