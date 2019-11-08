@@ -9,3 +9,5 @@ steps:
     - docker/nmk.rs
 images:
   - 'gcr.io/$PROJECT_ID/nmk.rs'
+options:
+  machineType: 'N1_HIGHCPU_8'
