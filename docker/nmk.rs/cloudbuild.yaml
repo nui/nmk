@@ -47,5 +47,5 @@ artifacts:
       - nmk.rs-amd64-linux-musl.gz
       - nmk.rs-armv7-linux.gz
 timeout: 1500s
-options:
-  machineType: 'N1_HIGHCPU_8'
+# options:
+#   machineType: 'N1_HIGHCPU_8'
