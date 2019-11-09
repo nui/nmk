@@ -25,6 +25,7 @@ arm-cross:
 
 release:
 	$(RELEASE_BUILD)
+	du target/$(RELEASE_BIN)
 
 clean:
 	cargo clean
