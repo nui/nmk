@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::time::Instant;
 
-use crate::argument::Argument;
+use crate::arg::Argument;
 use crate::core::*;
 use crate::terminal;
 

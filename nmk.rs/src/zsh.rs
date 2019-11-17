@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::argument::Argument;
+use crate::arg::Argument;
 use crate::core::*;
 use crate::platform::{is_alpine, is_arch, is_mac};
 

@@ -3,7 +3,7 @@ extern crate log;
 
 use crate::tmux::Tmux;
 
-mod argument;
+mod arg;
 mod container;
 #[macro_use]
 mod core;
@@ -18,7 +18,7 @@ mod zsh;
 
 fn main() {
     let start = std::time::Instant::now();
-    let arg = argument::parse();
+    let arg = arg::parse();
     nmk::setup_logging(arg.debug);
 
     if arg.ssh {

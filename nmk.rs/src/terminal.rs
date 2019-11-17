@@ -1,7 +1,7 @@
 use std::env;
 use std::ffi::OsString;
 
-use crate::argument::Argument;
+use crate::arg::Argument;
 use crate::container;
 
 fn is_vec_contains_term(vec: Vec<&str>, term: Option<OsString>) -> bool {
