@@ -26,7 +26,7 @@ sudo apt install vim-nox
     or
     curl -sSL nmk.nuimk.com/nmk.tar.gz | tar -C ~ -xzf -
 
-# optional, install binary entrypoint
+# optional, install entrypoint
     curl -sSL https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk.rs-amd64-linux-musl.gz | gunzip > ~/.nmk/bin/nmk
     chmod +x ~/.nmk/bin/nmk
 ```
