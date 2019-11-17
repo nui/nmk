@@ -10,6 +10,8 @@ RUN apt-get -yq update \
         git \
         make \
         musl-tools \
+        pigz \
+        pixz \
         zsh \
     && rm -rf /var/lib/apt/lists/*
 

@@ -1,8 +1,8 @@
 BIN_NAME := nmk
 DIST_DIR ?= dist
 
-DEBUG_BUILD := cargo build
-RELEASE_BUILD := RUSTFLAGS="-C link-arg=-s" cargo build --release
+RELEASE_ENV := RUSTFLAGS="-C link-arg=-s"
+RELEASE_BUILD := $(RELEASE_ENV) cargo build --release
 
 AMD64_LINUX_MUSL_TARGET := x86_64-unknown-linux-musl
 AMD64_LINUX_MUSL_BIN := target/$(AMD64_LINUX_MUSL_TARGET)/release/$(BIN_NAME)
@@ -13,7 +13,7 @@ ARMV7_LINUX_BIN := target/$(ARMV7_LINUX_TARGET)/release/$(BIN_NAME)
 ARMV7_LINUX_OUT := $(DIST_DIR)/nmk.rs-armv7-linux
 
 build:
-	$(DEBUG_BUILD)
+	cargo build
 
 arm-cross:
 	cross build --target $(ARMV7_LINUX_TARGET) --release
@@ -21,6 +21,9 @@ arm-cross:
 release:
 	$(RELEASE_BUILD)
 	du target/release/$(BIN_NAME)
+
+test:
+	$(RELEASE_ENV) cargo test --release
 
 clean:
 	cargo clean

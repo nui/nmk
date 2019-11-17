@@ -9,7 +9,7 @@ steps:
     - -v=/workspace:/workspace
     - -v=/workspace/cargo-build-cache-dir:/cargo-build-cache-dir
     - --workdir=/workspace
-    - debian
+    - 'gcr.io/$PROJECT_ID/nmk.rs'
     - ./docker/nmk.rs/restore-gcloud-cache
   timeout: 180s
 - name: 'gcr.io/cloud-builders/docker'
@@ -33,7 +33,7 @@ steps:
     - -v=/workspace:/workspace
     - -v=/workspace/cargo-build-cache-dir:/cargo-build-cache-dir
     - --workdir=/workspace
-    - debian
+    - 'gcr.io/$PROJECT_ID/nmk.rs'
     - ./docker/nmk.rs/save-gcloud-cache
   timeout: 180s
 - name: gcr.io/cloud-builders/gsutil
@@ -47,5 +47,5 @@ artifacts:
       - nmk.rs-amd64-linux-musl.gz
       - nmk.rs-armv7-linux.gz
 timeout: 1500s
-# options:
-#   machineType: 'N1_HIGHCPU_8'
+options:
+  machineType: 'N1_HIGHCPU_8'
