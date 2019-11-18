@@ -3,15 +3,15 @@ steps:
   args: ['cp', 'gs://nuimk-io-build-cache/nmk.rs/target.tar.gz', 'target.tar.gz']
 - name: gcr.io/cloud-builders/gsutil
   args: ['cp', 'gs://nuimk-io-build-cache/nmk.rs/cargo-registry.tar.gz', 'cargo-registry.tar.gz']
-- name: 'gcr.io/cloud-builders/docker'
-  args:
-    - run
-    - -v=/workspace:/workspace
-    - -v=/workspace/cargo-build-cache-dir:/cargo-build-cache-dir
-    - --workdir=/workspace
-    - 'gcr.io/$PROJECT_ID/nmk.rs'
-    - ./docker/nmk.rs/restore-gcloud-cache
-  timeout: 180s
+# - name: 'gcr.io/cloud-builders/docker'
+#   args:
+#     - run
+#     - -v=/workspace:/workspace
+#     - -v=/workspace/cargo-build-cache-dir:/cargo-build-cache-dir
+#     - --workdir=/workspace
+#     - 'gcr.io/$PROJECT_ID/nmk.rs'
+#     - ./docker/nmk.rs/restore-gcloud-cache
+#   timeout: 180s
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - run
@@ -27,15 +27,15 @@ steps:
     - amd64-linux-musl
     - armv7-linux
   timeout: 1200s
-- name: 'gcr.io/cloud-builders/docker'
-  args:
-    - run
-    - -v=/workspace:/workspace
-    - -v=/workspace/cargo-build-cache-dir:/cargo-build-cache-dir
-    - --workdir=/workspace
-    - 'gcr.io/$PROJECT_ID/nmk.rs'
-    - ./docker/nmk.rs/save-gcloud-cache
-  timeout: 180s
+# - name: 'gcr.io/cloud-builders/docker'
+#   args:
+#     - run
+#     - -v=/workspace:/workspace
+#     - -v=/workspace/cargo-build-cache-dir:/cargo-build-cache-dir
+#     - --workdir=/workspace
+#     - 'gcr.io/$PROJECT_ID/nmk.rs'
+#     - ./docker/nmk.rs/save-gcloud-cache
+#   timeout: 180s
 - name: gcr.io/cloud-builders/gsutil
   args: ['cp', 'target.tar.gz', 'gs://nuimk-io-build-cache/nmk.rs/target.tar.gz']
 - name: gcr.io/cloud-builders/gsutil
