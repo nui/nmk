@@ -35,7 +35,7 @@ alias help=run-help
     fi
 
     alias la=" command $prog $color_auto $ls_options -lha"
-    alias lh=" command $prog $color_auto $ls_options -lh"
+    alias lh="command $prog $color_auto $ls_options -lh"
     alias LH=" command $prog $color_never $ls_options -lhF"
     alias ls="command $prog $color_auto"
 }
