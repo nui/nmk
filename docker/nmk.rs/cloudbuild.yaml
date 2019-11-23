@@ -23,7 +23,6 @@ steps:
     - 'gcr.io/$PROJECT_ID/nmk.rs'
     - make
     - show-build-info
-    - clean-release
     - test
     - amd64-linux-musl
     - armv7-linux
