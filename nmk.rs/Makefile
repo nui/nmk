@@ -1,26 +1,32 @@
-BIN_NAME := nmk
+PACKAGE_NAME := nmk
 DIST_DIR ?= dist
 
 RELEASE_ENV := RUSTFLAGS="-C link-arg=-s"
 RELEASE_BUILD := $(RELEASE_ENV) cargo build --release
 
 AMD64_LINUX_MUSL_TARGET := x86_64-unknown-linux-musl
-AMD64_LINUX_MUSL_BIN := target/$(AMD64_LINUX_MUSL_TARGET)/release/$(BIN_NAME)
+AMD64_LINUX_MUSL_BIN := target/$(AMD64_LINUX_MUSL_TARGET)/release/$(PACKAGE_NAME)
 AMD64_LINUX_MUSL_OUT := $(DIST_DIR)/nmk.rs-amd64-linux-musl
 
 ARMV7_LINUX_TARGET := armv7-unknown-linux-gnueabihf
-ARMV7_LINUX_BIN := target/$(ARMV7_LINUX_TARGET)/release/$(BIN_NAME)
+ARMV7_LINUX_BIN := target/$(ARMV7_LINUX_TARGET)/release/$(PACKAGE_NAME)
 ARMV7_LINUX_OUT := $(DIST_DIR)/nmk.rs-armv7-linux
 
-build:
+build: clean-debug
 	cargo build
+
+clean-debug:
+	cargo clean --package $(PACKAGE_NAME)
+
+clean-release:
+	cargo clean --package $(PACKAGE_NAME) --release
 
 arm-cross:
 	cross build --target $(ARMV7_LINUX_TARGET) --release
 
 release:
 	$(RELEASE_BUILD)
-	du target/release/$(BIN_NAME)
+	du target/release/$(PACKAGE_NAME)
 
 test:
 	$(RELEASE_ENV) cargo test --release
@@ -28,7 +34,7 @@ test:
 clean:
 	cargo clean
 
-build-info:
+show-build-info:
 	rustup show
 
 amd64-linux-musl:
