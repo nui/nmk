@@ -5,6 +5,7 @@ use std::iter::FromIterator;
 use std::path::PathBuf;
 
 use indexmap::IndexSet;
+use nix::NixPath;
 
 pub struct PathVec {
     vec: VecDeque<PathBuf>,
@@ -45,7 +46,7 @@ impl PathVec {
     pub fn parse<T: AsRef<OsStr>>(input: T) -> Self {
         let unparsed = input.as_ref();
         if !unparsed.is_empty() {
-            env::split_paths(unparsed).collect()
+            env::split_paths(unparsed).filter(|p| p.len() > 0).collect()
         } else {
             Self::new()
         }
@@ -114,6 +115,14 @@ mod tests {
         let ps = PathVec::parse(OsString::from(FOO));
         let actual = ps.make();
         assert_eq!(actual, FOO);
+
+        // should fix following cases
+        let ps = PathVec::parse(OsString::from(":/foo"));
+        let actual = ps.make();
+        assert_eq!(actual, "/foo");
+        let ps = PathVec::parse(OsString::from("/foo:"));
+        let actual = ps.make();
+        assert_eq!(actual, "/foo");
 
         // two items
         let input = OsString::from(format!("{}:{}", FOO, BAR));
