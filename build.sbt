@@ -5,7 +5,7 @@ lazy val root = (project in file(".")).
     inThisBuild(List(
       organization := "com.nuimk",
       scalaVersion := "2.13.1",
-      version := "0.1.0-SNAPSHOT"
+      version := "0.0.1"
     )),
     name := "nmk",
     libraryDependencies ++= Seq(
