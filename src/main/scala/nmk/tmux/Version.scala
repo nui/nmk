@@ -30,7 +30,9 @@ object Version {
 
   case object V30 extends Version("3.0")
 
-  private val allVersions = List(V21, V22, V23, V24, V25, V26, V27, V28, V29, V29a, V30)
+  case object V30a extends Version("3.0a")
+
+  private val allVersions = List(V21, V22, V23, V24, V25, V26, V27, V28, V29, V29a, V30, V30a)
 
   private val unsupportedVersions = List(V24)
 
