@@ -7,21 +7,24 @@ use std::time::Instant;
 
 use crate::arg::Argument;
 use crate::core::*;
+use crate::nmk::is_dev_machine;
 use crate::terminal;
 
 const TMUX: &str = "tmux";
 
-pub struct Tmux {
+pub struct Tmux<'a> {
+    nmk_dir: &'a PathBuf,
     tmux_dir: PathBuf,
     bin: PathBuf,
     version: String,
 }
 
-impl Tmux {
+impl<'a> Tmux<'a> {
     pub fn new(nmk_dir: &PathBuf) -> Tmux {
         let tmux_dir = nmk_dir.join("tmux");
         assert!(tmux_dir.is_dir());
         Tmux {
+            nmk_dir,
             tmux_dir,
             bin: which::which(TMUX).expect("Cannot find tmux binary"),
             version: Tmux::call_check_version(),
@@ -122,8 +125,19 @@ impl Tmux {
         debug!("{:#?}", exec_name);
         debug!("{:#?}", exec_args);
         self.print_usage_time(&arg, &start);
+        if self.is_local_tmux() && is_dev_machine() {
+            warn!("using local tmux")
+        }
         nix::unistd::execv(&exec_name, &exec_args).expect("Can't start tmux");
         unreachable!()
+    }
+
+    pub fn bin_path(&self) -> &PathBuf {
+        &self.bin
+    }
+
+    pub fn is_local_tmux(&self) -> bool {
+        self.bin.starts_with(self.nmk_dir)
     }
 }
 

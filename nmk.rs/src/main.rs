@@ -31,7 +31,8 @@ fn main() {
     nmk::setup_path(&nmk_dir);
 
     let tmux = Tmux::new(&nmk_dir);
-    debug!("using tmux version {}", tmux.version());
+    debug!("tmux bin = {:?}", tmux.bin_path());
+    debug!("tmux version = {}", tmux.version());
 
     nmk::setup_environment(&nmk_dir);
     nmk::setup_preferred_editor();

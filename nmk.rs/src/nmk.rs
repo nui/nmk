@@ -107,3 +107,8 @@ pub fn display_message_of_the_day() {
             std::io::copy(&mut f, &mut stdout).expect("fail to print motd");
         });
 }
+
+pub fn is_dev_machine() -> bool {
+    env::var_os("DISPLAY").is_some() &&
+        env::var_os("WINDOWID").is_some()
+}
