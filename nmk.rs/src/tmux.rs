@@ -1,5 +1,5 @@
 use std::env;
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
@@ -80,55 +80,59 @@ impl<'a> Tmux<'a> {
     }
 
     pub fn login_shell(&self, arg: Argument, start: Instant) -> ! {
-        let mut vec = vec![TMUX, "-L", arg.socket()];
-        if arg.force256color {
-            vec.push("-2");
-        }
-        vec.push("-f");
-        let config = self.conf();
-        vec.push(config.to_str().unwrap());
-        vec.push("-c");
-        vec.push("exec zsh --login");
-        let exec_args: Vec<_> = vec.into_iter().flat_map(CString::new).collect();
-        let exec_name = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
-        debug!("{:#?}", exec_name);
-        debug!("{:#?}", exec_args);
+        let owned_args = {
+            let mut vec = vec![TMUX, "-L", arg.socket()];
+            if arg.force256color {
+                vec.push("-2");
+            }
+            let config = self.conf();
+            vec.extend_from_slice(&["-f", config.to_str().unwrap(), "-c", "exec zsh --login"]);
+            vec.into_iter().map(|arg| CString::new(arg).unwrap()).collect::<Vec<_>>()
+        };
+        let path = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
+        let args: Vec<&CStr> = owned_args.iter().map(CString::as_c_str).collect();
+        debug!("execv path: {:#?}", path);
+        debug!("execv args: {:#?}", args);
         self.print_usage_time(&arg, &start);
-        nix::unistd::execv(&exec_name, &exec_args).expect("Can't start login shell");
+        nix::unistd::execv(&path, &args).expect("Can't start login shell");
         unreachable!()
     }
 
     pub fn exec(&self, arg: Argument, start: Instant) -> ! {
         let socket = arg.socket();
-        let mut vec = vec![TMUX, "-L", socket];
-        if arg.force256color {
-            vec.push("-2");
-        }
-        let tmux_args = arg.tmux_args();
-        let config = self.conf();
-        if is_server_running(socket) {
-            if tmux_args.len() > 0 {
-                vec.extend(tmux_args);
-            } else {
-                if env::var_os("TMUX").is_some() && !arg.inception {
-                    panic!("add --inception to allow nested tmux sessions");
-                }
-                vec.push("attach");
+        let owned_args = {
+            let mut vec = vec![TMUX, "-L", arg.socket()];
+            if arg.force256color {
+                vec.push("-2");
             }
-        } else {
-            vec.push("-f");
-            vec.push(config.to_str().unwrap());
-            vec.extend(tmux_args);
-        }
-        let exec_args: Vec<_> = vec.into_iter().flat_map(CString::new).collect();
-        let exec_name = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
-        debug!("{:#?}", exec_name);
-        debug!("{:#?}", exec_args);
+            let tmux_args = arg.tmux_args();
+
+            let config = self.conf();
+            if is_server_running(socket) {
+                if tmux_args.len() > 0 {
+                    vec.extend(tmux_args);
+                } else {
+                    if env::var_os("TMUX").is_some() && !arg.inception {
+                        panic!("add --inception to allow nested tmux sessions");
+                    }
+                    vec.push("attach");
+                }
+            } else {
+                vec.push("-f");
+                vec.push(config.to_str().unwrap());
+                vec.extend(tmux_args);
+            }
+            vec.into_iter().map(|arg| CString::new(arg).unwrap()).collect::<Vec<_>>()
+        };
+        let path = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
+        let args: Vec<&CStr> = owned_args.iter().map(CString::as_c_str).collect();
+        debug!("execv path: {:#?}", path);
+        debug!("execv args: {:#?}", args);
         self.print_usage_time(&arg, &start);
         if self.is_local_tmux() && is_dev_machine() {
-            warn!("using local tmux")
+            warn!("Using local tmux on development machine")
         }
-        nix::unistd::execv(&exec_name, &exec_args).expect("Can't start tmux");
+        nix::unistd::execv(&path, &args).expect("Can't start tmux");
         unreachable!()
     }
 
