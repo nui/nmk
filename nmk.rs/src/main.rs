@@ -31,16 +31,16 @@ fn main() {
     nmk::setup_path(&nmk_dir);
 
     let tmux = Tmux::new(&nmk_dir);
-    debug!("tmux bin = {:?}", tmux.bin_path());
-    debug!("tmux version = {}", tmux.version());
+    debug!("tmux bin = {:?}", tmux.bin);
+    debug!("tmux version = {}", tmux.version);
 
     nmk::setup_environment(&nmk_dir);
     nmk::setup_preferred_editor();
     zsh::setup(&arg, &nmk_dir);
     if arg.login {
-        tmux.login_shell(arg, start);
+        tmux.login_shell(&arg, &start);
     } else {
         tmux.setup_environment(&arg);
-        tmux.exec(arg, start);
+        tmux.exec(&arg, &start);
     }
 }

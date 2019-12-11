@@ -15,31 +15,63 @@ const TMUX: &str = "tmux";
 pub struct Tmux<'a> {
     nmk_dir: &'a PathBuf,
     tmux_dir: PathBuf,
-    bin: PathBuf,
-    version: String,
+    config: PathBuf,
+    pub bin: PathBuf,
+    pub version: String,
+}
+
+fn find_config(tmux_dir: &PathBuf, version: &str) -> PathBuf {
+    let config = tmux_dir.join(format!("{}.conf", version));
+    assert!(config.exists(), "unsupported tmux version: {}", version);
+    config
+}
+
+fn find_version() -> String {
+    if let Ok(o) = Command::new(TMUX).arg("-V").output() {
+        if !o.status.success() {
+            match o.status.code() {
+                Some(i) => panic!("tmux exit with status: {}", i),
+                None => panic!("terminated by signal"),
+            };
+        }
+        let version_output = String::from_utf8(o.stdout)
+            .expect("tmux version output contain non utf-8");
+        version_output.trim().split(" ")
+            .nth(1).expect(&format!("bad output: {}", version_output))
+            .to_string()
+    } else {
+        panic!("{} not found", TMUX);
+    }
+}
+
+fn is_server_running(socket: &str) -> bool {
+    let running = Command::new(TMUX)
+        .arg("-L")
+        .arg(socket)
+        .arg("list-sessions")
+        .stderr(Stdio::null())
+        .stdout(Stdio::null())
+        .status()
+        .map(|o| o.success())
+        .unwrap_or_default();
+    debug!("server {} running", if running { "is" } else { "is not" });
+    running
 }
 
 impl<'a> Tmux<'a> {
     pub fn new(nmk_dir: &PathBuf) -> Tmux {
         let tmux_dir = nmk_dir.join("tmux");
         assert!(tmux_dir.is_dir());
+        let bin = which::which(TMUX).expect("Cannot find tmux binary");
+        let version = find_version();
+        let config = find_config(&tmux_dir, &version);
         Tmux {
             nmk_dir,
             tmux_dir,
-            bin: which::which(TMUX).expect("Cannot find tmux binary"),
-            version: Tmux::call_check_version(),
+            bin,
+            version,
+            config,
         }
-    }
-
-    pub fn version(&self) -> &str {
-        &self.version
-    }
-
-    fn conf(&self) -> PathBuf {
-        let conf_file = format!("{}.conf", &self.version);
-        let conf_path = self.tmux_dir.join(conf_file);
-        assert!(conf_path.exists(), "tmux {} is not supported", &self.version);
-        conf_path
     }
 
     pub fn setup_environment(&self, arg: &Argument) {
@@ -61,32 +93,13 @@ impl<'a> Tmux<'a> {
         }
     }
 
-    fn call_check_version() -> String {
-        if let Ok(o) = Command::new(TMUX).arg("-V").output() {
-            if !o.status.success() {
-                match o.status.code() {
-                    Some(i) => panic!("tmux exit with status: {}", i),
-                    None => panic!("terminated by signal"),
-                };
-            }
-            let version_output = String::from_utf8(o.stdout)
-                .expect("tmux version output contain non utf-8");
-            version_output.trim().split(" ")
-                .nth(1).expect(&format!("bad output: {}", version_output))
-                .to_string()
-        } else {
-            panic!("{} not found", TMUX);
-        }
-    }
-
-    pub fn login_shell(&self, arg: Argument, start: Instant) -> ! {
+    pub fn login_shell(&self, arg: &Argument, start: &Instant) -> ! {
         let owned_args = {
             let mut vec = vec![TMUX, "-L", arg.socket()];
             if arg.force256color {
                 vec.push("-2");
             }
-            let config = self.conf();
-            vec.extend_from_slice(&["-f", config.to_str().unwrap(), "-c", "exec zsh --login"]);
+            vec.extend_from_slice(&["-f", self.config.to_str().unwrap(), "-c", "exec zsh --login"]);
             vec.into_iter().map(|arg| CString::new(arg).unwrap()).collect::<Vec<_>>()
         };
         let path = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
@@ -98,7 +111,7 @@ impl<'a> Tmux<'a> {
         unreachable!()
     }
 
-    pub fn exec(&self, arg: Argument, start: Instant) -> ! {
+    pub fn exec(&self, arg: &Argument, start: &Instant) -> ! {
         let socket = arg.socket();
         let owned_args = {
             let mut vec = vec![TMUX, "-L", arg.socket()];
@@ -107,7 +120,6 @@ impl<'a> Tmux<'a> {
             }
             let tmux_args = arg.tmux_args();
 
-            let config = self.conf();
             if is_server_running(socket) {
                 if tmux_args.len() > 0 {
                     vec.extend(tmux_args);
@@ -119,7 +131,7 @@ impl<'a> Tmux<'a> {
                 }
             } else {
                 vec.push("-f");
-                vec.push(config.to_str().unwrap());
+                vec.push(self.config.to_str().unwrap());
                 vec.extend(tmux_args);
             }
             vec.into_iter().map(|arg| CString::new(arg).unwrap()).collect::<Vec<_>>()
@@ -136,25 +148,7 @@ impl<'a> Tmux<'a> {
         unreachable!()
     }
 
-    pub fn bin_path(&self) -> &PathBuf {
-        &self.bin
-    }
-
     pub fn is_local_tmux(&self) -> bool {
         self.bin.starts_with(self.nmk_dir)
     }
-}
-
-fn is_server_running(socket: &str) -> bool {
-    let running = Command::new(TMUX)
-        .arg("-L")
-        .arg(socket)
-        .arg("list-sessions")
-        .stderr(Stdio::null())
-        .stdout(Stdio::null())
-        .status()
-        .map(|o| o.success())
-        .unwrap_or_default();
-    debug!("server {} running", if running { "is" } else { "is not" });
-    running
 }
