@@ -18,7 +18,7 @@ steps:
     - -e
     - 'SHORT_SHA=$SHORT_SHA'
     - -v=/workspace:/workspace
-    - -v=/workspace/cargo-build-cache-dir/registry:/root/.cargo/registry
+    # - -v=/workspace/cargo-build-cache-dir/registry:/root/.cargo/registry
     - --workdir=/workspace/nmk.rs
     - 'gcr.io/$PROJECT_ID/nmk.rs'
     - make
@@ -26,6 +26,7 @@ steps:
     - test
     - amd64-linux-musl
     - armv7-linux
+    - dist
   timeout: 1200s
 # - name: 'gcr.io/cloud-builders/docker'
 #   args:

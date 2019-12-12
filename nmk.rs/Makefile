@@ -1,3 +1,5 @@
+.PHONY: dist
+
 PACKAGE_NAME := nmk
 DIST_DIR ?= dist
 
@@ -11,6 +13,8 @@ AMD64_LINUX_MUSL_OUT := $(DIST_DIR)/nmk.rs-amd64-linux-musl
 ARMV7_LINUX_TARGET := armv7-unknown-linux-gnueabihf
 ARMV7_LINUX_BIN := target/$(ARMV7_LINUX_TARGET)/release/$(PACKAGE_NAME)
 ARMV7_LINUX_OUT := $(DIST_DIR)/nmk.rs-armv7-linux
+
+export CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = arm-linux-gnueabihf-gcc
 
 build:
 	cargo clean --package $(PACKAGE_NAME)
@@ -36,11 +40,11 @@ show-build-info:
 amd64-linux-musl:
 	cargo clean --package $(PACKAGE_NAME) --release --target $(AMD64_LINUX_MUSL_TARGET)
 	$(RELEASE_BUILD) --target $(AMD64_LINUX_MUSL_TARGET)
-	cp $(AMD64_LINUX_MUSL_BIN) $(AMD64_LINUX_MUSL_OUT)
-	gzip -k $(AMD64_LINUX_MUSL_OUT)
 
 armv7-linux:
 	cargo clean --package $(PACKAGE_NAME) --release --target $(ARMV7_LINUX_TARGET)
 	$(RELEASE_BUILD) --target $(ARMV7_LINUX_TARGET)
-	cp $(ARMV7_LINUX_BIN) $(ARMV7_LINUX_OUT)
-	gzip -k $(ARMV7_LINUX_OUT)
+
+dist:
+	<$(AMD64_LINUX_MUSL_BIN) gzip > $(AMD64_LINUX_MUSL_OUT).gz
+	<$(ARMV7_LINUX_BIN) gzip > $(ARMV7_LINUX_OUT).gz
