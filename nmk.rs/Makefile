@@ -27,7 +27,7 @@ release:
 	du target/release/$(NMK_PACKAGE)
 
 test:
-	$(RELEASE_ENV) cargo test --release
+	cargo test
 
 clean:
 	cargo clean
