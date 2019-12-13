@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::arg::Argument;
 use crate::core::*;
-use crate::platform::{is_alpine, is_arch, is_mac};
+use common::platform::{is_alpine, is_arch, is_mac};
 
 fn has_local_zsh(nmk_dir: &PathBuf) -> bool {
     nmk_dir.join("local").join("bin").join("zsh").exists()

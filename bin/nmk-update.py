@@ -167,7 +167,7 @@ def build_parser():
 def select_launcher():
     machine = platform.machine()
     part = 'armv7-linux' if machine == 'armv7l' else 'amd64-linux-musl'
-    return 'https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk.rs-' + part + '.gz'
+    return 'https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk-' + part + '.gz'
 
 
 

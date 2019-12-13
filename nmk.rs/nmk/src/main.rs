@@ -9,7 +9,6 @@ mod container;
 mod core;
 mod nmk;
 mod pathenv;
-mod platform;
 mod terminal;
 mod time;
 mod tmux;

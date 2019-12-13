@@ -45,8 +45,10 @@ artifacts:
   objects:
     location: "gs://nmk.nuimk.com/nmk.rs"
     paths:
-      - nmk.rs-amd64-linux-musl.gz
-      - nmk.rs-armv7-linux.gz
+      - nmk-amd64-linux-musl.gz
+      - nmk-armv7-linux.gz
+      - nmkup-amd64-linux-musl.gz
+      - nmkup-armv7-linux.gz
 timeout: 1500s
 options:
   machineType: 'N1_HIGHCPU_8'
