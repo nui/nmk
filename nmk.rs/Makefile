@@ -1,4 +1,4 @@
-.PHONY: dist
+.PHONY: dist nmkup
 
 NMK_PACKAGE := nmk
 NMKUP_PACKAGE := nmkup
@@ -48,3 +48,7 @@ dist:
 	<target/$(AMD64_LINUX_MUSL_TARGET)/release/$(NMKUP_PACKAGE) gzip > $(DIST_DIR)/nmkup-amd64-linux-musl.gz
 	<target/$(ARMV7_LINUX_TARGET)/release/$(NMK_PACKAGE)   gzip > $(DIST_DIR)/nmk-armv7-linux.gz
 	<target/$(ARMV7_LINUX_TARGET)/release/$(NMKUP_PACKAGE) gzip > $(DIST_DIR)/nmkup-armv7-linux.gz
+
+nmkup:
+	cargo clean --package $(NMKUP_PACKAGE)
+	cargo build --package $(NMKUP_PACKAGE)
