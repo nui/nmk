@@ -1,6 +1,7 @@
 use std::convert::TryFrom;
 use std::fs::{create_dir_all, File};
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 use bytes::Bytes;
 use flate2::read::GzDecoder;
@@ -53,23 +54,20 @@ fn cache_metadata(dst: &Path, meta: &MetaData) {
     std::fs::write(cache_path, meta.to_string()).expect("Fail to write metadata");
 }
 
-fn check_and_prepare(dest: impl AsRef<Path>) {
-    let dest = dest.as_ref();
-    if !dest.exists() {
-        create_dir_all(dest).expect("Can't create directory");
-        info!("Created {:?} directory", dest);
-    }
-
-    // check if safe to install
-    let meta_file = dest.join(META_FILE);
-    let dest_is_empty = || dest.read_dir().unwrap().next().is_none();
-    assert!(meta_file.exists() || dest_is_empty(), "{:?} Missing cached metadata or directory is not empty", dest);
-}
-
 pub async fn install_or_update() -> Result<(), BoxError> {
     const NMK_DIR: &str = "NMK_DIR";
     let nmk_dir: PathBuf = std::env::var_os("NMK_DIR").expect(&format!("missing {} environment", NMK_DIR)).into();
-    check_and_prepare(&nmk_dir);
+    if !nmk_dir.exists() {
+        create_dir_all(&nmk_dir).expect("Can't create directory");
+        info!("Created {:?} directory", &nmk_dir);
+    }
+
+    // check if safe to install
+    let nmk_dir_empty = nmk_dir.read_dir().unwrap().next().is_none();
+    let meta_file_exist = nmk_dir.join(META_FILE).exists();
+    if !nmk_dir_empty {
+        assert!(meta_file_exist, "{:?} Missing cached metadata or directory is not empty", &nmk_dir_empty);
+    }
 
     let client = SecureClient::new();
     info!("Downloading archive");
@@ -77,6 +75,15 @@ pub async fn install_or_update() -> Result<(), BoxError> {
     if is_up2date(&nmk_dir, &meta) {
         info!("Already up to dated!")
     } else {
+        if meta_file_exist {
+            // uninstall old version
+            let _ = Command::new("sh")
+                .arg("uninstall.sh")
+                .current_dir(&nmk_dir)
+                .status()
+                .expect("fail to run sh");
+        }
+
         let uri = "https://storage.googleapis.com/nmk.nuimk.com/nmk.tar.gz".parse()?;
         let tar_gz = client.download_as_file(uri).await?;
         unpack_nmktar(tar_gz, &nmk_dir).await?;

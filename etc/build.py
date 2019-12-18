@@ -88,7 +88,6 @@ def generate_buildinfo(repo):
 
 
 delete_cache_files = r"""#!/bin/sh
-#!/bin/sh
 set -e
 find . -name '*.pyc' -exec rm -f {} +
 find . -name __pycache__ -exec rmdir {} +
