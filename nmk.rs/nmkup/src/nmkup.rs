@@ -23,7 +23,7 @@ pub fn find_nmkdir() -> PathBuf {
     match std::env::var_os(NMK_DIR) {
         Some(nmk_dir) => nmk_dir.into(),
         None => {
-            let nmk_dir = dirs::home_dir().expect("Can't find home directory");
+            let nmk_dir = dirs::home_dir().expect("Can't find home directory").join(".nmk");
             info!("Using default {}: {:?}", NMK_DIR, &nmk_dir);
             nmk_dir
         }
