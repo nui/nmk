@@ -17,18 +17,11 @@ sudo apt install vim-nox
 
 ## Installation
 ```sh
-# Github checkout
+curl --proto '=https' --tlsv1.2 -sSf https://nmk.nuimk.com | sh
+# or Github checkout
     git clone --recursive https://github.com/nuimk/nmk.git ~/.nmk
     ~/.nmk/bin/nmk
     ~/.nmk/vim/update-plugins
-# or just grab the latest build and extract it (without git)
-    curl -sSL https://storage.googleapis.com/nmk.nuimk.com/nmk.tar.gz | tar -C ~ -xzf -
-    or
-    curl -sSL nmk.nuimk.com/nmk.tar.gz | tar -C ~ -xzf -
-
-# optional, install entrypoint
-    curl -sSL https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk-amd64-linux-musl.gz | gunzip > ~/.nmk/bin/nmk
-    chmod +x ~/.nmk/bin/nmk
 ```
 
 ## Binary entrypoint

@@ -45,9 +45,9 @@ armv7-linux:
 
 dist:
 	<target/$(AMD64_LINUX_MUSL_TARGET)/release/$(NMK_PACKAGE)   gzip > $(DIST_DIR)/nmk-amd64-linux-musl.gz
-	<target/$(AMD64_LINUX_MUSL_TARGET)/release/$(NMKUP_PACKAGE) gzip > $(DIST_DIR)/nmkup-amd64-linux-musl.gz
+	cp target/$(AMD64_LINUX_MUSL_TARGET)/release/$(NMKUP_PACKAGE) $(DIST_DIR)/nmkup-amd64-linux-musl
 	<target/$(ARMV7_LINUX_TARGET)/release/$(NMK_PACKAGE)   gzip > $(DIST_DIR)/nmk-armv7-linux.gz
-	<target/$(ARMV7_LINUX_TARGET)/release/$(NMKUP_PACKAGE) gzip > $(DIST_DIR)/nmkup-armv7-linux.gz
+	cp target/$(ARMV7_LINUX_TARGET)/release/$(NMKUP_PACKAGE) $(DIST_DIR)/nmkup-armv7-linux
 
 nmkup:
 	cargo clean --package $(NMKUP_PACKAGE)

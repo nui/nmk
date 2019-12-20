@@ -47,8 +47,8 @@ artifacts:
     paths:
       - nmk-amd64-linux-musl.gz
       - nmk-armv7-linux.gz
-      - nmkup-amd64-linux-musl.gz
-      - nmkup-armv7-linux.gz
+      - nmkup-amd64-linux-musl
+      - nmkup-armv7-linux
 timeout: 1500s
 options:
   machineType: 'N1_HIGHCPU_8'

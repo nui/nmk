@@ -6,6 +6,7 @@ mod arg;
 mod client;
 mod logging;
 mod gcloud;
+mod nmkup;
 
 type BoxError = Box<dyn std::error::Error>;
 
@@ -13,6 +14,9 @@ type BoxError = Box<dyn std::error::Error>;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let arg = arg::parse();
     logging::setup(arg.debug);
-    archive::install_or_update().await?;
+
+    let nmk_dir = nmkup::find_nmkdir();
+    archive::install_or_update(&nmk_dir).await?;
+    nmkup::self_setup(&nmk_dir);
     Ok(())
 }

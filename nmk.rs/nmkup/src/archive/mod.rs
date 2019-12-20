@@ -54,40 +54,38 @@ fn cache_metadata(dst: &Path, meta: &MetaData) {
     std::fs::write(cache_path, meta.to_string()).expect("Fail to write metadata");
 }
 
-pub async fn install_or_update() -> Result<(), BoxError> {
-    const NMK_DIR: &str = "NMK_DIR";
-    let nmk_dir: PathBuf = std::env::var_os("NMK_DIR").expect(&format!("missing {} environment", NMK_DIR)).into();
+pub async fn install_or_update(nmk_dir: &PathBuf) -> Result<(), BoxError> {
     if !nmk_dir.exists() {
-        create_dir_all(&nmk_dir).expect("Can't create directory");
-        info!("Created {:?} directory", &nmk_dir);
+        create_dir_all(nmk_dir).expect("Can't create directory");
+        info!("Created {:?} directory", nmk_dir);
     }
 
     // check if safe to install
     let nmk_dir_empty = nmk_dir.read_dir().unwrap().next().is_none();
     let meta_file_exist = nmk_dir.join(META_FILE).exists();
     if !nmk_dir_empty {
-        assert!(meta_file_exist, "{:?} Missing cached metadata or directory is not empty", &nmk_dir_empty);
+        assert!(meta_file_exist, "{:?} Missing cached metadata or directory is not empty", nmk_dir_empty);
     }
 
     let client = SecureClient::new();
     info!("Downloading archive");
     let meta = MetaData::try_from(&download_metadata(&client).await?).expect("Fail parse metadata");
-    if is_up2date(&nmk_dir, &meta) {
+    if is_up2date(nmk_dir, &meta) {
         info!("Already up to dated!")
     } else {
         if meta_file_exist {
             // uninstall old version
             let _ = Command::new("sh")
                 .arg("uninstall.sh")
-                .current_dir(&nmk_dir)
+                .current_dir(nmk_dir)
                 .status()
                 .expect("fail to run sh");
         }
 
         let uri = "https://storage.googleapis.com/nmk.nuimk.com/nmk.tar.gz".parse()?;
         let tar_gz = client.download_as_file(uri).await?;
-        unpack_nmktar(tar_gz, &nmk_dir).await?;
-        cache_metadata(&nmk_dir, &meta);
+        unpack_nmktar(tar_gz, nmk_dir).await?;
+        cache_metadata(nmk_dir, &meta);
         info!("Installed a new version")
     }
     Ok(())
