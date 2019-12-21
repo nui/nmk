@@ -3,7 +3,9 @@ extern crate log;
 
 mod archive;
 mod arg;
+mod build;
 mod client;
+mod entrypoint;
 mod logging;
 mod gcloud;
 mod nmkup;
@@ -17,6 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let nmk_dir = nmkup::find_nmkdir();
     archive::install_or_update(&nmk_dir).await?;
+    entrypoint::install(&nmk_dir).await?;
     nmkup::self_setup(&nmk_dir);
     Ok(())
 }
