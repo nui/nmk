@@ -10,6 +10,7 @@ use tar::Archive;
 use crate::BoxError;
 use crate::client::SecureClient;
 use crate::gcloud::MetaData;
+use crate::arg::Argument;
 
 const META_FILE: &str = ".gcs.resource.json";
 
@@ -54,7 +55,7 @@ fn cache_metadata(dst: &Path, meta: &MetaData) {
     std::fs::write(cache_path, meta.to_string()).expect("Fail to write metadata");
 }
 
-pub async fn install_or_update(nmk_dir: &PathBuf) -> Result<(), BoxError> {
+pub async fn install_or_update(arg: &Argument<'_>, nmk_dir: &PathBuf) -> Result<(), BoxError> {
     if !nmk_dir.exists() {
         create_dir_all(nmk_dir).expect("Can't create directory");
         info!("Created {:?} directory", nmk_dir);
@@ -63,7 +64,7 @@ pub async fn install_or_update(nmk_dir: &PathBuf) -> Result<(), BoxError> {
     // check if safe to install
     let nmk_dir_empty = nmk_dir.read_dir().unwrap().next().is_none();
     let meta_file_exist = nmk_dir.join(META_FILE).exists();
-    if !nmk_dir_empty {
+    if !arg.force && !nmk_dir_empty {
         assert!(meta_file_exist, "{:?} Missing cached metadata or directory is not empty", nmk_dir_empty);
     }
 
