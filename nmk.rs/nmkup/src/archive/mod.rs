@@ -71,7 +71,7 @@ pub async fn install_or_update(arg: &Argument<'_>, nmk_dir: &PathBuf) -> Result<
     let client = SecureClient::new();
     info!("Downloading archive");
     let meta = MetaData::try_from(&download_metadata(&client).await?).expect("Fail parse metadata");
-    if is_up2date(nmk_dir, &meta) {
+    if !arg.force && is_up2date(nmk_dir, &meta) {
         info!("Already up to dated!")
     } else {
         if meta_file_exist {
