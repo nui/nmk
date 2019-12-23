@@ -13,13 +13,20 @@ use tempfile::tempfile;
 
 use crate::BoxError;
 
-pub struct SecureClient(Client<HttpsConnector<HttpConnector<GaiResolver>>, Body>);
+type HttpsClient = Client<HttpsConnector<HttpConnector<GaiResolver>>, Body>;
+
+pub struct SecureClient(HttpsClient);
 
 impl SecureClient {
     pub fn new() -> Self {
         let https = HttpsConnector::new();
         let client = Client::builder().build::<_, hyper::Body>(https);
         Self(client)
+    }
+
+    #[allow(dead_code)]
+    pub fn into_client(self) -> HttpsClient {
+        self.0
     }
 
     pub async fn download_as_file(&self, uri: Uri) -> Result<File, BoxError> {
