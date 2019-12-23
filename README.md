@@ -17,7 +17,7 @@ sudo apt install vim-nox
 
 ## Installation
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://nmk.nuimk.com | sh
+curl --proto '=https' --tlsv1.2 -sSf https://nmkup.nuimk.com | sh
 # or Github checkout
     git clone --recursive https://github.com/nuimk/nmk.git ~/.nmk
     ~/.nmk/bin/nmk

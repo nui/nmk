@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "nuimk-io"
+  },
+  "targets": {
+    "nuimk-io": {
+      "hosting": {
+        "nmkup": [
+          "nuimk-nmkup"
+        ]
+      }
+    }
+  }
+}

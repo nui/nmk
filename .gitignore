@@ -1,9 +1,9 @@
 *.pyc
 *.zwc
 
+.firebase/
 .idea/
 .netrwhist
-target/
 /.cache/
 /local
 /tmux/.tmux_history
@@ -19,5 +19,7 @@ target/
 /zsh/zshenv.extra
 /zsh/zshrc.extra.d/
 /zsh/zshrc.pre.d/
+firebase-debug.log*
 node_modules/
 npm-debug.log
+target/
