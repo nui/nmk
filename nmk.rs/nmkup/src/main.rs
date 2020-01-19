@@ -9,6 +9,7 @@ mod entrypoint;
 mod logging;
 mod gcloud;
 mod nmkup;
+mod nmkpkg;
 
 type BoxError = Box<dyn std::error::Error>;
 
@@ -21,5 +22,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     archive::install_or_update(&arg, &nmk_dir).await?;
     entrypoint::install(&nmk_dir).await?;
     nmkup::self_setup(&nmk_dir);
+//    nmkpkg::install(&nmk_dir).await?;
     Ok(())
 }
