@@ -3,7 +3,7 @@ use std::fs::File;
 use std::path::PathBuf;
 
 use log::LevelFilter;
-use simplelog::{TerminalMode, TermLogger};
+use simplelog::{SimpleLogger, TerminalMode, TermLogger};
 
 use crate::core::set_env;
 use crate::pathenv::PathVec;
@@ -14,10 +14,11 @@ pub fn setup_logging(debug: bool) {
         .set_thread_level(LevelFilter::Trace)
         .set_target_level(LevelFilter::Trace)
         .build();
-    // silently ignore if error
-    let _ = TermLogger::init(log_level,
-                             config,
-                             TerminalMode::Stderr);
+    if TermLogger::init(log_level,
+                        config.clone(),
+                        TerminalMode::Stderr).is_err() {
+        SimpleLogger::init(log_level, config).expect("Unable to setup logging");
+    }
 }
 
 pub fn setup_environment(nmk_dir: &PathBuf) {

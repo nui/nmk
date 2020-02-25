@@ -1,5 +1,5 @@
 use log::LevelFilter;
-use simplelog::{TermLogger, TerminalMode};
+use simplelog::{SimpleLogger, TerminalMode, TermLogger};
 
 pub fn setup(debug: bool) {
     let log_level = if debug { LevelFilter::Debug } else { LevelFilter::Info };
@@ -7,8 +7,9 @@ pub fn setup(debug: bool) {
         .set_thread_level(LevelFilter::Trace)
         .set_target_level(LevelFilter::Trace)
         .build();
-    // silently ignore if error
-    let _ = TermLogger::init(log_level,
-                             config,
-                             TerminalMode::Stderr);
+    if TermLogger::init(log_level,
+                        config.clone(),
+                        TerminalMode::Stderr).is_err() {
+        SimpleLogger::init(log_level, config).expect("Unable to setup logging");
+    }
 }
