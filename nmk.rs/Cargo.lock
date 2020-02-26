@@ -653,6 +653,7 @@ version = "0.1.0"
 dependencies = [
  "bytes",
  "clap",
+ "common",
  "dirs",
  "flate2",
  "hyper",

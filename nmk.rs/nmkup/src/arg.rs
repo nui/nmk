@@ -1,5 +1,7 @@
 use clap::{App, Arg, ArgMatches};
 
+use common::get_version;
+
 #[derive(Debug)]
 pub struct Argument<'a> {
     arg: ArgMatches<'a>,
@@ -21,7 +23,9 @@ const DEBUG: &str = "DEBUG";
 const FORCE: &str = "FORCE";
 
 pub fn parse() -> Argument<'static> {
+    let version = get_version().unwrap_or_default();
     App::new("nmkup")
+        .version(version.as_str())
         .about("All in one binary to setup nmk")
         .arg(Arg::with_name(DEBUG)
             .short("d")

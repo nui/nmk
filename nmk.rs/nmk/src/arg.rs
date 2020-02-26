@@ -1,6 +1,7 @@
 use clap::{App, Arg, ArgMatches, Values};
 
-use crate::time::{human_time, seconds_since_build};
+use common::get_version;
+use common::time::{human_time, seconds_since_build};
 
 #[derive(Debug)]
 pub struct Argument<'a> {
@@ -51,14 +52,6 @@ const DEBUG: &str = "DEBUG";
 const TMUX_ARG: &str = "TMUX_ARG";
 const USAGE: &str = "USAGE";
 const SSH: &str = "SSH";
-
-fn get_version() -> Option<String> {
-    match (seconds_since_build(), option_env!("SHORT_SHA")) {
-        (Some(secs), Some(sha)) => Some(format!("#{} ({} since last build)", sha, human_time(secs))),
-        (Some(secs), None) => Some(format!("({} since last build)", human_time(secs))),
-        _ => None,
-    }
-}
 
 pub fn parse() -> Argument<'static> {
     let version = get_version().unwrap_or_default();

@@ -10,7 +10,6 @@ mod core;
 mod nmk;
 mod pathenv;
 mod terminal;
-mod time;
 mod tmux;
 mod zsh;
 
