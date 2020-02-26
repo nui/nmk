@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate log;
+use structopt::StructOpt;
 
 use crate::tmux::Tmux;
 
@@ -16,7 +15,7 @@ mod zsh;
 
 fn main() {
     let start = std::time::Instant::now();
-    let arg = arg::parse();
+    let arg: arg::Opt = arg::Opt::from_args();
     nmk::setup_logging(arg.debug);
 
     if arg.ssh {
@@ -24,13 +23,13 @@ fn main() {
     }
 
     let nmk_dir = nmk::nmk_dir();
-    debug!("nmk_dir={:?}", nmk_dir);
+    log::debug!("nmk_dir={:?}", nmk_dir);
     nmk::setup_ld_library_path(&nmk_dir);
     nmk::setup_path(&nmk_dir);
 
     let tmux = Tmux::new(&nmk_dir);
-    debug!("tmux bin = {:?}", tmux.bin);
-    debug!("tmux version = {}", tmux.version);
+    log::debug!("tmux bin = {:?}", tmux.bin);
+    log::debug!("tmux version = {}", tmux.version);
 
     nmk::setup_environment(&nmk_dir);
     nmk::setup_preferred_editor();

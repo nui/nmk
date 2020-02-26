@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::time::Instant;
 
-use crate::arg::Argument;
+use crate::arg::Opt;
 use crate::core::*;
 use crate::nmk::is_dev_machine;
 use crate::terminal;
@@ -54,7 +54,7 @@ fn is_server_running(socket: &str) -> bool {
         .status()
         .map(|o| o.success())
         .unwrap_or_default();
-    debug!("server {} running", if running { "is" } else { "is not" });
+    log::debug!("server {} running", if running { "is" } else { "is not" });
     running
 }
 
@@ -74,7 +74,7 @@ impl<'a> Tmux<'a> {
         }
     }
 
-    pub fn setup_environment(&self, arg: &Argument) {
+    pub fn setup_environment(&self, arg: &Opt) {
         set_env("NMK_TMUX_DEFAULT_SHELL", which::which("zsh").expect("zsh not found"));
         set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
@@ -84,19 +84,19 @@ impl<'a> Tmux<'a> {
         set_env("NMK_TMUX_256_COLOR", one_hot!(color));
     }
 
-    fn print_usage_time(&self, arg: &Argument, start: &Instant) {
+    fn print_usage_time(&self, arg: &Opt, start: &Instant) {
         let before_exec = start.elapsed().as_millis();
         if arg.usage {
             println!("{}", before_exec);
         } else {
-            debug!("usage time: {}ms", before_exec);
+            log::debug!("usage time: {}ms", before_exec);
         }
     }
 
-    pub fn login_shell(&self, arg: &Argument, start: &Instant) -> ! {
+    pub fn login_shell(&self, arg: &Opt, start: &Instant) -> ! {
         let owned_args = {
-            let mut vec = vec![TMUX, "-L", arg.socket()];
-            if arg.force256color {
+            let mut vec = vec![TMUX, "-L", &arg.socket];
+            if arg.force_256_color {
                 vec.push("-2");
             }
             vec.extend_from_slice(&["-f", self.config.to_str().unwrap(), "-c", "exec zsh --login"]);
@@ -104,21 +104,21 @@ impl<'a> Tmux<'a> {
         };
         let path = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
         let args: Vec<&CStr> = owned_args.iter().map(CString::as_c_str).collect();
-        debug!("execv path: {:#?}", path);
-        debug!("execv args: {:#?}", args);
+        log::debug!("execv path: {:#?}", path);
+        log::debug!("execv args: {:#?}", args);
         self.print_usage_time(&arg, &start);
         nix::unistd::execv(&path, &args).expect("Can't start login shell");
         unreachable!()
     }
 
-    pub fn exec(&self, arg: &Argument, start: &Instant) -> ! {
-        let socket = arg.socket();
+    pub fn exec(&self, arg: &Opt, start: &Instant) -> ! {
+        let socket = arg.socket.as_str();
         let owned_args = {
-            let mut vec = vec![TMUX, "-L", arg.socket()];
-            if arg.force256color {
+            let mut vec = vec![TMUX, "-L", socket];
+            if arg.force_256_color {
                 vec.push("-2");
             }
-            let tmux_args = arg.tmux_args();
+            let tmux_args: Vec<&str> = arg.tmux_args.iter().map(String::as_str).collect();
 
             if is_server_running(socket) {
                 if tmux_args.len() > 0 {
@@ -138,11 +138,11 @@ impl<'a> Tmux<'a> {
         };
         let path = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
         let args: Vec<&CStr> = owned_args.iter().map(CString::as_c_str).collect();
-        debug!("execv path: {:#?}", path);
-        debug!("execv args: {:#?}", args);
+        log::debug!("execv path: {:#?}", path);
+        log::debug!("execv args: {:#?}", args);
         self.print_usage_time(&arg, &start);
         if self.is_local_tmux() && is_dev_machine() {
-            warn!("Using local tmux on development machine")
+            log::warn!("Using local tmux on development machine")
         }
         nix::unistd::execv(&path, &args).expect("Can't start tmux");
         unreachable!()

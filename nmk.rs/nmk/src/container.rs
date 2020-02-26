@@ -10,18 +10,16 @@ struct CGroup<'a> {
 impl<'a> CGroup<'a> {
     pub fn parse(line: &'a str) -> Option<Self> {
         let mut iter = line.split(":");
-        match (iter.next(), iter.next(), iter.next()) {
-            (Some(hierarchy_id), Some(subsystems), Some(control_group)) => Some(Self {
-                hierarchy_id,
-                subsystems,
-                control_group,
-            }),
-            _ => None
-        }
+        Some(Self {
+            hierarchy_id: iter.next()?,
+            subsystems: iter.next()?,
+            control_group: iter.next()?,
+        })
     }
 
     pub fn is_container(&self) -> bool {
-        self.control_group.starts_with("/docker") || self.control_group.starts_with("/kube")
+        let cgroup = self.control_group;
+        cgroup.starts_with("/docker") || cgroup.starts_with("/kube")
     }
 }
 

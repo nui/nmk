@@ -32,9 +32,9 @@ pub async fn install(nmk_dir: impl AsRef<Path>) -> Result<(), BoxError> {
         Target::ArmV7Linux => "https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk-armv7-linux.gz"
     }.parse()?;
     let client = SecureClient::new();
-    info!("Downloading entrypoint");
+    log::info!("Downloading entrypoint");
     let tar_gz = client.download_as_file(uri).await?;
     unzip_entrypoint(tar_gz, nmk_dir.join("bin").join("nmk"));
-    info!("Extracted entrypoint");
+    log::info!("Extracted entrypoint");
     Ok(())
 }

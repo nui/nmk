@@ -7,10 +7,10 @@ use bytes::Bytes;
 use flate2::read::GzDecoder;
 use tar::Archive;
 
+use crate::arg::Argument;
 use crate::BoxError;
 use crate::client::SecureClient;
 use crate::gcloud::MetaData;
-use crate::arg::Argument;
 
 const META_FILE: &str = ".gcs.resource.json";
 
@@ -18,7 +18,7 @@ async fn unpack_nmktar<P: AsRef<Path>>(file: File, dst: P) -> Result<(), BoxErro
     let tar = GzDecoder::new(file);
     let mut archive = Archive::new(tar);
     let dst = dst.as_ref();
-    info!("Installing to {:?}", dst);
+    log::info!("Installing to {:?}", dst);
     for entry in archive.entries()? {
         let mut entry = entry?;
         let path = dst.join(entry.path()?.strip_prefix(".nmk")?);
@@ -35,7 +35,7 @@ async fn download_metadata(client: &SecureClient) -> Result<Bytes, BoxError> {
 fn is_up2date(dst: &Path, meta: &MetaData) -> bool {
     let cache_path = dst.join(META_FILE);
     if !cache_path.exists() {
-        debug!("Not found GoogleCloudStorage API cache");
+        log::debug!("Not found GoogleCloudStorage API cache");
         false
     } else {
         let md5 = meta.md5();
@@ -58,7 +58,7 @@ fn cache_metadata(dst: &Path, meta: &MetaData) {
 pub async fn install_or_update(arg: &Argument<'_>, nmk_dir: &PathBuf) -> Result<(), BoxError> {
     if !nmk_dir.exists() {
         create_dir_all(nmk_dir).expect("Can't create directory");
-        info!("Created {:?} directory", nmk_dir);
+        log::info!("Created {:?} directory", nmk_dir);
     }
 
     // check if safe to install
@@ -69,10 +69,10 @@ pub async fn install_or_update(arg: &Argument<'_>, nmk_dir: &PathBuf) -> Result<
     }
 
     let client = SecureClient::new();
-    info!("Downloading archive");
+    log::info!("Downloading archive");
     let meta = MetaData::try_from(&download_metadata(&client).await?).expect("Fail parse metadata");
     if !arg.force && is_up2date(nmk_dir, &meta) {
-        info!("Already up to dated!")
+        log::info!("Already up to dated!")
     } else {
         if meta_file_exist {
             // uninstall old version
@@ -87,7 +87,7 @@ pub async fn install_or_update(arg: &Argument<'_>, nmk_dir: &PathBuf) -> Result<
         let tar_gz = client.download_as_file(uri).await?;
         unpack_nmktar(tar_gz, nmk_dir).await?;
         cache_metadata(nmk_dir, &meta);
-        info!("Installed a new version")
+        log::info!("Installed a new version")
     }
     Ok(())
 }

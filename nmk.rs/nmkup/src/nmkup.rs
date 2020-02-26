@@ -1,6 +1,8 @@
 use std::{env, fs};
 use std::path::PathBuf;
 
+use common::env_var::NMK_DIR;
+
 fn is_same_location(a: &PathBuf, b: &PathBuf) -> bool {
     fs::canonicalize(a).unwrap() == fs::canonicalize(b).unwrap()
 }
@@ -14,17 +16,16 @@ pub fn self_setup(nmk_dir: &PathBuf) {
     let target_bin = nmk_dir.join("bin").join("nmkup");
     if should_install(&current_exec, &target_bin) {
         fs::copy(current_exec, target_bin).expect("install nmkup failed");
-        info!("Installed nmkup");
+        log::info!("Installed nmkup");
     }
 }
 
 pub fn find_nmkdir() -> PathBuf {
-    const NMK_DIR: &str = "NMK_DIR";
     match std::env::var_os(NMK_DIR) {
         Some(nmk_dir) => nmk_dir.into(),
         None => {
             let nmk_dir = dirs::home_dir().expect("Can't find home directory").join(".nmk");
-            info!("Using default {}: {:?}", NMK_DIR, &nmk_dir);
+            log::info!("Using default {}: {:?}", NMK_DIR, &nmk_dir);
             nmk_dir
         }
     }

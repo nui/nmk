@@ -1,7 +1,7 @@
 use std::env;
 use std::ffi::OsString;
 
-use crate::arg::Argument;
+use crate::arg::Opt;
 use crate::container;
 
 fn is_vec_contains_term(vec: Vec<&str>, term: Option<OsString>) -> bool {
@@ -25,11 +25,11 @@ fn is_256_colorterm(term: Option<OsString>) -> bool {
     is_vec_contains_term(terms, term)
 }
 
-pub fn support_256_color(arg: &Argument) -> bool {
-    arg.force256color
+pub fn support_256_color(arg: &Opt) -> bool {
+    arg.force_256_color
         || is_256_term(env::var_os("TERM"))
         || is_256_colorterm(env::var_os("COLORTERM"))
-        || (arg.autofix && container::detect_container())
+        || (!arg.no_autofix && container::detect_container())
 }
 
 #[cfg(test)]
