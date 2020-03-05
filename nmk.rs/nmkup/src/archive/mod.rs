@@ -7,7 +7,7 @@ use bytes::Bytes;
 use flate2::read::GzDecoder;
 use tar::Archive;
 
-use crate::arg::Argument;
+use crate::arg::Opt;
 use crate::BoxError;
 use crate::client::SecureClient;
 use crate::gcloud::MetaData;
@@ -55,7 +55,7 @@ fn cache_metadata(dst: &Path, meta: &MetaData) {
     std::fs::write(cache_path, meta.to_string()).expect("Fail to write metadata");
 }
 
-pub async fn install_or_update(arg: &Argument<'_>, nmk_dir: &PathBuf) -> Result<(), BoxError> {
+pub async fn install_or_update(opt: &Opt, nmk_dir: &PathBuf) -> Result<(), BoxError> {
     if !nmk_dir.exists() {
         create_dir_all(nmk_dir).expect("Can't create directory");
         log::info!("Created {:?} directory", nmk_dir);
@@ -64,14 +64,14 @@ pub async fn install_or_update(arg: &Argument<'_>, nmk_dir: &PathBuf) -> Result<
     // check if safe to install
     let nmk_dir_empty = nmk_dir.read_dir().unwrap().next().is_none();
     let meta_file_exist = nmk_dir.join(META_FILE).exists();
-    if !arg.force && !nmk_dir_empty {
+    if !opt.force && !nmk_dir_empty {
         assert!(meta_file_exist, "{:?} Missing cached metadata or directory is not empty", nmk_dir_empty);
     }
 
     let client = SecureClient::new();
     log::info!("Downloading archive");
     let meta = MetaData::try_from(&download_metadata(&client).await?).expect("Fail parse metadata");
-    if !arg.force && is_up2date(nmk_dir, &meta) {
+    if !opt.force && is_up2date(nmk_dir, &meta) {
         log::info!("Already up to dated!")
     } else {
         if meta_file_exist {

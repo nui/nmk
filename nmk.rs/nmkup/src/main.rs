@@ -1,3 +1,5 @@
+use structopt::StructOpt;
+
 mod archive;
 mod arg;
 mod build;
@@ -12,11 +14,11 @@ type BoxError = Box<dyn std::error::Error>;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let arg = arg::parse();
-    logging::setup(arg.debug);
+    let opt = arg::Opt::from_args();
+    logging::setup(opt.debug);
 
     let nmk_dir = nmkup::find_nmkdir();
-    archive::install_or_update(&arg, &nmk_dir).await?;
+    archive::install_or_update(&opt, &nmk_dir).await?;
     entrypoint::install(&nmk_dir).await?;
     nmkup::self_setup(&nmk_dir);
 //    nmkpkg::install(&nmk_dir).await?;
