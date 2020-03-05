@@ -21,7 +21,6 @@ zsh/plugins/zsh-syntax-highlighting/images
 docker
 docs
 ms
-nmk.go
 nmk.rs
 project
 src

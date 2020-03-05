@@ -29,9 +29,6 @@ curl --proto '=https' --tlsv1.2 -sSf https://nmkup.nuimk.com | sh
 If python is not install on target system, use following binary to start tmux
 
 - [Linux](https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk-amd64-linux-musl.gz)
-- [Mac](https://storage.googleapis.com/nmk.nuimk.com/nmk.go/nmk.go-amd64-darwin)
-- [FreeBSD](https://storage.googleapis.com/nmk.nuimk.com/nmk.go/nmk.go-amd64-freebsd)
-
 
 ## Tmux navigation
 ```
