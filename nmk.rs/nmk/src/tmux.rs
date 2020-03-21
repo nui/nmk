@@ -1,6 +1,5 @@
 use std::env;
-use std::ffi::{CStr, CString};
-use std::os::unix::ffi::OsStrExt;
+use std::os::unix::process::CommandExt;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::time::Instant;
@@ -27,17 +26,15 @@ fn find_config(tmux_dir: &PathBuf, version: &str) -> PathBuf {
 }
 
 fn find_version() -> String {
-    if let Ok(o) = Command::new(TMUX).arg("-V").output() {
-        if !o.status.success() {
-            match o.status.code() {
-                Some(i) => panic!("tmux exit with status: {}", i),
-                None => panic!("terminated by signal"),
-            };
+    if let Ok(output) = Command::new(TMUX).arg("-V").output() {
+        if !output.status.success() {
+            let code = output.status.code().expect("terminated by signal");
+            panic!("tmux exit with status: {}", code);
         }
-        let version_output = String::from_utf8(o.stdout)
+        let version_output = String::from_utf8(output.stdout)
             .expect("tmux version output contain non utf-8");
         version_output.trim().split(" ")
-            .nth(1).expect(&format!("bad output: {}", version_output))
+            .nth(1).unwrap_or_else(|| panic!("bad output: {}", version_output))
             .to_string()
     } else {
         panic!("{} not found", TMUX);
@@ -52,8 +49,8 @@ fn is_server_running(socket: &str) -> bool {
         .stderr(Stdio::null())
         .stdout(Stdio::null())
         .status()
-        .map(|o| o.success())
-        .unwrap_or_default();
+        .map(|status| status.success())
+        .unwrap_or(false);
     log::debug!("server {} running", if running { "is" } else { "is not" });
     running
 }
@@ -61,7 +58,7 @@ fn is_server_running(socket: &str) -> bool {
 impl<'a> Tmux<'a> {
     pub fn new(nmk_dir: &PathBuf) -> Tmux {
         let tmux_dir = nmk_dir.join("tmux");
-        assert!(tmux_dir.is_dir());
+        assert!(tmux_dir.is_dir(), "{:?} is not directory", tmux_dir);
         let bin = which::which(TMUX).expect("Cannot find tmux binary");
         let version = find_version();
         let config = find_config(&tmux_dir, &version);
@@ -94,58 +91,47 @@ impl<'a> Tmux<'a> {
     }
 
     pub fn login_shell(&self, arg: &Opt, start: &Instant) -> ! {
-        let owned_args = {
-            let mut vec = vec![TMUX, "-L", &arg.socket];
-            if arg.force_256_color {
-                vec.push("-2");
-            }
-            vec.extend_from_slice(&["-f", self.config.to_str().unwrap(), "-c", "exec zsh --login"]);
-            vec.into_iter().map(|arg| CString::new(arg).unwrap()).collect::<Vec<_>>()
-        };
-        let path = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
-        let args: Vec<&CStr> = owned_args.iter().map(CString::as_c_str).collect();
-        log::debug!("execv path: {:#?}", path);
-        log::debug!("execv args: {:#?}", args);
+        let mut cmd = Command::new(&self.bin);
+        cmd.args(&["-L", &arg.socket]);
+        if arg.force_256_color {
+            cmd.arg("-2");
+        }
+        cmd.arg("-f");
+        cmd.arg(&self.config);
+        cmd.args(&["-c", "exec zsh --login"]);
+        log::debug!("login command: {:?}", cmd);
         self.print_usage_time(&arg, &start);
-        nix::unistd::execv(&path, &args).expect("Can't start login shell");
-        unreachable!()
+        let err = cmd.exec();
+        panic!("exec fail with {:?}", err);
     }
 
     pub fn exec(&self, arg: &Opt, start: &Instant) -> ! {
-        let socket = arg.socket.as_str();
-        let owned_args = {
-            let mut vec = vec![TMUX, "-L", socket];
-            if arg.force_256_color {
-                vec.push("-2");
-            }
-            let tmux_args: Vec<&str> = arg.tmux_args.iter().map(String::as_str).collect();
-
-            if is_server_running(socket) {
-                if tmux_args.len() > 0 {
-                    vec.extend(tmux_args);
-                } else {
-                    if env::var_os("TMUX").is_some() && !arg.inception {
-                        panic!("add --inception to allow nested tmux sessions");
-                    }
-                    vec.push("attach");
-                }
+        let mut cmd = Command::new(&self.bin);
+        cmd.args(&["-L", &arg.socket]);
+        if arg.force_256_color {
+            cmd.arg("-2");
+        }
+        if is_server_running(&arg.socket) {
+            if !arg.tmux_args.is_empty() {
+                cmd.args(arg.tmux_args.iter());
             } else {
-                vec.push("-f");
-                vec.push(self.config.to_str().unwrap());
-                vec.extend(tmux_args);
+                if env::var_os("TMUX").is_some() && !arg.inception {
+                    panic!("add --inception to allow nested tmux sessions");
+                }
+                cmd.arg("attach");
             }
-            vec.into_iter().map(|arg| CString::new(arg).unwrap()).collect::<Vec<_>>()
-        };
-        let path = CString::new(self.bin.as_os_str().as_bytes()).unwrap();
-        let args: Vec<&CStr> = owned_args.iter().map(CString::as_c_str).collect();
-        log::debug!("execv path: {:#?}", path);
-        log::debug!("execv args: {:#?}", args);
+        } else {
+            cmd.arg("-f");
+            cmd.arg(&self.config);
+            cmd.args(arg.tmux_args.iter());
+        }
+        log::debug!("exec command: {:?}", cmd);
         self.print_usage_time(&arg, &start);
         if self.is_local_tmux() && is_dev_machine() {
             log::warn!("Using local tmux on development machine")
         }
-        nix::unistd::execv(&path, &args).expect("Can't start tmux");
-        unreachable!()
+        let err = cmd.exec();
+        panic!("exec fail with {:?}", err);
     }
 
     pub fn is_local_tmux(&self) -> bool {

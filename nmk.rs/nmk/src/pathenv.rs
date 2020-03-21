@@ -1,7 +1,7 @@
 use std::{env, fmt};
 use std::collections::VecDeque;
 use std::ffi::{OsStr, OsString};
-use std::fmt::{Error, Formatter};
+use std::fmt::Formatter;
 use std::iter::FromIterator;
 use std::path::PathBuf;
 
