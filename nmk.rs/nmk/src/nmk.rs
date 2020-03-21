@@ -55,30 +55,24 @@ pub fn setup_preferred_editor() {
 }
 
 pub fn setup_path(nmk_dir: &PathBuf) {
-    let mut p = PathVec::parse(env::var_os(PATH).expect("$PATH not found"));
-    p.push_front(nmk_dir.join("local").join("bin"));
-    p.push_front(nmk_dir.join("bin"));
-    p = p.unique().no_version_managers();
-    if log::log_enabled!(log::Level::Debug) {
-        for (i, path) in p.iter().enumerate() {
-            log::debug!("{}[{}]={:?}", PATH, i + 1, path);
-        }
-    }
-    set_env(PATH, p.make());
+    let mut bin_path = PathVec::parse(env::var_os(PATH).expect("$PATH not found"));
+    bin_path.push_front(nmk_dir.join("local").join("bin"));
+    bin_path.push_front(nmk_dir.join("bin"));
+    bin_path = bin_path.unique().no_version_managers();
+    log::debug!("{} = {:#?}", PATH, bin_path);
+    set_env(PATH, bin_path.make());
 }
 
 pub fn setup_ld_library_path(nmk_dir: &PathBuf) {
     let local_lib_dir = nmk_dir.join("local").join("lib");
     if local_lib_dir.exists() {
-        let mut ps = match env::var_os(LD_LIBRARY_PATH) {
-            Some(path) => {
-                log::debug!("{}: {:?}", LD_LIBRARY_PATH, path);
-                PathVec::parse(path)
-            }
+        let mut lib_path = match env::var_os(LD_LIBRARY_PATH) {
+            Some(value) => PathVec::parse(value),
             None => PathVec::new(),
         };
-        ps.push_front(local_lib_dir);
-        let next_ld = ps.make();
+        lib_path.push_front(local_lib_dir);
+        log::debug!("{} = {:#?}", LD_LIBRARY_PATH, lib_path);
+        let next_ld = lib_path.make();
         set_env(LD_LIBRARY_PATH, next_ld);
     }
 }

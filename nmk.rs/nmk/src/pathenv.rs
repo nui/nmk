@@ -1,6 +1,7 @@
+use std::{env, fmt};
 use std::collections::VecDeque;
-use std::env;
 use std::ffi::{OsStr, OsString};
+use std::fmt::{Error, Formatter};
 use std::iter::FromIterator;
 use std::path::PathBuf;
 
@@ -9,6 +10,16 @@ use nix::NixPath;
 
 pub struct PathVec {
     vec: VecDeque<PathBuf>,
+}
+
+impl fmt::Debug for PathVec {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let mut f = f.debug_list();
+        for p in self.iter() {
+            f.entry(p);
+        }
+        f.finish()
+    }
 }
 
 impl PathVec {
