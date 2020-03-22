@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsStr;
 use std::fs::File;
 use std::path::PathBuf;
 
@@ -40,17 +41,20 @@ pub fn setup_environment(nmk_dir: &PathBuf) {
 }
 
 pub fn setup_preferred_editor() {
-    match env::var_os(EDITOR) {
-        Some(editor) => {
-            log::debug!("using {:?} as preferred editor", editor);
-        }
-        None => {
-            let mut editors = ["nvim", "vim"].iter();
-            if let Some(editor) = editors.find(|bin| which::which(bin).is_ok()) {
-                set_env(EDITOR, editor);
-                log::debug!("using {} as preferred editor", editor);
-            }
-        }
+    const PREFERRED_EDITORS: &[&str] = &["nvim", "vim"];
+    let mut editors: Vec<&OsStr> = Vec::with_capacity(PREFERRED_EDITORS.len() + 1);
+    editors.extend(PREFERRED_EDITORS.iter().map(|e| -> &OsStr { e.as_ref() }));
+
+    let env_editor;
+    if let Some(editor) = env::var_os(EDITOR) {
+        env_editor = editor;
+        editors.insert(0, &env_editor);
+    }
+    if let Some(editor) = editors.into_iter().find(|bin| which::which(bin).is_ok()) {
+        set_env(EDITOR, editor);
+        log::debug!("using {:?} as preferred editor", editor);
+    } else {
+        env::remove_var(EDITOR);
     }
 }
 
