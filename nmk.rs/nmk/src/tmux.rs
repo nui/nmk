@@ -28,7 +28,7 @@ fn find_config(tmux_dir: &PathBuf, version: &str) -> PathBuf {
 fn find_version() -> String {
     if let Ok(output) = Command::new(TMUX).arg("-V").output() {
         if !output.status.success() {
-            let code = output.status.code().expect("terminated by signal");
+            let code = output.status.code().expect("tmux is terminated by signal");
             panic!("tmux exit with status: {}", code);
         }
         let version_output = String::from_utf8(output.stdout)
@@ -58,7 +58,7 @@ fn is_server_running(socket: &str) -> bool {
 impl<'a> Tmux<'a> {
     pub fn new(nmk_dir: &PathBuf) -> Tmux {
         let tmux_dir = nmk_dir.join("tmux");
-        assert!(tmux_dir.is_dir(), "{:?} is not directory", tmux_dir);
+        assert!(tmux_dir.is_dir(), "{} is not directory", tmux_dir.to_string_lossy());
         let bin = which::which(TMUX).expect("Cannot find tmux binary");
         let version = find_version();
         let config = find_config(&tmux_dir, &version);

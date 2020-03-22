@@ -1,28 +1,29 @@
 use std::env;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 
 use crate::arg::Opt;
 use crate::container;
 
-fn is_vec_contains_term(vec: Vec<&str>, term: Option<OsString>) -> bool {
-    term.and_then(|x| x.into_string().ok())
-        .map_or(false, |s| vec.contains(&s.as_str()))
+fn slice_contains_term(slice: &[&str], term: Option<OsString>) -> bool {
+    term.as_deref()
+        .and_then(OsStr::to_str)
+        .map_or(false, |s| slice.contains(&s))
 }
 
 fn is_256_term(term: Option<OsString>) -> bool {
-    let terms = vec![
+    const TERMS: &[&str] = &[
         "cygwin",
         "gnome-256color",
         "putty",
         "screen-256color",
         "xterm-256color",
     ];
-    is_vec_contains_term(terms, term)
+    slice_contains_term(TERMS, term)
 }
 
 fn is_256_colorterm(term: Option<OsString>) -> bool {
-    let terms = vec!["gnome-terminal", "rxvt-xpm", "xfce4-terminal"];
-    is_vec_contains_term(terms, term)
+    const COLOR_TERMS: &[&str] = &["gnome-terminal", "rxvt-xpm", "xfce4-terminal"];
+    slice_contains_term(COLOR_TERMS, term)
 }
 
 pub fn support_256_color(arg: &Opt) -> bool {

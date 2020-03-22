@@ -12,7 +12,7 @@ impl MetaData {
     pub fn md5(&self) -> Option<&str> {
         self.inner
             .get("md5Hash")
-            .and_then(|v| v.as_str())
+            .and_then(Value::as_str)
     }
 
     pub fn to_string(&self) -> String {
