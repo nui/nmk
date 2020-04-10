@@ -1,8 +1,7 @@
+use once_cell::sync::Lazy;
 use structopt::StructOpt;
 
-lazy_static::lazy_static! {
-    static ref VERSION: String = ::common::get_version().unwrap_or_default();
-}
+static VERSION: Lazy<String> = Lazy::new(||::common::get_version().unwrap_or_default());
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "nmk", about = "An entrypoint for nmk", version = VERSION.as_str())]

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 
 #[allow(dead_code)]
 #[derive(PartialEq, Clone)]
@@ -24,19 +24,17 @@ pub fn is_mac() -> bool {
     *PLATFORM == PlatformType::OSX
 }
 
-lazy_static! {
-    static ref PLATFORM: PlatformType = {
-        let mut platform = what_platform();
-        if platform == PlatformType::Linux {
-            if PathBuf::from("/etc/alpine-release").exists() {
-                platform = PlatformType::Alpine
-            } else if PathBuf::from("/etc/arch-release").exists() {
-                platform = PlatformType::Arch
-            }
+static PLATFORM: Lazy<PlatformType> = Lazy::new(|| {
+    let mut platform = what_platform();
+    if platform == PlatformType::Linux {
+        if PathBuf::from("/etc/alpine-release").exists() {
+            platform = PlatformType::Alpine
+        } else if PathBuf::from("/etc/arch-release").exists() {
+            platform = PlatformType::Arch
         }
-        platform
-    };
-}
+    }
+    platform
+});
 
 #[cfg(target_os = "macos")]
 fn what_platform() -> PlatformType {
