@@ -1,0 +1,4 @@
+[build.env]
+passthrough = [
+    "GIT_SHORT_SHA",
+]

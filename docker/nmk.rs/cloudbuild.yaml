@@ -16,7 +16,7 @@ steps:
   args:
     - run
     - -e
-    - 'SHORT_SHA=$SHORT_SHA'
+    - 'GIT_SHORT_SHA=$SHORT_SHA'
     - -v=/workspace:/workspace
     # - -v=/workspace/cargo-build-cache-dir/registry:/root/.cargo/registry
     - --workdir=/workspace/nmk.rs

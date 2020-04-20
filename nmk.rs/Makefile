@@ -1,4 +1,4 @@
-.PHONY: dist nmkup
+.PHONY: dist nmkup git-short-sha
 
 NMK_PACKAGE := nmk
 NMKUP_PACKAGE := nmkup
@@ -12,14 +12,22 @@ ARMV7_LINUX_TARGET := armv7-unknown-linux-gnueabihf
 
 CLEAN_ALL_PACKAGES := cargo clean --package $(NMK_PACKAGE) --package $(NMKUP_PACKAGE) --package common
 
+.DEFAULT_GOAL := build
+
 export CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = arm-linux-gnueabihf-gcc
 
 build:
 	$(CLEAN_ALL_PACKAGES)
 	cargo build
 
-arm-cross:
-	cross build --target $(ARMV7_LINUX_TARGET) --release
+git-short-sha:
+	$(eval GIT_SHORT_SHA = $(shell git rev-parse --short HEAD))
+
+arm-cross: git-short-sha
+	$(CLEAN_ALL_PACKAGES) --release --target $(ARMV7_LINUX_TARGET)
+	# this line is need because somehow above line doesn't work as expected
+	rm -rf target/$(ARMV7_LINUX_TARGET)/release/build/common-*
+	env GIT_SHORT_SHA=$(GIT_SHORT_SHA) cross build --target $(ARMV7_LINUX_TARGET) --release
 
 release:
 	$(CLEAN_ALL_PACKAGES) --release
