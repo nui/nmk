@@ -73,7 +73,7 @@ impl PathVec {
 impl FromIterator<PathBuf> for PathVec {
     fn from_iter<T: IntoIterator<Item=PathBuf>>(iter: T) -> Self {
         Self {
-            vec: iter.into_iter().collect()
+            vec: FromIterator::from_iter(iter)
         }
     }
 }

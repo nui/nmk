@@ -1,7 +1,7 @@
 use std::env;
 use std::ffi::OsStr;
 use std::fs::File;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use log::LevelFilter;
 use simplelog::{SimpleLogger, TerminalMode, TermLogger};
@@ -96,7 +96,7 @@ pub fn display_message_of_the_day() {
     let mut stdout = std::io::stdout();
     ["/var/run/motd.dynamic", "/etc/motd"]
         .iter()
-        .map(PathBuf::from)
+        .map(Path::new)
         .filter(|p| p.exists())
         .flat_map(File::open)
         .for_each(|mut f| {
