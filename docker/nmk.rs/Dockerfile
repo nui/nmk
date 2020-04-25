@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 # use old version of glibc to ensure binary compatibility
 
 RUN apt-get -yq update \
@@ -8,6 +8,7 @@ RUN apt-get -yq update \
         curl \
         gcc-arm-linux-gnueabihf \
         git \
+        libssl-dev \
         make \
         musl-tools \
         pigz \
