@@ -8,7 +8,6 @@ RUN apt-get -yq update \
         curl \
         gcc-arm-linux-gnueabihf \
         git \
-        libssl-dev \
         make \
         musl-tools \
         pigz \
@@ -20,8 +19,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no
     && . /root/.cargo/env \
     && rustup target add \
         armv7-unknown-linux-gnueabihf \
-        x86_64-unknown-linux-musl \
-    && cargo install sccache
+        x86_64-unknown-linux-musl
 
 ENV DIST_DIR=/workspace
 ENV PATH=/root/.cargo/bin:${PATH}
