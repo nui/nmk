@@ -1,4 +1,4 @@
-.PHONY: dist nmkup git-short-sha
+.PHONY: dist nmkup export-build-env invalidate-cache
 
 NMK_PACKAGE := nmk
 NMKUP_PACKAGE := nmkup
@@ -16,21 +16,22 @@ CLEAN_ALL_PACKAGES := cargo clean --package $(NMK_PACKAGE) --package $(NMKUP_PAC
 
 export CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = arm-linux-gnueabihf-gcc
 
-build:
-	$(CLEAN_ALL_PACKAGES)
+export-build-env:
+	$(eval export GIT_SHORT_SHA = $(shell git rev-parse --short HEAD))
+
+build: invalidate-cache
 	cargo build
 
-git-short-sha:
-	$(eval GIT_SHORT_SHA = $(shell git rev-parse --short HEAD))
+invalidate-cache:
+	touch common/src/lib.rs
 
-arm-cross: git-short-sha
-	$(CLEAN_ALL_PACKAGES) --release --target $(ARMV7_LINUX_TARGET)
-	# this line is need because somehow above line doesn't work as expected
-	rm -rf target/$(ARMV7_LINUX_TARGET)/release/build/common-*
-	env GIT_SHORT_SHA=$(GIT_SHORT_SHA) cross build --target $(ARMV7_LINUX_TARGET) --release
+armv7-cross: export-build-env invalidate-cache
+	cross build --release --target $(ARMV7_LINUX_TARGET) --package nmk --package common
 
-release:
-	$(CLEAN_ALL_PACKAGES) --release
+armv7-linux: invalidate-cache
+	$(RELEASE_BUILD) --target $(ARMV7_LINUX_TARGET)
+
+release: invalidate-cache
 	$(RELEASE_BUILD)
 	du target/release/$(NMK_PACKAGE)
 
@@ -43,13 +44,8 @@ clean:
 show-build-info:
 	rustup show
 
-amd64-linux-musl:
-	$(CLEAN_ALL_PACKAGES) --release --target $(AMD64_LINUX_MUSL_TARGET)
+amd64-linux-musl: invalidate-cache
 	$(RELEASE_BUILD) --target $(AMD64_LINUX_MUSL_TARGET)
-
-armv7-linux:
-	$(CLEAN_ALL_PACKAGES) --release --target $(ARMV7_LINUX_TARGET)
-	$(RELEASE_BUILD) --target $(ARMV7_LINUX_TARGET)
 
 dist:
 	<target/$(AMD64_LINUX_MUSL_TARGET)/release/$(NMK_PACKAGE)   gzip > $(DIST_DIR)/nmk-amd64-linux-musl.gz
@@ -57,6 +53,3 @@ dist:
 	<target/$(ARMV7_LINUX_TARGET)/release/$(NMK_PACKAGE)   gzip > $(DIST_DIR)/nmk-armv7-linux.gz
 	cp target/$(ARMV7_LINUX_TARGET)/release/$(NMKUP_PACKAGE) $(DIST_DIR)/nmkup-armv7-linux
 
-nmkup:
-	cargo clean --package $(NMKUP_PACKAGE)
-	cargo build --package $(NMKUP_PACKAGE)
