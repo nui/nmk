@@ -47,6 +47,9 @@ show-build-info:
 amd64-linux-musl: invalidate-cache
 	$(RELEASE_BUILD) --target $(AMD64_LINUX_MUSL_TARGET)
 
+cross-amd64-linux-musl: invalidate-cache
+	$(RELEASE_ENV) cross build --release --target $(AMD64_LINUX_MUSL_TARGET)
+
 dist:
 	<target/$(AMD64_LINUX_MUSL_TARGET)/release/$(NMK_PACKAGE)   gzip > $(DIST_DIR)/nmk-amd64-linux-musl.gz
 	cp target/$(AMD64_LINUX_MUSL_TARGET)/release/$(NMKUP_PACKAGE) $(DIST_DIR)/nmkup-amd64-linux-musl

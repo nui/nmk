@@ -18,6 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     logging::setup(opt.debug);
 
     let nmk_dir = nmkup::find_nmkdir();
+    // Installation should be done in order
     archive::install_or_update(&opt, &nmk_dir).await?;
     entrypoint::install(&nmk_dir).await?;
     nmkup::self_setup(&nmk_dir);

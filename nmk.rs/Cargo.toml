@@ -5,3 +5,6 @@ members = [
     "nmk",
     "nmkup",
 ]
+
+[profile.release]
+lto = false
