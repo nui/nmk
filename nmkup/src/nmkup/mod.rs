@@ -13,7 +13,7 @@ mod nmkpkg;
 type BoxError = Box<dyn std::error::Error>;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = arg::Opt::from_args();
     logging::setup(opt.debug);
 

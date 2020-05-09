@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::time::Instant;
 
-use crate::arg::Opt;
+use crate::cmdline::Opt;
 use crate::core::*;
 use crate::nmk::is_dev_machine;
 use crate::terminal;

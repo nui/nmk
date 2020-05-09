@@ -1,4 +1,0 @@
-#!/bin/sh
-
-tar -I pigz -C /cargo-build-cache-dir -cf cargo-registry.tar.gz registry
-tar -I pigz -C nmk.rs -cf target.tar.gz target

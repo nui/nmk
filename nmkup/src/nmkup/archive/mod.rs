@@ -7,10 +7,10 @@ use bytes::Bytes;
 use flate2::read::GzDecoder;
 use tar::Archive;
 
-use crate::arg::Opt;
-use crate::BoxError;
-use crate::client::SecureClient;
-use crate::gcloud::MetaData;
+use crate::nmkup::arg::Opt;
+use crate::nmkup::BoxError;
+use crate::nmkup::client::SecureClient;
+use crate::nmkup::gcloud::MetaData;
 
 const META_FILE: &str = ".gcs.resource.json";
 

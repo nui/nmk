@@ -1,4 +1,4 @@
-use common::platform;
+use crate::common::platform;
 
 #[allow(dead_code)]
 struct CGroup<'a> {

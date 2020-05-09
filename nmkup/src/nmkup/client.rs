@@ -11,7 +11,7 @@ use hyper_rustls::HttpsConnector;
 
 use tempfile::tempfile;
 
-use crate::BoxError;
+use crate::nmkup::BoxError;
 
 type HttpsClient = Client<HttpsConnector<HttpConnector<GaiResolver>>, Body>;
 

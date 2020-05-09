@@ -1,7 +1,7 @@
 use std::{env, fs};
 use std::path::PathBuf;
 
-use common::env_var::NMK_DIR;
+use crate::common::env_var::NMK_DIR;
 
 fn is_same_location(a: &PathBuf, b: &PathBuf) -> bool {
     fs::canonicalize(a).unwrap() == fs::canonicalize(b).unwrap()

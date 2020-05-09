@@ -1,4 +1,0 @@
-#!/bin/sh
-
-tar -C /cargo-build-cache-dir -xf cargo-registry.tar.gz
-tar -C nmk.rs -xf target.tar.gz

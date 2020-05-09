@@ -5,11 +5,14 @@ use std::path::{Path, PathBuf};
 
 use log::LevelFilter;
 use simplelog::{SimpleLogger, TerminalMode, TermLogger};
+use structopt::StructOpt;
 
-use common::env_var::{EDITOR, LD_LIBRARY_PATH, NMK_DIR, PATH};
-
+use crate::zsh;
+use crate::cmdline::Opt;
+use crate::common::env_var::{EDITOR, LD_LIBRARY_PATH, NMK_DIR, PATH};
 use crate::core::set_env;
 use crate::pathenv::PathVec;
+use crate::tmux::Tmux;
 
 pub fn setup_logging(debug: bool) {
     let log_level = if debug { LevelFilter::Debug } else { LevelFilter::Info };
@@ -107,4 +110,33 @@ pub fn display_message_of_the_day() {
 pub fn is_dev_machine() -> bool {
     env::var_os("DISPLAY").is_some() &&
         env::var_os("WINDOWID").is_some()
+}
+
+pub fn main() {
+    let start = std::time::Instant::now();
+    let arg: Opt = Opt::from_args();
+    setup_logging(arg.debug);
+
+    if arg.ssh {
+        display_message_of_the_day();
+    }
+
+    let nmk_dir = nmk_dir();
+    log::debug!("nmk_dir={:?}", nmk_dir);
+    setup_ld_library_path(&nmk_dir);
+    setup_path(&nmk_dir);
+
+    let tmux = Tmux::new(&nmk_dir);
+    log::debug!("tmux bin = {:?}", tmux.bin);
+    log::debug!("tmux version = {}", tmux.version);
+
+    setup_environment(&nmk_dir);
+    setup_preferred_editor();
+    zsh::setup(&arg, &nmk_dir);
+    if arg.login {
+        tmux.login_shell(&arg, &start);
+    } else {
+        tmux.setup_environment(&arg);
+        tmux.exec(&arg, &start);
+    }
 }

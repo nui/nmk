@@ -6,9 +6,9 @@ use std::path::Path;
 use flate2::read::GzDecoder;
 use hyper::Uri;
 
-use crate::BoxError;
-use crate::build::Target;
-use crate::client::SecureClient;
+use crate::nmkup::BoxError;
+use crate::nmkup::build::Target;
+use crate::nmkup::client::SecureClient;
 
 fn unzip_entrypoint(file: File, dst: impl AsRef<Path>) {
     let dst = dst.as_ref();

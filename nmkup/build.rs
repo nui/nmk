@@ -9,4 +9,5 @@ macro_rules! rustc_env {
 fn main() {
     let secs = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
     rustc_env!("EPOCHSECONDS", secs);
+    rustc_env!("CARGO_TARGET", std::env::var("TARGET").unwrap());
 }

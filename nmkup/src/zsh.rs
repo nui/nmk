@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
-use common::platform::{is_alpine, is_arch, is_mac};
+use crate::common::platform::{is_alpine, is_arch, is_mac};
 
-use crate::arg::Opt;
+use crate::cmdline::Opt;
 use crate::core::*;
 
 fn has_local_zsh(nmk_dir: &PathBuf) -> bool {

@@ -1,7 +1,7 @@
 use once_cell::sync::Lazy;
 use structopt::StructOpt;
 
-static VERSION: Lazy<String> = Lazy::new(|| ::common::get_version().unwrap_or_default());
+static VERSION: Lazy<String> = Lazy::new(|| crate::common::get_version().unwrap_or_default());
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "nmkup", about = "All in one binary to setup nmk", version = VERSION.as_str())]

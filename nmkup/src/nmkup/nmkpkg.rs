@@ -2,7 +2,7 @@ use std::path::Path;
 
 use os_info::VersionType;
 
-use crate::BoxError;
+use crate::nmkup::BoxError;
 
 enum Distro {
     Ubuntu
