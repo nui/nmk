@@ -22,8 +22,6 @@ build: invalidate-cache
 invalidate-cache:
 	touch src/main.rs
 
-armv7-cross: export-build-env invalidate-cache
-	cross build --release --target $(ARMV7_LINUX_TARGET) --package nmkup
 
 armv7-linux: invalidate-cache
 	$(RELEASE_BUILD) --target $(ARMV7_LINUX_TARGET)
@@ -46,6 +44,9 @@ amd64-linux-musl: invalidate-cache
 
 cross-amd64-linux-musl: invalidate-cache
 	$(RELEASE_ENV) cross build --release --target $(AMD64_LINUX_MUSL_TARGET)
+
+cross-armv7-linux: export-build-env invalidate-cache
+	$(RELEASE_ENV) cross build --release --target $(ARMV7_LINUX_TARGET)
 
 dist:
 	<target/$(AMD64_LINUX_MUSL_TARGET)/release/$(NMKUP_PACKAGE)   gzip > $(DIST_DIR)/nmk-amd64-linux-musl.gz

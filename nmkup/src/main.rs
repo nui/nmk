@@ -20,7 +20,7 @@ fn main() {
         .and_then(std::ffi::OsStr::to_str);
     match name {
         Some("nmk") => nmk::main(),
-        Some("nmkup") => {
+        Some(name) if name.starts_with("nmkup") => {
             if let Err(e) = nmkup::main() {
                 eprintln!("{:?}", e);
                 std::process::exit(-1);
