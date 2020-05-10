@@ -1,17 +1,17 @@
 use std::env;
 use std::path::PathBuf;
 
-mod cmdline;
-mod common;
 mod container;
 #[macro_use]
 mod core;
+mod logging;
 mod nmk;
 mod nmkup;
 mod pathenv;
-mod terminal;
-mod tmux;
-mod zsh;
+mod time;
+mod version;
+mod env_var;
+mod platform;
 
 fn main() {
     let arg0 = env::args().next().map(PathBuf::from);

@@ -3,29 +3,20 @@ use std::ffi::OsStr;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
-use log::LevelFilter;
-use simplelog::{SimpleLogger, TerminalMode, TermLogger};
 use structopt::StructOpt;
 
-use crate::zsh;
-use crate::cmdline::Opt;
-use crate::common::env_var::{EDITOR, LD_LIBRARY_PATH, NMK_DIR, PATH};
-use crate::core::set_env;
-use crate::pathenv::PathVec;
-use crate::tmux::Tmux;
+use cmdline::Opt;
+use tmux::Tmux;
 
-pub fn setup_logging(debug: bool) {
-    let log_level = if debug { LevelFilter::Debug } else { LevelFilter::Info };
-    let config = simplelog::ConfigBuilder::new()
-        .set_thread_level(LevelFilter::Trace)
-        .set_target_level(LevelFilter::Trace)
-        .build();
-    if TermLogger::init(log_level,
-                        config.clone(),
-                        TerminalMode::Stderr).is_err() {
-        SimpleLogger::init(log_level, config).expect("Unable to setup logging");
-    }
-}
+use crate::core::set_env;
+use crate::env_var::{EDITOR, LD_LIBRARY_PATH, NMK_DIR, PATH};
+use crate::pathenv::PathVec;
+
+mod cmdline;
+mod terminal;
+mod tmux;
+mod zsh;
+
 
 pub fn setup_environment(nmk_dir: &PathBuf) {
     let init_vim = nmk_dir.join("vim").join("init.vim");
@@ -115,7 +106,7 @@ pub fn is_dev_machine() -> bool {
 pub fn main() {
     let start = std::time::Instant::now();
     let arg: Opt = Opt::from_args();
-    setup_logging(arg.debug);
+    crate::logging::setup(arg.debug);
 
     if arg.ssh {
         display_message_of_the_day();

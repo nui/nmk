@@ -4,10 +4,10 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::time::Instant;
 
-use crate::cmdline::Opt;
 use crate::core::*;
+use crate::nmk::cmdline::Opt;
 use crate::nmk::is_dev_machine;
-use crate::terminal;
+use crate::nmk::terminal;
 
 const TMUX: &str = "tmux";
 
