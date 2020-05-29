@@ -35,18 +35,17 @@ pub fn setup_environment(nmk_dir: &PathBuf) {
 }
 
 pub fn setup_preferred_editor() {
-    let mut editors = match env::var_os(EDITOR) {
-        Some(editor) => vec![editor],
-        None => vec![]
-    };
-    let preferred_editors = ["nvim", "vim"].iter().map(OsString::from);
-    editors.extend(preferred_editors);
+    const PREFERRED_EDITORS: &[&str] = &["nvim", "vim"];
 
-    if let Some(editor) = editors.iter().find(|bin| which::which(bin).is_ok()) {
-        set_env(EDITOR, editor);
-        log::debug!("using {:?} as preferred editor", editor);
-    } else {
-        env::remove_var(EDITOR);
+    match env::var_os(EDITOR).into_iter()
+        .chain(PREFERRED_EDITORS.iter().map(OsString::from))
+        .find(|bin| which::which(bin).is_ok())
+    {
+        Some(editor) => {
+            log::debug!("using {:?} as preferred editor", editor);
+            set_env(EDITOR, editor);
+        }
+        None => env::remove_var(EDITOR)
     }
 }
 
