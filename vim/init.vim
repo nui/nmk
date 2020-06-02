@@ -28,7 +28,7 @@ filetype plugin indent on
 let mapleader = ','
 let maplocalleader = '\'
 
-let &colorcolumn = 80
+let &colorcolumn = 100
 let &laststatus = 2  " always show status line
 set list
 let &listchars = 'tab:▸ ,trail:·,extends:#,nbsp:·'
