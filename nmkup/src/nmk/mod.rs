@@ -9,7 +9,7 @@ use cmdline::Opt;
 use tmux::Tmux;
 
 use crate::core::set_env;
-use crate::env_var::{EDITOR, LD_LIBRARY_PATH, NMK_DIR, PATH};
+use crate::env::{DISPLAY, EDITOR, LD_LIBRARY_PATH, NMK_BIN, NMK_DIR, PATH, VIMINIT, VIRTUAL_ENV, WINDOWID, ZDOTDIR};
 use crate::pathenv::PathVec;
 
 mod cmdline;
@@ -25,13 +25,13 @@ pub fn setup_environment(nmk_dir: &PathBuf) {
 
     let quote_first_space = |s: &str| s.to_string().replace(" ", r"\ ");
     if let Some(path) = init_vim.to_str().map(quote_first_space) {
-        set_env("VIMINIT", format!("source {}", path));
+        set_env(VIMINIT, format!("source {}", path));
     }
-    set_env("ZDOTDIR", zdotdir);
+    set_env(ZDOTDIR, zdotdir);
 
-    env::remove_var("VIRTUAL_ENV");
+    env::remove_var(VIRTUAL_ENV);
 
-    set_env("NMK_BIN", env::current_exe().expect("fail to get full path to executable"));
+    set_env(NMK_BIN, env::current_exe().expect("fail to get full path to executable"));
 }
 
 pub fn setup_preferred_editor() {
@@ -96,8 +96,8 @@ pub fn display_message_of_the_day() {
 }
 
 pub fn is_dev_machine() -> bool {
-    env::var_os("DISPLAY").is_some() &&
-        env::var_os("WINDOWID").is_some()
+    env::var_os(DISPLAY).is_some() &&
+        env::var_os(WINDOWID).is_some()
 }
 
 pub fn main() {

@@ -1,4 +1,3 @@
-use std::env;
 use std::path::PathBuf;
 
 mod container;
@@ -10,11 +9,11 @@ mod nmkup;
 mod pathenv;
 mod time;
 mod version;
-mod env_var;
+mod env;
 mod platform;
 
 fn main() {
-    let arg0 = env::args().next().map(PathBuf::from);
+    let arg0 = std::env::args().next().map(PathBuf::from);
     let name = arg0.as_ref()
         .and_then(|a| a.file_stem())
         .and_then(std::ffi::OsStr::to_str);
