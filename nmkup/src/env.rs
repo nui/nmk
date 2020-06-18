@@ -1,5 +1,8 @@
+#[rustfmt::skip]
 macro_rules! declare {
-    ($id: ident) => {pub const $id: &str = stringify!($id);};
+    ($id: ident) => {
+        pub const $id: &str = stringify!($id);
+    };
 }
 
 declare!(DISPLAY);

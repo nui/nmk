@@ -9,14 +9,16 @@ use cmdline::Opt;
 use tmux::Tmux;
 
 use crate::core::set_env;
-use crate::env::{DISPLAY, EDITOR, LD_LIBRARY_PATH, NMK_BIN, NMK_DIR, PATH, VIMINIT, VIRTUAL_ENV, WINDOWID, ZDOTDIR};
+use crate::env::{
+    DISPLAY, EDITOR, LD_LIBRARY_PATH, NMK_BIN, NMK_DIR, PATH, VIMINIT, VIRTUAL_ENV, WINDOWID,
+    ZDOTDIR,
+};
 use crate::pathenv::PathVec;
 
 mod cmdline;
 mod terminal;
 mod tmux;
 mod zsh;
-
 
 pub fn setup_environment(nmk_dir: &PathBuf) {
     let init_vim = nmk_dir.join("vim").join("init.vim");
@@ -31,13 +33,17 @@ pub fn setup_environment(nmk_dir: &PathBuf) {
 
     env::remove_var(VIRTUAL_ENV);
 
-    set_env(NMK_BIN, env::current_exe().expect("fail to get full path to executable"));
+    set_env(
+        NMK_BIN,
+        env::current_exe().expect("fail to get full path to executable"),
+    );
 }
 
 pub fn setup_preferred_editor() {
     const PREFERRED_EDITORS: &[&str] = &["nvim", "vim"];
 
-    match env::var_os(EDITOR).into_iter()
+    match env::var_os(EDITOR)
+        .into_iter()
         .chain(PREFERRED_EDITORS.iter().map(OsString::from))
         .find(|bin| which::which(bin).is_ok())
     {
@@ -45,7 +51,7 @@ pub fn setup_preferred_editor() {
             log::debug!("using {:?} as preferred editor", editor);
             set_env(EDITOR, editor);
         }
-        None => env::remove_var(EDITOR)
+        None => env::remove_var(EDITOR),
     }
 }
 
@@ -96,8 +102,7 @@ pub fn display_message_of_the_day() {
 }
 
 pub fn is_dev_machine() -> bool {
-    env::var_os(DISPLAY).is_some() &&
-        env::var_os(WINDOWID).is_some()
+    env::var_os(DISPLAY).is_some() && env::var_os(WINDOWID).is_some()
 }
 
 pub fn main() {

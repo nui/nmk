@@ -1,5 +1,5 @@
-use std::{env, fs};
 use std::path::PathBuf;
+use std::{env, fs};
 
 use crate::env::NMK_DIR;
 
@@ -24,7 +24,9 @@ pub fn find_nmkdir() -> PathBuf {
     match std::env::var_os(NMK_DIR) {
         Some(nmk_dir) => nmk_dir.into(),
         None => {
-            let nmk_dir = dirs::home_dir().expect("Can't find home directory").join(".nmk");
+            let nmk_dir = dirs::home_dir()
+                .expect("Can't find home directory")
+                .join(".nmk");
             log::info!("Using default {}: {:?}", NMK_DIR, &nmk_dir);
             nmk_dir
         }

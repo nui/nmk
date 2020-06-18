@@ -1,7 +1,8 @@
+use crate::version::get_verbose_version;
 use once_cell::sync::Lazy;
 use structopt::StructOpt;
 
-static VERSION: Lazy<String> = Lazy::new(|| crate::version::get_verbose_version().unwrap_or_default());
+static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().unwrap_or_default());
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "nmk", about = "An entrypoint for nmk", version = VERSION.as_str())]
@@ -9,11 +10,11 @@ pub struct Opt {
     #[structopt(short = "2", help = "Assume the terminal supports 256 colours")]
     pub force_256_color: bool,
     #[structopt(
-    short = "L",
-    long = "socket",
-    default_value = "nmk",
-    value_name = "NAME",
-    help = "Use a different tmux socket name",
+        short = "L",
+        long = "socket",
+        default_value = "nmk",
+        value_name = "NAME",
+        help = "Use a different tmux socket name"
     )]
     pub socket: String,
     #[structopt(short = "l", long, help = "Start zsh login shell")]

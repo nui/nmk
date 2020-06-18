@@ -23,11 +23,7 @@ pub fn human_time(secs: i64) -> String {
         result.push(format!("{}m", minutes));
     }
     result.push(format!("{}s", seconds));
-    result
-        .into_iter()
-        .take(2)
-        .collect::<Vec<_>>()
-        .join(" ")
+    result.into_iter().take(2).collect::<Vec<_>>().join(" ")
 }
 
 pub fn seconds_since_build() -> Option<i64> {

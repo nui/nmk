@@ -1,9 +1,9 @@
-use std::{env, fmt};
 use std::collections::VecDeque;
 use std::ffi::{OsStr, OsString};
 use std::fmt::Formatter;
 use std::iter::FromIterator;
 use std::path::PathBuf;
+use std::{env, fmt};
 
 use indexmap::IndexSet;
 use nix::NixPath;
@@ -27,12 +27,13 @@ impl PathVec {
         return env::join_paths(self.unique()).expect("join path error");
     }
 
-    pub fn iter(&self) -> impl Iterator<Item=&PathBuf> {
+    pub fn iter(&self) -> impl Iterator<Item = &PathBuf> {
         self.vec.iter()
     }
 
     pub fn unique(&self) -> Self {
-        self.vec.iter()
+        self.vec
+            .iter()
             .collect::<IndexSet<_>>()
             .into_iter()
             .cloned()
@@ -40,9 +41,11 @@ impl PathVec {
     }
 
     pub fn no_version_managers(&self) -> Self {
-        self.vec.iter().filter(|x| {
-            !x.ends_with(".pyenv/shims") && !x.ends_with(".rbenv/shims")
-        }).cloned().collect()
+        self.vec
+            .iter()
+            .filter(|x| !x.ends_with(".pyenv/shims") && !x.ends_with(".rbenv/shims"))
+            .cloned()
+            .collect()
     }
 
     pub fn push_front<T: Into<PathBuf>>(&mut self, path: T) {
@@ -71,9 +74,9 @@ impl PathVec {
 }
 
 impl FromIterator<PathBuf> for PathVec {
-    fn from_iter<T: IntoIterator<Item=PathBuf>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = PathBuf>>(iter: T) -> Self {
         Self {
-            vec: FromIterator::from_iter(iter)
+            vec: FromIterator::from_iter(iter),
         }
     }
 }

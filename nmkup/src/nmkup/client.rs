@@ -3,10 +3,10 @@ use std::io::prelude::*;
 use std::io::SeekFrom;
 
 use bytes::{Buf, BufMut, Bytes, BytesMut};
-use hyper::{Body, Client, Uri};
 use hyper::body::HttpBody;
 use hyper::client::connect::dns::GaiResolver;
 use hyper::client::HttpConnector;
+use hyper::{Body, Client, Uri};
 use hyper_rustls::HttpsConnector;
 
 use tempfile::tempfile;

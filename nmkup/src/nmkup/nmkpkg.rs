@@ -5,7 +5,7 @@ use os_info::VersionType;
 use crate::nmkup::BoxError;
 
 enum Distro {
-    Ubuntu
+    Ubuntu,
 }
 
 fn find_distro() -> Option<Distro> {
@@ -21,12 +21,12 @@ fn find_distro() -> Option<Distro> {
 fn find_archive(distro: Distro, username: &str) -> Option<String> {
     let base = "https://storage.googleapis.com/nmk.nuimk.com/nmkpkg/cloudbuild";
     let archive = match distro {
-        Distro::Ubuntu => {
-            match username {
-                n @ "beid" | n @ "nui" | n @ "ubuntu" | n @ "root" => Some(format!("tmux-3.0a--{}--ubuntu-18.04.tar.gz", n)),
-                _ => None
+        Distro::Ubuntu => match username {
+            n @ "beid" | n @ "nui" | n @ "ubuntu" | n @ "root" => {
+                Some(format!("tmux-3.0a--{}--ubuntu-18.04.tar.gz", n))
             }
-        }
+            _ => None,
+        },
     };
     archive.map(|a| format!("{}/{}", base, a))
 }
@@ -37,7 +37,7 @@ fn find_path(username: &str) -> Option<&'static str> {
         "nui" => Some("/home/nui"),
         "ubuntu" => Some("/home/ubuntu"),
         "root" => Some("/root"),
-        _ => None
+        _ => None,
     }
 }
 

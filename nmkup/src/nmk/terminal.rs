@@ -5,7 +5,7 @@ use std::ops::Deref;
 use crate::container;
 use crate::nmk::cmdline::Opt;
 
-fn slice_contains_term<T: Deref<Target=OsStr>>(slice: &[&str], term: Option<T>) -> bool {
+fn slice_contains_term<T: Deref<Target = OsStr>>(slice: &[&str], term: Option<T>) -> bool {
     term.as_deref()
         .and_then(OsStr::to_str)
         .map_or(false, |s| slice.contains(&s))

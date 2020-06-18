@@ -8,11 +8,13 @@ pub fn set_env<K: AsRef<str>, V: AsRef<OsStr>>(key: K, value: V) {
     log::debug!("export {}={:?}", key, value);
 }
 
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! one_hot {
     ($e: expr) => {if $e {"1"} else {"0"}};
 }
 
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! on_off {
     ($e: expr) => {if $e {"on"} else {"off"}};

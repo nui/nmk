@@ -7,10 +7,10 @@ use bytes::Bytes;
 use flate2::read::GzDecoder;
 use tar::Archive;
 
-use crate::nmkup::BoxError;
 use crate::nmkup::client::SecureClient;
 use crate::nmkup::cmdline::Opt;
 use crate::nmkup::gcloud::MetaData;
+use crate::nmkup::BoxError;
 
 const META_FILE: &str = ".gcs.resource.json";
 
@@ -40,12 +40,13 @@ fn is_up2date(dst: &Path, meta: &MetaData) -> bool {
     } else {
         let md5 = meta.md5();
 
-        let raw_cached_meta = std::fs::read_to_string(&cache_path).expect("Fail read cached metadata");
+        let raw_cached_meta =
+            std::fs::read_to_string(&cache_path).expect("Fail read cached metadata");
         let cached_meta = raw_cached_meta.parse::<MetaData>().ok();
         let cached_md5 = cached_meta.as_ref().and_then(|x| x.md5());
         match (cached_md5, md5) {
             (Some(a), Some(b)) => a == b,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -65,7 +66,11 @@ pub async fn install_or_update(opt: &Opt, nmk_dir: &PathBuf) -> Result<(), BoxEr
     let nmk_dir_empty = nmk_dir.read_dir().unwrap().next().is_none();
     let meta_file_exist = nmk_dir.join(META_FILE).exists();
     if !opt.force && !nmk_dir_empty {
-        assert!(meta_file_exist, "{:?} Missing cached metadata or directory is not empty", nmk_dir_empty);
+        assert!(
+            meta_file_exist,
+            "{:?} Missing cached metadata or directory is not empty",
+            nmk_dir_empty
+        );
     }
 
     let client = SecureClient::new();

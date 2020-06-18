@@ -31,10 +31,13 @@ fn find_version() -> String {
             let code = output.status.code().expect("tmux is terminated by signal");
             panic!("tmux exit with status: {}", code);
         }
-        let version_output = String::from_utf8(output.stdout)
-            .expect("tmux version output contain non utf-8");
-        version_output.trim().split(" ")
-            .nth(1).unwrap_or_else(|| panic!("bad output: {}", version_output))
+        let version_output =
+            String::from_utf8(output.stdout).expect("tmux version output contain non utf-8");
+        version_output
+            .trim()
+            .split(" ")
+            .nth(1)
+            .unwrap_or_else(|| panic!("bad output: {}", version_output))
             .to_string()
     } else {
         panic!("{} not found", TMUX);
@@ -58,7 +61,11 @@ fn is_server_running(socket: &str) -> bool {
 impl<'a> Tmux<'a> {
     pub fn new(nmk_dir: &PathBuf) -> Tmux {
         let tmux_dir = nmk_dir.join("tmux");
-        assert!(tmux_dir.is_dir(), "{} is not directory", tmux_dir.to_string_lossy());
+        assert!(
+            tmux_dir.is_dir(),
+            "{} is not directory",
+            tmux_dir.to_string_lossy()
+        );
         let bin = which::which(TMUX).expect("Cannot find tmux binary");
         let version = find_version();
         let config = find_config(&tmux_dir, &version);
@@ -72,12 +79,18 @@ impl<'a> Tmux<'a> {
     }
 
     pub fn setup_environment(&self, arg: &Opt) {
-        set_env("NMK_TMUX_DEFAULT_SHELL", which::which("zsh").expect("zsh not found"));
+        set_env(
+            "NMK_TMUX_DEFAULT_SHELL",
+            which::which("zsh").expect("zsh not found"),
+        );
         set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
         set_env("NMK_TMUX_VERSION", &self.version);
         let color = terminal::support_256_color(arg);
-        set_env("NMK_TMUX_DEFAULT_TERMINAL", if color { "screen-256color" } else { "screen" });
+        set_env(
+            "NMK_TMUX_DEFAULT_TERMINAL",
+            if color { "screen-256color" } else { "screen" },
+        );
         set_env("NMK_TMUX_256_COLOR", one_hot!(color));
     }
 

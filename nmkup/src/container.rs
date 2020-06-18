@@ -24,7 +24,9 @@ impl<'a> CGroup<'a> {
 }
 
 fn is_container(s: &str) -> bool {
-    s.lines().flat_map(CGroup::parse).any(|cg| cg.is_container())
+    s.lines()
+        .flat_map(CGroup::parse)
+        .any(|cg| cg.is_container())
 }
 
 pub fn detect_container() -> bool {

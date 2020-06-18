@@ -3,18 +3,19 @@ use std::path::PathBuf;
 mod container;
 #[macro_use]
 mod core;
+mod env;
 mod logging;
 mod nmk;
 mod nmkup;
 mod pathenv;
+mod platform;
 mod time;
 mod version;
-mod env;
-mod platform;
 
 fn main() {
     let arg0 = std::env::args().next().map(PathBuf::from);
-    let name = arg0.as_ref()
+    let name = arg0
+        .as_ref()
         .and_then(|a| a.file_stem())
         .and_then(std::ffi::OsStr::to_str);
     match name {
@@ -26,6 +27,6 @@ fn main() {
             }
         }
         Some(name) => panic!("Not support command name: {}", name),
-        None => unimplemented!()
+        None => unimplemented!(),
     }
 }
