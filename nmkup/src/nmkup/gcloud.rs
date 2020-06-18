@@ -1,6 +1,5 @@
 use std::str::FromStr;
 
-use bytes::Bytes;
 use serde_json::Value;
 use std::convert::TryFrom;
 
@@ -26,10 +25,10 @@ impl FromStr for MetaData {
     }
 }
 
-impl TryFrom<&Bytes> for MetaData {
+impl TryFrom<&[u8]> for MetaData {
     type Error = serde_json::error::Error;
 
-    fn try_from(value: &Bytes) -> Result<Self, Self::Error> {
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         let text = String::from_utf8_lossy(value);
         serde_json::from_str(&text).map(|v| Self { inner: v })
     }

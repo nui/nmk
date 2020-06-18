@@ -2,7 +2,6 @@ use structopt::StructOpt;
 
 mod archive;
 mod build;
-mod client;
 mod cmdline;
 mod entrypoint;
 mod gcloud;

@@ -1,21 +1,20 @@
 use std::convert::TryFrom;
-use std::fs::{create_dir_all, File};
+use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use bytes::Bytes;
+use bytes::{Buf, Bytes};
 use flate2::read::GzDecoder;
 use tar::Archive;
 
-use crate::nmkup::client::SecureClient;
 use crate::nmkup::cmdline::Opt;
 use crate::nmkup::gcloud::MetaData;
 use crate::nmkup::BoxError;
 
 const META_FILE: &str = ".gcs.resource.json";
 
-async fn unpack_nmktar<P: AsRef<Path>>(file: File, dst: P) -> Result<(), BoxError> {
-    let tar = GzDecoder::new(file);
+async fn unpack_nmktar<P: AsRef<Path>>(data: Bytes, dst: P) -> Result<(), BoxError> {
+    let tar = GzDecoder::new(data.bytes());
     let mut archive = Archive::new(tar);
     let dst = dst.as_ref();
     log::info!("Installing to {:?}", dst);
@@ -27,9 +26,11 @@ async fn unpack_nmktar<P: AsRef<Path>>(file: File, dst: P) -> Result<(), BoxErro
     Ok(())
 }
 
-async fn download_metadata(client: &SecureClient) -> Result<Bytes, BoxError> {
-    let uri = "https://www.googleapis.com/storage/v1/b/nmk.nuimk.com/o/nmk.tar.gz".parse()?;
-    Ok(client.get_bytes(uri).await?)
+async fn download_metadata() -> Result<Bytes, BoxError> {
+    let url = "https://www.googleapis.com/storage/v1/b/nmk.nuimk.com/o/nmk.tar.gz";
+    let client = reqwest::Client::new();
+    let data = client.get(url).send().await?.bytes().await?;
+    Ok(data)
 }
 
 fn is_up2date(dst: &Path, meta: &MetaData) -> bool {
@@ -73,9 +74,8 @@ pub async fn install_or_update(opt: &Opt, nmk_dir: &PathBuf) -> Result<(), BoxEr
         );
     }
 
-    let client = SecureClient::new();
     log::info!("Downloading archive");
-    let meta = MetaData::try_from(&download_metadata(&client).await?).expect("Fail parse metadata");
+    let meta = MetaData::try_from(download_metadata().await?.bytes()).expect("Fail parse metadata");
     if !opt.force && is_up2date(nmk_dir, &meta) {
         log::info!("Already up to dated!")
     } else {
@@ -88,9 +88,12 @@ pub async fn install_or_update(opt: &Opt, nmk_dir: &PathBuf) -> Result<(), BoxEr
                 .expect("fail to run sh");
         }
 
-        let uri = "https://storage.googleapis.com/nmk.nuimk.com/nmk.tar.gz".parse()?;
-        let tar_gz = client.download_as_file(uri).await?;
-        unpack_nmktar(tar_gz, nmk_dir).await?;
+        let tar_gz_data = reqwest::get("https://storage.googleapis.com/nmk.nuimk.com/nmk.tar.gz")
+            .await?
+            .bytes()
+            .await?;
+
+        unpack_nmktar(tar_gz_data, nmk_dir).await?;
         cache_metadata(nmk_dir, &meta);
         log::info!("Installed a new version")
     }
