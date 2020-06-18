@@ -28,15 +28,12 @@ fn unzip_entrypoint(file: File, dst: impl AsRef<Path>) {
 pub async fn install(nmk_dir: impl AsRef<Path>) -> Result<(), BoxError> {
     let nmk_dir = nmk_dir.as_ref();
     let target = Target::try_parse_env().unwrap();
-    let uri: Uri = match target {
-        Target::Amd64Linux => {
-            "https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk-amd64-linux-musl.gz"
-        }
-        Target::ArmV7Linux => {
-            "https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk-armv7-linux.gz"
-        }
-    }
-    .parse()?;
+    let tar_file = match target {
+        Target::Amd64Linux => "nmk-amd64-linux-musl.gz",
+        Target::ArmV7Linux => "nmk-armv7-linux.gz",
+    };
+    let base_uri = "https://storage.googleapis.com/nmk.nuimk.com/nmk.rs";
+    let uri: Uri = format!("{}/{}", base_uri, tar_file).parse()?;
     let client = SecureClient::new();
     log::info!("Downloading entrypoint");
     let tar_gz = client.download_as_file(uri).await?;
