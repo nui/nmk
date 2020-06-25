@@ -1,6 +1,7 @@
-use crate::version::get_verbose_version;
 use once_cell::sync::Lazy;
 use structopt::StructOpt;
+
+use crate::version::get_verbose_version;
 
 static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().unwrap_or_default());
 

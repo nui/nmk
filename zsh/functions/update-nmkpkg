@@ -13,7 +13,7 @@ fi
 
 local archive=${1:a}
 
-local install_path="$NMK_DIR/local"
+local install_path="$NMK_HOME/local"
 
 if [[ ! -e $install_path ]]; then
     mkdir $install_path

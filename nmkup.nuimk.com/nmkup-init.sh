@@ -12,27 +12,17 @@ NMKUP_UPDATE_ROOT="${NMKUP_UPDATE_ROOT:-https://storage.googleapis.com/nmk.nuimk
 #XXX: If you change anything here, please make the same changes in setup_mode.rs
 usage() {
     cat 1>&2 <<EOF
-nmkup-init 1.21.0 (fd87b86c6 2019-12-19)
-The installer for nmkup
+nmkup 0.1.0
+All in one binary to setup nmk
 
 USAGE:
-    nmkup-init [FLAGS] [OPTIONS]
+    nmkup [FLAGS]
 
 FLAGS:
-    -v, --verbose           Enable verbose output
-    -q, --quiet             Disable progress output
-    -y                      Disable confirmation prompt.
-        --no-modify-path    Don't configure the PATH environment variable
-    -h, --help              Prints help information
-    -V, --version           Prints version information
-
-OPTIONS:
-        --default-host <default-host>              Choose a default host triple
-        --default-toolchain <default-toolchain>    Choose a default toolchain to install
-        --default-toolchain none                   Do not install any toolchains
-        --profile [minimal|default|complete]       Choose a profile
-    -c, --component <components>...                Component name to also install
-    -t, --target <targets>...                      Target name to also install
+    -f, --force      Force install
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+    -v               Request verbose logging
 EOF
 }
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env zsh
 
-# This script depends on NMK_DIR environment variable
-if [[ -z $NMK_DIR ]]; then
-    >&2 print -- 'NMK_DIR is unset'
+# This script depends on NMK_HOME environment variable
+if [[ -z $NMK_HOME ]]; then
+    >&2 print -- 'NMK_HOME is unset'
     exit 1
 fi
 
@@ -12,8 +12,8 @@ is_git_repo() {
 }
 # }}}
 
-if [[ -d $NMK_DIR ]]; then
-    _BUNDLE_DIR=$NMK_DIR/vim/bundle
+if [[ -d $NMK_HOME ]]; then
+    _BUNDLE_DIR=$NMK_HOME/vim/bundle
     # for each plugin url line
     while read line; do
         # ignore comment
@@ -35,7 +35,7 @@ if [[ -d $NMK_DIR ]]; then
                 git clone -q ${match[2]} $_PLUGIN_DIR
             fi
         fi
-    done < $NMK_DIR/vim/plugins
+    done < $NMK_HOME/vim/plugins
 else
-    >&2 print -- '$NMK_DIR is not a directory'
+    >&2 print -- '$NMK_HOME is not a directory'
 fi

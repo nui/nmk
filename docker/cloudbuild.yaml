@@ -23,6 +23,6 @@ artifacts:
   objects:
     location: "gs://nmk.nuimk.com"
     paths:
-      - nmk.tar.gz
-      - nmk.tar.gz.sha256
+      - dotfiles.tar.xz
+      - dotfiles.tar.xz.sha256
 

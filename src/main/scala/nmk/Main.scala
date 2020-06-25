@@ -10,7 +10,7 @@ import nmk.tmux.{Tmux, Version}
 @Singleton
 class Main @Inject()(tmux: Tmux,
                      zsh: Zsh) {
-  private val NmkDir = scala.util.Properties.envOrNone("NMK_DIR").get
+  private val NmkDir = scala.util.Properties.envOrNone("NMK_HOME").get
   private val ZshRc = Paths.get(NmkDir, "zsh", ".zshrc")
 
   def run = {

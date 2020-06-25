@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import argparse
 import hashlib
 import os
@@ -153,9 +153,9 @@ def create_final_archive(workdir):
         tarinfo.name = str(Path('.nmk').joinpath(tarinfo.name))
         return tarinfo
 
-    (_, archive_path) = tempfile.mkstemp('.nmk.tar.gz')
+    (_, archive_path) = tempfile.mkstemp('.dotfiles.tar.xz')
     os.remove(archive_path)
-    with tarfile.open(archive_path, 'x:gz') as archive:
+    with tarfile.open(archive_path, 'x:xz') as archive:
         add_all_to_tar(archive=archive, src=workdir, filter=tar_filter)
     return archive_path
 
@@ -168,15 +168,28 @@ def generate_hash(file):
 
 
 def upload(workdir):
-    prefix = ('gsutil',
-              '-h', 'Cache-Control:private, max-age=0, no-transform',
-              'cp')
-    for file in ('nmk.tar.gz', 'nmk.tar.gz.sha256'):
-        subprocess.run(prefix + (workdir.joinpath(file), f'gs://nmk.nuimk.com/{file}')).check_returncode()
+    os.environ['CLOUDSDK_ACTIVE_CONFIG_NAME'] = 'nui'
+    prefix = ('gsutil', '-h', 'Cache-Control:no-cache, max-age=0, no-transform')
+    upload_tar = prefix + (
+        '-h',
+        'Content-Type: application/octet-stream',
+        'cp',
+        workdir.joinpath('dotfiles.tar.xz'),
+        f'gs://nmk.nuimk.com/dotfiles.tar.xz'
+    )
+    subprocess.run(upload_tar).check_returncode()
+    upload_checksum = prefix + (
+        '-h',
+        'Content-Type: text/plain',
+        'cp',
+        workdir.joinpath('dotfiles.tar.xz.sha256'),
+        f'gs://nmk.nuimk.com/dotfiles.tar.xz.sha256'
+    )
+    subprocess.run(upload_checksum).check_returncode()
 
 
 def copy_to(workdir, target):
-    for file in ('nmk.tar.gz', 'nmk.tar.gz.sha256'):
+    for file in ('dotfiles.tar.xz', 'dotfiles.tar.xz.sha256'):
         shutil.copy(workdir.joinpath(file), target)
 
 
@@ -184,7 +197,7 @@ def sign_archive_and_open_explorer(workdir):
     for i in range(0, 3):
         try:
             subprocess.run(['gpg', '-b', '-u', '0x28B07F9036262EEF4D5B2B21B837E20D47A47347',
-                            workdir.joinpath('nmk.tar.gz')]).check_returncode()
+                            workdir.joinpath('dotfiles.tar.xz')]).check_returncode()
         except subprocess.CalledProcessError:
             continue
         break
@@ -206,7 +219,7 @@ def main():
     shutil.rmtree(tmp_dir)
 
     tmp_dir = Path(tempfile.mkdtemp(TMPDIR_SUFFIX))
-    archive = tmp_dir.joinpath('nmk.tar.gz')
+    archive = tmp_dir.joinpath('dotfiles.tar.xz')
     shutil.move(tmp_archive, archive)
     generate_hash(archive)
     if args.upload:

@@ -104,7 +104,7 @@ def python_info():
 def setup_path(nmk_dir):
     """
     Setup PATH environment.
-      - prepend NMK_DIR/bin and NMK_DIR/local/bin
+      - prepend NMK_HOME/bin and NMK_HOME/local/bin
     """
     nmk_paths = [
         path.join(nmk_dir, 'bin'),
@@ -163,7 +163,7 @@ def setup_environment(args, nmk_dir, tmux_version):
     initvim = path.join(nmk_dir, 'vim/init.vim')
     zdotdir = path.join(nmk_dir, 'zsh')
 
-    environ['NMK_DIR'] = nmk_dir
+    environ['NMK_HOME'] = nmk_dir
     environ['NMK_TMUX_DEFAULT_SHELL'] = find_executable('zsh')
     environ['NMK_TMUX_DETACH_ON_DESTROY'] = args.detach_on_destroy
     environ['NMK_TMUX_HISTORY'] = path.join(nmk_dir, 'tmux', '.tmux_history')

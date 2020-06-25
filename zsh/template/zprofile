@@ -8,7 +8,7 @@ export ANDROID_HOME=~/Android/Sdk
 
 path=(
     ~/bin
-    $NMK_DIR/bin
+    $NMK_HOME/bin
     $path
     ~/.cargo/bin
     ~/.pyenv/bin

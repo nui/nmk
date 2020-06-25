@@ -9,7 +9,7 @@ declare!(DISPLAY);
 declare!(EDITOR);
 declare!(LD_LIBRARY_PATH);
 declare!(NMK_BIN);
-declare!(NMK_DIR);
+declare!(NMK_HOME);
 declare!(PATH);
 declare!(VIMINIT);
 declare!(VIRTUAL_ENV);

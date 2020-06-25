@@ -6,10 +6,10 @@
 " This must be first, because it changes other options as a side effect.
 set nocompatible
 
-let g:nmk_config_dir = expand('$NMK_DIR/vim')
+let g:nmk_config_dir = expand('$NMK_HOME/vim')
 let g:nmk_256color = $TERM =~ '256color'
 
-let s:cache_dir  = expand('$NMK_DIR/.cache')
+let s:cache_dir  = expand('$NMK_HOME/.cache')
 let s:local_settings_file = printf('%s/local.vim', g:nmk_config_dir)
 
 " Use pathogen to easily modify the runtime path

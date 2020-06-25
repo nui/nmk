@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
-(( ! ${+NMK_DIR} )) && {
-    print -- '$NMK_DIR is unset'
+(( ! ${+NMK_HOME} )) && {
+    print -- '$NMK_HOME is unset'
     exit 1
 }
 

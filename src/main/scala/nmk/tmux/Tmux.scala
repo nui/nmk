@@ -78,7 +78,7 @@ class Tmux @Inject()(
     // Colors
     r +=
       """
-        |if-shell '[ x$NMK_TMUX_256_COLOR = x1 ]' 'source-file $NMK_DIR/tmux/256color.conf' 'source-file $NMK_DIR/tmux/8color.conf'
+        |if-shell '[ x$NMK_TMUX_256_COLOR = x1 ]' 'source-file $NMK_HOME/tmux/256color.conf' 'source-file $NMK_HOME/tmux/8color.conf'
         |""".toConfig
     // Unset temporary environment variables that were used during tmux initialization
     r ++= unsetTmuxSettingEnv
@@ -191,7 +191,7 @@ class Tmux @Inject()(
   }
 
   private def listEnvs(): List[String] = {
-    val source = Source.fromFile(sys.env("NMK_DIR") + "/config.json")
+    val source = Source.fromFile(sys.env("NMK_HOME") + "/config.json")
     val fileContents = source.getLines().mkString
     source.close()
     val nmkConfig = jsonMapper.mapper.readValue[NmkConfig](fileContents)

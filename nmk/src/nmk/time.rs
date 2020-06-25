@@ -26,15 +26,11 @@ pub fn human_time(secs: i64) -> String {
     result.into_iter().take(2).collect::<Vec<_>>().join(" ")
 }
 
-pub fn seconds_since_build() -> Option<i64> {
-    option_env!("EPOCHSECONDS")
-        .and_then(|t| t.parse::<i64>().ok())
-        .and_then(|build_time| {
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .ok()
-                .map(|x| x.as_secs() as i64 - build_time)
-        })
+pub fn seconds_since_build(build_epoch: i64) -> Option<i64> {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .ok()
+        .map(|x| x.as_secs() as i64 - build_epoch)
 }
 
 #[cfg(test)]

@@ -1,0 +1,40 @@
+[package]
+name = "nmk"
+version = "0.1.0"
+authors = ["Nui Narongwet <narongwet.m@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+bytes = "0.5.5"
+dirs = "2.0.2"
+indexmap = "1.4.0"
+log = "0.4.8"
+nix = "0.17.0"
+once_cell = "1.4.0"
+os_info = "2.0.6"
+reqwest = { version = "0.10.6", default-features = false, features = ["rustls-tls"] }
+serde = "1.0.114"
+serde_json = "1.0.55"
+simplelog = "0.8.0"
+structopt = "0.3.15"
+tar = "0.4.29"
+tokio = { version = "0.2.21", features = ["full"] }
+which = "4.0.1"
+xz2 = "0.1.6"
+
+[profile.release]
+lto = true
+
+[lib]
+name = "nmk"
+path = "src/nmk/lib.rs"
+
+[[bin]]
+name = "nmk"
+test = false
+doc = false
+
+[[bin]]
+name = "nmkup"
+test = false
+doc = false

@@ -1,18 +1,18 @@
 use std::env;
 use std::os::unix::process::CommandExt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::Instant;
 
+use crate::cmdline::Opt;
 use crate::core::*;
-use crate::nmk::cmdline::Opt;
-use crate::nmk::is_dev_machine;
-use crate::nmk::terminal;
+use crate::terminal;
+use crate::utils::is_dev_machine;
 
 const TMUX: &str = "tmux";
 
-pub struct Tmux<'a> {
-    nmk_dir: &'a PathBuf,
+pub struct Tmux {
+    nmk_home: PathBuf,
     tmux_dir: PathBuf,
     config: PathBuf,
     pub bin: PathBuf,
@@ -58,9 +58,9 @@ fn is_server_running(socket: &str) -> bool {
     running
 }
 
-impl<'a> Tmux<'a> {
-    pub fn new(nmk_dir: &PathBuf) -> Tmux {
-        let tmux_dir = nmk_dir.join("tmux");
+impl Tmux {
+    pub fn new(nmk_home: &Path) -> Tmux {
+        let tmux_dir = nmk_home.join("tmux");
         assert!(
             tmux_dir.is_dir(),
             "{} is not directory",
@@ -70,7 +70,7 @@ impl<'a> Tmux<'a> {
         let version = find_version();
         let config = find_config(&tmux_dir, &version);
         Tmux {
-            nmk_dir,
+            nmk_home: nmk_home.to_owned(),
             tmux_dir,
             bin,
             version,
@@ -148,6 +148,6 @@ impl<'a> Tmux<'a> {
     }
 
     pub fn is_local_tmux(&self) -> bool {
-        self.bin.starts_with(self.nmk_dir)
+        self.bin.starts_with(&self.nmk_home)
     }
 }
