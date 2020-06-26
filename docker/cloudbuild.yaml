@@ -24,7 +24,7 @@ steps:
     - -h
     - 'Content-Type: application/octet-stream'
     - -h
-    - 'Cache-Control:no-cache,max-age=0,no-transform'
+    - 'Cache-Control: no-store, no-transform'
     - cp
     - dotfiles.tar.xz
     - gs://nmk.nuimk.com

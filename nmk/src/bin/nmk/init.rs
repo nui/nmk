@@ -3,7 +3,7 @@ use std::ffi::OsString;
 use std::fs::File;
 use std::path::Path;
 
-use nmk::env::{EDITOR, LD_LIBRARY_PATH, NMK_BIN, NMK_HOME, PATH, VIMINIT, VIRTUAL_ENV, ZDOTDIR};
+use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_BIN, NMK_HOME, PATH, VIMINIT, VIRTUAL_ENV, ZDOTDIR};
 
 use crate::core::set_env;
 use crate::pathenv::PathVec;

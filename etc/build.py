@@ -169,21 +169,15 @@ def generate_hash(file):
 
 def upload(workdir):
     os.environ['CLOUDSDK_ACTIVE_CONFIG_NAME'] = 'nui'
-    prefix = ('gsutil', '-h', 'Cache-Control:no-cache, max-age=0, no-transform')
+    prefix = ('gsutil', '-h', 'Cache-Control: no-store, no-transform')
     upload_tar = prefix + (
-        '-h',
-        'Content-Type: application/octet-stream',
-        'cp',
-        workdir.joinpath('dotfiles.tar.xz'),
-        f'gs://nmk.nuimk.com/dotfiles.tar.xz'
+        '-h', 'Content-Type: application/octet-stream',
+        'cp', workdir.joinpath('dotfiles.tar.xz'), 'gs://nmk.nuimk.com/dotfiles.tar.xz'
     )
     subprocess.run(upload_tar).check_returncode()
     upload_checksum = prefix + (
-        '-h',
-        'Content-Type: text/plain',
-        'cp',
-        workdir.joinpath('dotfiles.tar.xz.sha256'),
-        f'gs://nmk.nuimk.com/dotfiles.tar.xz.sha256'
+        '-h', 'Content-Type: text/plain',
+        'cp', workdir.joinpath('dotfiles.tar.xz.sha256'), 'gs://nmk.nuimk.com/dotfiles.tar.xz.sha256'
     )
     subprocess.run(upload_checksum).check_returncode()
 

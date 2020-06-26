@@ -5,12 +5,9 @@ use std::{env, fmt};
 
 use dirs::home_dir;
 
-use crate::env::NMK_HOME;
+use crate::env_name::NMK_HOME;
 
 /// Main directory of dotfiles
-///
-/// - if NMK_HOME is set, use it
-/// - if not should default to $HOME/.nmk
 pub struct NmkHome(PathBuf);
 
 impl fmt::Debug for NmkHome {
@@ -24,6 +21,9 @@ impl NmkHome {
         self.0.join(".git").exists()
     }
 
+    /// Attempt to find correct NMK_HOME candidate
+    /// - if NMK_HOME is set, use it
+    /// - otherwise default to $HOME/.nmk
     pub fn find() -> Option<Self> {
         env::var_os(NMK_HOME)
             .map(PathBuf::from)

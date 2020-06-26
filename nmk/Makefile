@@ -46,6 +46,6 @@ deploy-artifact: invalidate-cache cross-amd64-linux-musl cross-armv7-linux
 	<target/$(ARMV7_LINUX_TARGET)/release/$(NMK_PACKAGE)			xz >	$(UPLOAD_TMP_DIR)/nmk-armv7-linux.xz
 	cp target/$(AMD64_LINUX_MUSL_TARGET)/release/$(NMKUP_PACKAGE)			$(UPLOAD_TMP_DIR)/nmkup-amd64-linux-musl
 	cp target/$(ARMV7_LINUX_TARGET)/release/$(NMKUP_PACKAGE)				$(UPLOAD_TMP_DIR)/nmkup-armv7-linux
-	gsutil -m -h "Cache-Control:no-cache,max-age=0,no-transform" cp $(UPLOAD_TMP_DIR)/* gs://nmk.nuimk.com
+	gsutil -m -h "Cache-Control: no-store, no-transform" cp $(UPLOAD_TMP_DIR)/* gs://nmk.nuimk.com
 	rm -rf $(UPLOAD_TMP_DIR)
 
