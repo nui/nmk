@@ -49,7 +49,7 @@ main() {
 
     local _url
     case "$_arch" in
-        x86_64-unknown-linux-gnu)
+        x86_64-unknown-linux-gnu | x86_64-unknown-linux-musl)
             _url="${NMKUP_UPDATE_ROOT}/nmkup-amd64-linux-musl"
             ;;
         armv7-unknown-linux-gnueabihf)
