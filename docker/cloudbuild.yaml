@@ -19,10 +19,12 @@ steps:
     - --copy-to
     - /workspace
   timeout: 60s
-artifacts:
-  objects:
-    location: "gs://nmk.nuimk.com"
-    paths:
-      - dotfiles.tar.xz
-      - dotfiles.tar.xz.sha256
-
+- name: 'gcr.io/cloud-builders/gsutil'
+  args:
+    - -h
+    - 'Content-Type: application/octet-stream'
+    - -h
+    - 'Cache-Control:no-cache,max-age=0,no-transform'
+    - cp
+    - dotfiles.tar.xz
+    - gs://nmk.nuimk.com
