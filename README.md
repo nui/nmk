@@ -17,18 +17,25 @@ sudo apt install vim-nox
 
 ## Installation
 ```sh
+# Run the following in your terminal
 curl --proto '=https' --tlsv1.2 -sSf https://nmkup.nuimk.com | sh
-# or Github checkout
-    git clone --recursive https://github.com/nuimk/nmk.git ~/.nmk
-    ~/.nmk/bin/nmk
-    ~/.nmk/vim/update-plugins
+
+
+# Or full Github checkout with following steps
+
+# Step 1. Clone repository
+git clone --recursive https://github.com/nuimk/nmk.git ~/.nmk
+
+# Step 2. Build entrypoint and install
+# Use cargo to build entrypoint
+(cd ~/.nmk/nmk && cargo build --release)
+# Install to global
+sudo install ~/.nmk/nmk/target/release/nmk /usr/local/bin/nmk
+
+# Step 3. Run nmk and update vim plugins
+nmk
+~/.nmk/vim/update-plugins
 ```
-
-## Binary entrypoint
-
-If python is not install on target system, use following binary to start tmux
-
-- [Linux](https://storage.googleapis.com/nmk.nuimk.com/nmk.rs/nmk-amd64-linux-musl.gz)
 
 ## Tmux navigation
 ```
