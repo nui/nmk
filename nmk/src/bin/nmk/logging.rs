@@ -1,11 +1,11 @@
 use log::LevelFilter;
 use simplelog::{SimpleLogger, TermLogger, TerminalMode};
 
-pub fn setup(debug: bool) {
-    let log_level = if debug {
-        LevelFilter::Debug
-    } else {
-        LevelFilter::Info
+pub fn setup(verbosity: u8) {
+    let log_level = match verbosity {
+        0 => LevelFilter::Info,
+        1 => LevelFilter::Debug,
+        _ => LevelFilter::Trace,
     };
     let config = simplelog::ConfigBuilder::new()
         .set_thread_level(LevelFilter::Trace)

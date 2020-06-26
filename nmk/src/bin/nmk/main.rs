@@ -19,7 +19,7 @@ mod zsh;
 fn main() {
     let start = std::time::Instant::now();
     let arg: Opt = Opt::from_args();
-    crate::logging::setup(arg.debug);
+    crate::logging::setup(arg.verbosity);
 
     if arg.ssh {
         init::display_message_of_the_day();

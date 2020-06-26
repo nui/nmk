@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 bytes = "0.5.5"
-dirs = "2.0.2"
+dirs = "3.0.0"
 indexmap = "1.4.0"
 log = "0.4.8"
 nix = "0.17.0"

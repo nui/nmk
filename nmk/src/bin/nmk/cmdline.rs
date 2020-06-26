@@ -26,9 +26,9 @@ pub struct Opt {
     pub no_autofix: bool,
     #[structopt(long, help = "Allow nested tmux sessions")]
     pub inception: bool,
-    #[structopt(short = "d", long, help = "Display debug log")]
-    pub debug: bool,
-    #[structopt(long, help = "Print usage time")]
+    #[structopt(short, parse(from_occurrences), help = "Request verbose logging")]
+    pub verbosity: u8,
+    #[structopt(long, help = "Prints usage time")]
     pub usage: bool,
     #[structopt(long)]
     pub ssh: bool,
