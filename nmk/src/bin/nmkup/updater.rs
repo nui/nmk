@@ -10,6 +10,7 @@ use nmk::artifact::download_file;
 use nmk::home::NmkHome;
 
 use crate::build::Target;
+use crate::ARTIFACT_BASE_URL;
 
 fn is_same_location(a: &PathBuf, b: &PathBuf) -> bool {
     fs::canonicalize(a).unwrap() == fs::canonicalize(b).unwrap()
@@ -36,15 +37,13 @@ pub async fn self_setup(
     Ok(())
 }
 
-const NMKUP_BASE_URL: &str = "https://storage.googleapis.com/nmk.nuimk.com/nmk.rs";
-
 pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result<()> {
     let target = Target::try_parse_env().unwrap();
     let tar_file = match target {
         Target::Amd64Linux => "nmkup-amd64-linux-musl.xz",
         Target::ArmV7Linux => "nmkup-armv7-linux.xz",
     };
-    let url = format!("{}/{}", NMKUP_BASE_URL, tar_file);
+    let url = format!("{}/{}", ARTIFACT_BASE_URL, tar_file);
     let client = reqwest::Client::new();
     let data = download_file(&client, url).await?;
 

@@ -10,6 +10,8 @@ mod logging;
 mod settings;
 mod updater;
 
+pub const ARTIFACT_BASE_URL: &str = "https://storage.googleapis.com/nmk.nuimk.com";
+
 #[tokio::main]
 pub async fn main() -> nmk::Result<()> {
     let opt = cmdline::Opt::from_args();

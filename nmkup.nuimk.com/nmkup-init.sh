@@ -7,7 +7,7 @@
 set -u
 
 # If NMKUP_UPDATE_ROOT is unset or empty, default it.
-NMKUP_UPDATE_ROOT="${NMKUP_UPDATE_ROOT:-https://storage.googleapis.com/nmk.nuimk.com/nmk.rs}"
+NMKUP_UPDATE_ROOT="${NMKUP_UPDATE_ROOT:-https://storage.googleapis.com/nmk.nuimk.com}"
 
 #XXX: If you change anything here, please make the same changes in setup_mode.rs
 usage() {

@@ -10,6 +10,7 @@ use nmk::home::NmkHome;
 
 use crate::build::Target;
 use crate::cmdline::Opt;
+use crate::ARTIFACT_BASE_URL;
 
 fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) {
     let mut xz = XzDecoder::new(data.bytes());
@@ -22,7 +23,6 @@ fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) {
     std::io::copy(&mut xz, &mut file).expect("Unable to write entrypoint");
 }
 
-const NMK_BASE_URL: &str = "https://storage.googleapis.com/nmk.nuimk.com/nmk.rs";
 const NMK_METADATA: &str = ".nmk.metadata";
 
 pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<bool> {
@@ -33,7 +33,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
         Target::Amd64Linux => "nmk-amd64-linux-musl.xz",
         Target::ArmV7Linux => "nmk-armv7-linux.xz",
     };
-    let url = format!("{}/{}", NMK_BASE_URL, tar_file);
+    let url = format!("{}/{}", ARTIFACT_BASE_URL, tar_file);
 
     let metadata_path = nmk_home.join(NMK_METADATA);
 
@@ -42,6 +42,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
     log::info!("entrypoint: Getting metadata.");
     let metadata = download_file_metadata(&client, &url).await?;
     log::info!("entrypoint: Received metadata.");
+    log::debug!("entrypoint: etag {}", metadata.etag());
     if !opt.force && is_entrypoint_up2date(&metadata_path, &metadata) {
         log::info!("entrypoint: Already up to date.");
         Ok(false)
@@ -67,5 +68,6 @@ fn is_entrypoint_up2date(src: impl AsRef<Path>, metadata: &Metadata) -> bool {
 
     let cache_metadata =
         Metadata::read_from_file(src).expect("Fail to read or parse cached entrypoint metadata");
+    log::debug!("entrypoint: cached etag {}", cache_metadata.etag());
     cache_metadata.etag() == metadata.etag()
 }
