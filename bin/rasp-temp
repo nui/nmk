@@ -1,2 +1,2 @@
-#!/usr/bin/env zsh
+#!/bin/sh
 exec watch -n 1 /opt/vc/bin/vcgencmd measure_temp

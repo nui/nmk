@@ -11,7 +11,7 @@ pub fn nmk_home() -> std::result::Result<PathBuf, String> {
     let path = match std::env::var_os(env::NMK_HOME) {
         Some(s) => PathBuf::from(s),
         None => dirs::home_dir()
-            .ok_or("Can't find home directory".to_string())?
+            .ok_or("Can't find home directory")?
             .join(".nmk"),
     };
     if path.exists() {
