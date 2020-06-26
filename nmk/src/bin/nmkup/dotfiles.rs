@@ -4,7 +4,6 @@ use std::process::Command;
 
 use bytes::{Buf, Bytes};
 use tar::Archive;
-use xz2::read::XzDecoder;
 
 use nmk::artifact::{download_file, download_file_metadata, Metadata};
 use nmk::home::NmkHome;
@@ -16,7 +15,8 @@ const DOTFILES_METADATA: &str = ".dotfiles.metadata";
 
 async fn untar_dotfiles<P: AsRef<Path>>(data: Bytes, dst: P) -> nmk::Result<()> {
     let dst = dst.as_ref();
-    let mut archive = Archive::new(XzDecoder::new(data.bytes()));
+    let tar_data_stream = xz2::bufread::XzDecoder::new(data.bytes());
+    let mut archive = Archive::new(tar_data_stream);
     log::info!("dotfiles: Installing to {:?}.", dst);
     for entry in archive.entries()? {
         let mut entry = entry?;

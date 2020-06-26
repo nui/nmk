@@ -1,9 +1,9 @@
 use std::fs::OpenOptions;
+use std::io;
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 
 use bytes::{Buf, Bytes};
-use xz2::read::XzDecoder;
 
 use nmk::artifact::{download_file, download_file_metadata, Metadata};
 use nmk::home::NmkHome;
@@ -12,15 +12,14 @@ use crate::build::Target;
 use crate::cmdline::Opt;
 use crate::ARTIFACT_BASE_URL;
 
-fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) {
-    let mut xz = XzDecoder::new(data.bytes());
+fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
+    let mut data_stream = xz2::read::XzDecoder::new(data.bytes());
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
         .mode(0o755)
-        .open(dst.as_ref())
-        .unwrap();
-    std::io::copy(&mut xz, &mut file).expect("Unable to write entrypoint");
+        .open(dst.as_ref())?;
+    std::io::copy(&mut data_stream, &mut file)
 }
 
 const NMK_METADATA: &str = ".nmk.metadata";
@@ -50,7 +49,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
         log::info!("entrypoint: Getting data.");
         let data = download_file(&client, url).await?;
         log::info!("entrypoint: Received data.");
-        unxz_entrypoint(data, nmk_home.join("bin").join("nmk"));
+        unxz_entrypoint(data, nmk_home.join("bin").join("nmk"))?;
         metadata
             .write_to_file(metadata_path)
             .expect("Unable to cache entrypoint metadata");

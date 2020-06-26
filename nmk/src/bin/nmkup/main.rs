@@ -12,8 +12,7 @@ mod updater;
 
 pub const ARTIFACT_BASE_URL: &str = "https://storage.googleapis.com/nmk.nuimk.com";
 
-#[tokio::main]
-pub async fn main() -> nmk::Result<()> {
+async fn main_task() -> nmk::Result<()> {
     let opt = cmdline::Opt::from_args();
     let _settings = settings::Settings::new(&opt);
     crate::logging::setup(opt.verbosity);
@@ -26,6 +25,14 @@ pub async fn main() -> nmk::Result<()> {
     let entrypoint_updated = entrypoint::install_or_update(&opt, &nmk_home).await?;
     updater::self_setup(&nmk_home, is_nmkup_init(), entrypoint_updated).await?;
     Ok(())
+}
+
+fn main() -> nmk::Result<()> {
+    let mut rt = tokio::runtime::Builder::new()
+        .basic_scheduler()
+        .enable_all()
+        .build()?;
+    rt.block_on(main_task())
 }
 
 fn is_nmkup_init() -> bool {

@@ -1,10 +1,9 @@
 use std::fs::OpenOptions;
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::{Path, PathBuf};
-use std::{env, fs};
+use std::{env, fs, io};
 
 use bytes::{Buf, Bytes};
-use xz2::read::XzDecoder;
 
 use nmk::artifact::download_file;
 use nmk::home::NmkHome;
@@ -57,12 +56,12 @@ pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result
     Ok(())
 }
 
-fn unxz_nmkup(data: Bytes, dst: impl AsRef<Path>) -> std::io::Result<()> {
-    let mut xz = XzDecoder::new(data.bytes());
+fn unxz_nmkup(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
+    let mut xz = xz2::read::XzDecoder::new(data.bytes());
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
         .mode(0o755)
         .open(dst.as_ref())?;
-    std::io::copy(&mut xz, &mut file).map(|_| {})
+    std::io::copy(&mut xz, &mut file)
 }
