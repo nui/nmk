@@ -48,24 +48,14 @@ pub struct ListObjectResponse {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ObjectMeta {
-    pub kind: String,
     pub id: String,
     pub self_link: String,
     pub media_link: String,
     pub name: String,
-    pub bucket: String,
     pub generation: String,
-    pub metageneration: String,
-    pub content_type: String,
-    pub storage_class: String,
     pub size: String,
     pub md5_hash: String,
-    pub cache_control: String,
-    pub crc32c: String,
     pub etag: String,
-    pub time_created: String,
-    pub updated: String,
-    pub time_storage_class_updated: String,
 }
 
 #[derive(Debug)]

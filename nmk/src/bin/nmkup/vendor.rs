@@ -1,3 +1,4 @@
+use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::{fs, io};
@@ -7,14 +8,17 @@ use tar::Archive;
 
 use nmk::artifact::{download_file, ObjectMeta};
 use nmk::home::NmkHome;
-use std::fs::File;
 
 const LIST_OBJECTS_URL: &str =
     "https://storage.googleapis.com/storage/v1/b/nmk.nuimk.com/o?delimiter=/&prefix=nmkpkg/";
 
 pub async fn install(nmk_home: &NmkHome) -> nmk::Result<()> {
     let client = reqwest::Client::new();
-    let objects = nmk::artifact::list_objects(&client, LIST_OBJECTS_URL).await?;
+    let objects: Vec<_> = nmk::artifact::list_objects(&client, LIST_OBJECTS_URL)
+        .await?
+        .into_iter()
+        .filter(|o| o.name.ends_with(".tar.xz"))
+        .collect();
     let obj_meta = select_vendor_files(&objects)?;
     let download_url = obj_meta.media_link.as_str();
     log::info!("vendor: Download url {}", download_url);
