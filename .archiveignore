@@ -20,17 +20,21 @@ zsh/plugins/zsh-syntax-highlighting/images
 # our directories
 docker
 docs
-ms
-nmkup
+nmk
+nmkup.nuimk.com
 project
 src
+systemd
 tools
 zsh/src
 # our files
 .archiveignore
+.firebaserc
 build.sbt
+config.json
 etc/build.py
+firebase.json
+package-lock.json
 package.json
 settings.js
 vim/update-plugins
-yarn.lock
