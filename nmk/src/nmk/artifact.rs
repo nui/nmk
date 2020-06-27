@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 use std::path::Path;
 use std::str::FromStr;
 
-use bytes::Bytes;
+use bytes::{Buf, Bytes};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -39,6 +39,35 @@ impl FromStr for Metadata {
     }
 }
 
+#[derive(Deserialize)]
+pub struct ListObjectResponse {
+    pub kind: String,
+    pub items: Vec<ObjectMeta>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ObjectMeta {
+    pub kind: String,
+    pub id: String,
+    pub self_link: String,
+    pub media_link: String,
+    pub name: String,
+    pub bucket: String,
+    pub generation: String,
+    pub metageneration: String,
+    pub content_type: String,
+    pub storage_class: String,
+    pub size: String,
+    pub md5_hash: String,
+    pub cache_control: String,
+    pub crc32c: String,
+    pub etag: String,
+    pub time_created: String,
+    pub updated: String,
+    pub time_storage_class_updated: String,
+}
+
 #[derive(Debug)]
 enum DownloadFileError {
     EtagNotFound,
@@ -56,7 +85,7 @@ impl std::error::Error for DownloadFileError {}
 pub async fn download_file_metadata(
     client: &Client,
     url: impl AsRef<str>,
-) -> Result<Metadata, Box<dyn std::error::Error>> {
+) -> crate::Result<Metadata> {
     let url = url.as_ref();
     let response = client.head(url).send().await?;
     let status = response.status();
@@ -77,10 +106,7 @@ pub async fn download_file_metadata(
     }
 }
 
-pub async fn download_file(
-    client: &Client,
-    url: impl AsRef<str>,
-) -> Result<Bytes, Box<dyn std::error::Error>> {
+pub async fn download_file(client: &Client, url: impl AsRef<str>) -> crate::Result<Bytes> {
     let url = url.as_ref();
     let response = client.get(url).send().await?;
     let status = response.status();
@@ -92,4 +118,19 @@ pub async fn download_file(
             url: url.to_string(),
         })?
     }
+}
+
+pub async fn list_objects(client: &Client, url: impl AsRef<str>) -> crate::Result<Vec<ObjectMeta>> {
+    let url = url.as_ref();
+    let response = client.get(url).send().await?;
+    let status = response.status();
+    if !status.is_success() {
+        Err(DownloadFileError::HttpError {
+            status: status.as_u16(),
+            url: url.to_string(),
+        })?
+    }
+    let data = response.bytes().await?;
+    let list_result = serde_json::from_slice::<ListObjectResponse>(data.bytes())?;
+    Ok(list_result.items)
 }

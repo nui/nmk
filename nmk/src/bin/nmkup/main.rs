@@ -9,6 +9,7 @@ mod entrypoint;
 mod logging;
 mod settings;
 mod updater;
+mod vendor;
 
 pub const ARTIFACT_BASE_URL: &str = "https://storage.googleapis.com/nmk.nuimk.com";
 
@@ -23,6 +24,9 @@ async fn main_task() -> nmk::Result<()> {
     assert!(!nmk_home.is_git(), "NMK_HOME is git");
     dotfiles::install_or_update(&opt, &nmk_home).await?;
     let entrypoint_updated = entrypoint::install_or_update(&opt, &nmk_home).await?;
+    if opt.vendor {
+        vendor::install(&nmk_home).await?;
+    }
     updater::self_setup(&nmk_home, is_nmkup_init(), entrypoint_updated).await?;
     Ok(())
 }
