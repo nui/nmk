@@ -7,6 +7,7 @@ use tar::Archive;
 
 use nmk::artifact::{download_file, ObjectMeta};
 use nmk::home::NmkHome;
+use std::fs::File;
 
 const LIST_OBJECTS_URL: &str =
     "https://storage.googleapis.com/storage/v1/b/nmk.nuimk.com/o?delimiter=/&prefix=nmkpkg/";
@@ -14,7 +15,7 @@ const LIST_OBJECTS_URL: &str =
 pub async fn install(nmk_home: &NmkHome) -> nmk::Result<()> {
     let client = reqwest::Client::new();
     let objects = nmk::artifact::list_objects(&client, LIST_OBJECTS_URL).await?;
-    let obj_meta = select_vendor_files(&objects);
+    let obj_meta = select_vendor_files(&objects)?;
     let download_url = obj_meta.media_link.as_str();
     log::info!("vendor: Download url {}", download_url);
     let client = reqwest::Client::new();
@@ -54,13 +55,13 @@ fn remove_dir_contents(path: impl AsRef<Path>) -> io::Result<()> {
     Ok(())
 }
 
-fn select_vendor_files(objects: &[ObjectMeta]) -> &ObjectMeta {
+fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
     let mut input = String::new();
     let stdin = std::io::stdin();
     let max_index = objects.len();
     assert!(max_index > 0, "Not found any vendor data to select");
     let display_names = get_display_name(objects);
-    println!();
+    display_some_os_info()?;
     loop {
         input.clear();
         println!("Pick vendor files to use?");
@@ -73,12 +74,31 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> &ObjectMeta {
             log::debug!("Input value: {:?}", input);
             if let Ok(index) = input.trim().parse::<usize>() {
                 if (1..=max_index).contains(&index) {
-                    return &objects[index - 1];
+                    return Ok(&objects[index - 1]);
                 }
             }
             println!("Invalid index: {}", input);
         }
     }
+}
+
+fn display_some_os_info() -> nmk::Result<()> {
+    let mut stdout = std::io::stdout();
+    let infos = [
+        "/etc/os-release",
+        "/etc/centos-release",
+        "/etc/debian_version",
+    ];
+    log::info!("Displaying some useful info..");
+    for s in infos.iter() {
+        let p = Path::new(s);
+        if p.exists() {
+            if let Ok(mut f) = File::open(p) {
+                std::io::copy(&mut f, &mut stdout)?;
+            }
+        }
+    }
+    Ok(())
 }
 
 async fn untar_vendor_files<P: AsRef<Path>>(data: Bytes, dst: P) -> nmk::Result<()> {
