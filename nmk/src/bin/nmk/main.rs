@@ -3,13 +3,11 @@ use structopt::StructOpt;
 use crate::cmdline::Opt;
 
 mod cmdline;
-mod container;
 #[macro_use]
 mod core;
 mod init;
 mod logging;
 mod pathenv;
-mod platform;
 mod terminal;
 mod tmux;
 mod utils;

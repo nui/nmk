@@ -1,8 +1,9 @@
 use std::path::Path;
 
+use nmk::platform::{is_alpine, is_arch, is_mac};
+
 use crate::cmdline::Opt;
 use crate::core::*;
-use crate::platform::{is_alpine, is_arch, is_mac};
 
 fn has_vendored_zsh(nmk_home: &Path) -> bool {
     nmk_home.join("vendor").join("bin").join("zsh").exists()

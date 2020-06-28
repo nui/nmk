@@ -38,17 +38,17 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
 
     let client = reqwest::Client::new();
 
-    log::info!("entrypoint: Getting metadata.");
+    log::debug!("entrypoint: Getting metadata.");
     let metadata = download_file_metadata(&client, &url).await?;
-    log::info!("entrypoint: Received metadata.");
+    log::debug!("entrypoint: Received metadata.");
     log::debug!("entrypoint: etag {}", metadata.etag());
     if !opt.force && is_entrypoint_up2date(&metadata_path, &metadata) {
         log::info!("entrypoint: Already up to date.");
         Ok(false)
     } else {
-        log::info!("entrypoint: Getting data.");
+        log::debug!("entrypoint: Getting data.");
         let data = download_file(&client, url).await?;
-        log::info!("entrypoint: Received data.");
+        log::debug!("entrypoint: Received data.");
         unxz_entrypoint(data, nmk_home.join("bin").join("nmk"))?;
         metadata
             .write_to_file(metadata_path)

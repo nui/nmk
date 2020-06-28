@@ -58,9 +58,9 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()>
     let dotfiles_url = format!("{}/{}", ARTIFACT_BASE_URL, "dotfiles.tar.xz");
 
     let client = reqwest::Client::new();
-    log::info!("dotfiles: Getting metadata.");
+    log::debug!("dotfiles: Getting metadata.");
     let metadata = download_file_metadata(&client, &dotfiles_url).await?;
-    log::info!("dotfiles: Received metadata.");
+    log::debug!("dotfiles: Received metadata.");
     log::debug!("dotfiles: etag {}", metadata.etag());
     if !opt.force && is_dotfiles_up2date(nmk_home.join(DOTFILES_METADATA), &metadata) {
         log::info!("dotfiles: Already up to date.");
@@ -74,9 +74,9 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()>
                 .expect("fail to run sh");
         }
 
-        log::info!("dotfiles: Getting data.");
+        log::debug!("dotfiles: Getting data.");
         let tar_xz_data = download_file(&client, &dotfiles_url).await?;
-        log::info!("dotfiles: Received data.");
+        log::debug!("dotfiles: Received data.");
         untar_dotfiles(tar_xz_data, nmk_home).await?;
         metadata
             .write_to_file(nmk_home.join(DOTFILES_METADATA))

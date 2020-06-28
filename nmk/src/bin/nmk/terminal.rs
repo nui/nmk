@@ -2,8 +2,9 @@ use std::env;
 use std::ffi::{OsStr, OsString};
 use std::ops::Deref;
 
+use nmk::container;
+
 use crate::cmdline::Opt;
-use crate::container;
 
 fn slice_contains_term<T: Deref<Target = OsStr>>(slice: &[&str], term: Option<T>) -> bool {
     term.as_deref()

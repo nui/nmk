@@ -23,17 +23,17 @@ pub async fn install(nmk_home: &NmkHome) -> nmk::Result<()> {
     let download_url = obj_meta.media_link.as_str();
     log::info!("vendor: Download url {}", download_url);
     let client = reqwest::Client::new();
-    log::info!("vendor: Getting data.");
+    log::debug!("vendor: Getting data.");
     let tar_xz_data = download_file(&client, download_url).await?;
-    log::info!("vendor: Received data.");
+    log::debug!("vendor: Received data.");
     let vendor_path = nmk_home.join("vendor");
     if vendor_path.exists() {
-        log::info!("vendor: Removing {:?} content.", vendor_path);
+        log::debug!("vendor: Removing {:?} content.", vendor_path);
         remove_dir_contents(&vendor_path)?;
     } else {
         fs::create_dir(&vendor_path)?;
     }
-    log::info!("vendor: Extracting data.");
+    log::debug!("vendor: Extracting data.");
     untar_vendor_files(tar_xz_data, &vendor_path).await?;
     log::info!("vendor: Done.");
     Ok(())
