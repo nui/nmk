@@ -140,14 +140,14 @@ impl Tmux {
         }
         log::debug!("exec command: {:?}", cmd);
         self.print_usage_time(&arg, &start);
-        if self.is_local_tmux() && is_dev_machine() {
-            log::warn!("Using local tmux on development machine")
+        if self.is_vendored_tmux() && is_dev_machine() {
+            log::warn!("Using vendored tmux on development machine")
         }
         let err = cmd.exec();
         panic!("exec fail with {:?}", err);
     }
 
-    pub fn is_local_tmux(&self) -> bool {
+    pub fn is_vendored_tmux(&self) -> bool {
         self.bin.starts_with(&self.nmk_home)
     }
 }

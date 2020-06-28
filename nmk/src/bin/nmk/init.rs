@@ -47,7 +47,7 @@ pub fn setup_preferred_editor() {
 
 pub fn setup_path(nmk_home: &Path) {
     let mut bin_path = PathVec::parse(env::var_os(PATH).expect("$PATH not found"));
-    bin_path.push_front(nmk_home.join("local").join("bin"));
+    bin_path.push_front(nmk_home.join("vendor").join("bin"));
     bin_path.push_front(nmk_home.join("bin"));
     bin_path = bin_path.unique().no_version_managers();
     log::debug!("{} = {:#?}", PATH, bin_path);
@@ -55,13 +55,13 @@ pub fn setup_path(nmk_home: &Path) {
 }
 
 pub fn setup_ld_library_path(nmk_home: &Path) {
-    let local_lib_dir = nmk_home.join("local").join("lib");
-    if local_lib_dir.exists() {
+    let vendored_lib_dir = nmk_home.join("vendor").join("lib");
+    if vendored_lib_dir.exists() {
         let mut lib_path = match env::var_os(LD_LIBRARY_PATH) {
             Some(value) => PathVec::parse(value),
             None => PathVec::new(),
         };
-        lib_path.push_front(local_lib_dir);
+        lib_path.push_front(vendored_lib_dir);
         log::debug!("{} = {:#?}", LD_LIBRARY_PATH, lib_path);
         let next_ld = lib_path.make();
         set_env(LD_LIBRARY_PATH, next_ld);

@@ -4,8 +4,8 @@ use crate::cmdline::Opt;
 use crate::core::*;
 use crate::platform::{is_alpine, is_arch, is_mac};
 
-fn has_local_zsh(nmk_home: &Path) -> bool {
-    nmk_home.join("local").join("bin").join("zsh").exists()
+fn has_vendored_zsh(nmk_home: &Path) -> bool {
+    nmk_home.join("vendor").join("bin").join("zsh").exists()
 }
 
 pub fn use_global_rcs(arg: &Opt, nmk_home: &Path) -> bool {
@@ -13,7 +13,7 @@ pub fn use_global_rcs(arg: &Opt, nmk_home: &Path) -> bool {
     // from /etc/profile. And they do reset $PATH completely.
     // It makes PATH set by nmk unusable
     let hostile = is_mac() || is_alpine() || is_arch();
-    let no_global_rcs = !arg.no_autofix && hostile && !has_local_zsh(nmk_home);
+    let no_global_rcs = !arg.no_autofix && hostile && !has_vendored_zsh(nmk_home);
     !no_global_rcs
 }
 

@@ -1,6 +1,11 @@
-# Fix local installation of zsh.
-# We have to change fpath at runtime to match installation directory.
-export FPATH=${FPATH:gs#/NmK-LoCaL_MaRkEr#${NMK_HOME}/local#}
+# Fix vendored zsh. We have to change fpath at runtime to match installation directory.
+() {
+    local next_path
+    local prefix="/prefix:"
+    next_path=$prefix$FPATH
+    next_path=${next_path:gs#:/nmk-vendor#:${NMK_HOME}/vendor#}
+    FPATH=${next_path#"$prefix"}
+}
 
 () {
     local file
@@ -211,7 +216,6 @@ alias gpu-reload="sudo rmmod nvidia_uvm ; sudo modprobe nvidia_uvm"
     unfunction bind2maps
 }
 autoload -Uz reset
-autoload -Uz update-nmkpkg
 
 () {
     local min_tmout=$(( 24*3600 ))

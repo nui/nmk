@@ -10,7 +10,7 @@ use nmk::artifact::{download_file, ObjectMeta};
 use nmk::home::NmkHome;
 
 const LIST_OBJECTS_URL: &str =
-    "https://storage.googleapis.com/storage/v1/b/nmk.nuimk.com/o?delimiter=/&prefix=nmkpkg/";
+    "https://storage.googleapis.com/storage/v1/b/nmk.nuimk.com/o?delimiter=/&prefix=nmk-vendor/";
 
 pub async fn install(nmk_home: &NmkHome) -> nmk::Result<()> {
     let client = reqwest::Client::new();
@@ -26,7 +26,7 @@ pub async fn install(nmk_home: &NmkHome) -> nmk::Result<()> {
     log::info!("vendor: Getting data.");
     let tar_xz_data = download_file(&client, download_url).await?;
     log::info!("vendor: Received data.");
-    let vendor_path = nmk_home.join("local");
+    let vendor_path = nmk_home.join("vendor");
     if vendor_path.exists() {
         log::info!("vendor: Removing {:?} content.", vendor_path);
         remove_dir_contents(&vendor_path)?;
