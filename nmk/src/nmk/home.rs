@@ -22,11 +22,14 @@ impl NmkHome {
     }
 
     /// Attempt to find correct NMK_HOME candidate
-    /// - if NMK_HOME is set, use it
+    /// - if NMK_HOME is set, canonicalize it
     /// - otherwise default to $HOME/.nmk
+    ///
+    /// Absolute path is necessary because we use this value in vendored zsh.
     pub fn find() -> Option<Self> {
         env::var_os(NMK_HOME)
             .map(PathBuf::from)
+            .and_then(|p| p.canonicalize().ok())
             .or_else(|| home_dir().map(|p| p.join(".nmk")))
             .map(From::from)
     }

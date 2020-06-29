@@ -9,6 +9,7 @@ use crate::cmdline::Opt;
 use crate::core::set_env;
 use crate::pathenv::PathVec;
 use crate::tmux::Tmux;
+use nmk::home::NmkHome;
 
 fn setup_environment(nmk_home: &Path) {
     let zdotdir = nmk_home.join("zsh");
@@ -79,7 +80,7 @@ pub fn setup_then_exec(start: std::time::Instant, arg: Opt) -> ! {
         display_message_of_the_day();
     }
 
-    let nmk_home = nmk::home::NmkHome::find().expect("Unable to locate dotfiles directory");
+    let nmk_home = NmkHome::find().expect("Unable to locate NMK_HOME");
     assert!(nmk_home.exists(), "{:?} doesn't exist", nmk_home);
 
     log::debug!("Dotfiles directory: {:?}", nmk_home);
