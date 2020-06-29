@@ -116,16 +116,10 @@ class Tmux @Inject()(
   private def copyToSystemClipboard(implicit version: Version) = {
     val copyToClipboard = "xclip -selection clipboard"
     val head = "if-shell 'xclip -o > /dev/null 2>&1'"
-    val tail = version match {
-      case x if x >= V24 =>
-        s"""
-           |'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "$copyToClipboard"'
-           |""".toConfig
-      case _ =>
-        s"""
-           |'bind-key -t vi-copy y copy-pipe "$copyToClipboard"'
-           |""".toConfig
-    }
+    val tail =
+      s"""
+         |'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "$copyToClipboard"'
+         |""".toConfig
     s"$head $tail"
   }
 
@@ -155,16 +149,10 @@ class Tmux @Inject()(
       "PageUp" -> "halfpage-up",
       "PageDown" -> "halfpage-down"
     ) flatMap { case (k, v) =>
-      version match {
-        case x if x >= V24 => Seq(
-          s"unbind-key -T copy-mode-vi $k",
-          s"bind-key -T copy-mode-vi $k send-keys -X $v"
-        )
-        case _ => Seq(
-          s"unbind-key -t vi-copy $k",
-          s"bind-key -t vi-copy $k $v"
-        )
-      }
+      Seq(
+        s"unbind-key -T copy-mode-vi $k",
+        s"bind-key -T copy-mode-vi $k send-keys -X $v"
+      )
     }
   }
 
