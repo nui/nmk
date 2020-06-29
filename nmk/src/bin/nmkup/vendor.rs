@@ -60,14 +60,13 @@ fn remove_dir_contents(path: impl AsRef<Path>) -> io::Result<()> {
 }
 
 fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
-    let mut input = String::new();
     let stdin = std::io::stdin();
     let max_index = objects.len();
     assert!(max_index > 0, "Not found any vendor data to select");
     let display_names = get_display_name(objects);
     display_some_os_info()?;
+    let mut input = String::new();
     loop {
-        input.clear();
         println!("Pick vendor files to use?");
         for (index, name) in display_names.iter().enumerate() {
             println!(" [{:2}] {}", index + 1, name);
@@ -83,6 +82,7 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
             }
             println!("Invalid index: {}", input);
         }
+        input.clear();
     }
 }
 

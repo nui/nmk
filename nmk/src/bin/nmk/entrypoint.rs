@@ -3,33 +3,27 @@ use std::ffi::OsString;
 use std::fs::File;
 use std::path::Path;
 
-use nmk::env_name::{
-    EDITOR, LD_LIBRARY_PATH, NMK_BIN, NMK_HOME, PATH, VIMINIT, VIRTUAL_ENV, ZDOTDIR,
-};
+use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, VIRTUAL_ENV, ZDOTDIR};
 
+use crate::cmdline::Opt;
 use crate::core::set_env;
 use crate::pathenv::PathVec;
+use crate::tmux::Tmux;
 
-pub fn setup_environment(nmk_home: &Path) {
-    let init_vim = nmk_home.join("vim").join("init.vim");
+fn setup_environment(nmk_home: &Path) {
     let zdotdir = nmk_home.join("zsh");
     set_env(NMK_HOME, nmk_home);
-
-    let quote_first_space = |s: &str| s.to_string().replace(" ", r"\ ");
-    if let Some(path) = init_vim.to_str().map(quote_first_space) {
-        set_env(VIMINIT, format!("source {}", path));
-    }
     set_env(ZDOTDIR, zdotdir);
 
-    env::remove_var(VIRTUAL_ENV);
+    let init_vim = nmk_home.join("vim").join("init.vim");
+    if let Some(path) = init_vim.to_str() {
+        set_env(VIMINIT, format!(r"source\ {}", path));
+    }
 
-    set_env(
-        NMK_BIN,
-        env::current_exe().expect("fail to get full path to executable"),
-    );
+    env::remove_var(VIRTUAL_ENV);
 }
 
-pub fn setup_preferred_editor() {
+fn setup_preferred_editor() {
     const PREFERRED_EDITORS: &[&str] = &["nvim", "vim"];
 
     match env::var_os(EDITOR)
@@ -45,7 +39,7 @@ pub fn setup_preferred_editor() {
     }
 }
 
-pub fn setup_path(nmk_home: &Path) {
+fn setup_path(nmk_home: &Path) {
     let mut bin_path = PathVec::parse(env::var_os(PATH).expect("$PATH not found"));
     bin_path.push_front(nmk_home.join("vendor").join("bin"));
     bin_path.push_front(nmk_home.join("bin"));
@@ -54,7 +48,7 @@ pub fn setup_path(nmk_home: &Path) {
     set_env(PATH, bin_path.make());
 }
 
-pub fn setup_ld_library_path(nmk_home: &Path) {
+fn setup_ld_library_path(nmk_home: &Path) {
     let vendored_lib_dir = nmk_home.join("vendor").join("lib");
     if vendored_lib_dir.exists() {
         let mut lib_path = match env::var_os(LD_LIBRARY_PATH) {
@@ -68,7 +62,7 @@ pub fn setup_ld_library_path(nmk_home: &Path) {
     }
 }
 
-pub fn display_message_of_the_day() {
+fn display_message_of_the_day() {
     let mut stdout = std::io::stdout();
     ["/var/run/motd.dynamic", "/etc/motd"]
         .iter()
@@ -78,4 +72,31 @@ pub fn display_message_of_the_day() {
         .for_each(|mut f| {
             std::io::copy(&mut f, &mut stdout).expect("fail to print motd");
         });
+}
+
+pub fn setup_then_exec(start: std::time::Instant, arg: Opt) -> ! {
+    if arg.ssh {
+        display_message_of_the_day();
+    }
+
+    let nmk_home = nmk::home::NmkHome::find().expect("Unable to locate dotfiles directory");
+    assert!(nmk_home.exists(), "{:?} doesn't exist", nmk_home);
+
+    log::debug!("Dotfiles directory: {:?}", nmk_home);
+    setup_ld_library_path(&nmk_home);
+    setup_path(&nmk_home);
+
+    let tmux = Tmux::new(&nmk_home);
+    log::debug!("tmux path = {:?}", tmux.bin);
+    log::debug!("tmux version = {}", tmux.version);
+
+    setup_environment(&nmk_home);
+    setup_preferred_editor();
+    crate::zsh::setup(&arg, &nmk_home);
+    if arg.login {
+        tmux.login_shell(&arg, &start);
+    } else {
+        tmux.setup_environment(&arg);
+        tmux.exec(&arg, &start);
+    }
 }
