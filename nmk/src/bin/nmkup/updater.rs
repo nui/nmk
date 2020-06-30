@@ -40,6 +40,7 @@ pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result
     let target = Target::try_parse_env().unwrap();
     let tar_file = match target {
         Target::Amd64Linux => "nmkup-amd64-linux-musl.xz",
+        Target::Arm64Linux => "nmkup-arm64-linux-musl.xz",
         Target::ArmV7Linux => "nmkup-armv7-linux.xz",
     };
     let url = format!("{}/{}", ARTIFACT_BASE_URL, tar_file);

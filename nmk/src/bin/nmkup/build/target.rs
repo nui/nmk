@@ -3,6 +3,7 @@ use std::str::FromStr;
 #[derive(Debug)]
 pub enum Target {
     Amd64Linux,
+    Arm64Linux,
     ArmV7Linux,
 }
 
@@ -18,6 +19,7 @@ impl FromStr for Target {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "x86_64-unknown-linux-gnu" | "x86_64-unknown-linux-musl" => Ok(Target::Amd64Linux),
+            "aarch64-unknown-linux-gnu" | "aarch64-unknown-linux-musl" => Ok(Target::Arm64Linux),
             "armv7-unknown-linux-gnueabihf" => Ok(Target::ArmV7Linux),
             _ => Err(s.to_string()),
         }

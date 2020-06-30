@@ -30,6 +30,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
     let target = Target::try_parse_env().unwrap();
     let tar_file = match target {
         Target::Amd64Linux => "nmk-amd64-linux-musl.xz",
+        Target::Arm64Linux => "nmk-arm64-linux-musl.xz",
         Target::ArmV7Linux => "nmk-armv7-linux.xz",
     };
     let url = format!("{}/{}", ARTIFACT_BASE_URL, tar_file);

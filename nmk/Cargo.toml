@@ -23,7 +23,7 @@ which = "4.0.1"
 xz2 = "0.1.6"
 
 [profile.release]
-lto = true
+lto = false
 
 [lib]
 name = "nmk"
