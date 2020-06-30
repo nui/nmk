@@ -6,19 +6,24 @@ use std::{fs, io};
 use bytes::{Buf, Bytes};
 use tar::Archive;
 
+use crate::cmdline::Opt;
+use crate::os_release_id::OsReleaseId;
 use nmk::artifact::{download_file, ObjectMeta};
 use nmk::home::NmkHome;
 
 const LIST_OBJECTS_URL: &str =
     "https://storage.googleapis.com/storage/v1/b/nmk.nuimk.com/o?delimiter=/&prefix=nmk-vendor/";
 
-pub async fn install(nmk_home: &NmkHome) -> nmk::Result<()> {
+pub async fn install(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()> {
     let client = reqwest::Client::new();
-    let objects: Vec<_> = nmk::artifact::list_objects(&client, LIST_OBJECTS_URL)
+    let mut objects: Vec<_> = nmk::artifact::list_objects(&client, LIST_OBJECTS_URL)
         .await?
         .into_iter()
         .filter(|o| o.name.ends_with(".tar.xz"))
         .collect();
+    if !opt.no_filter {
+        objects = filter_by_os_release(objects);
+    }
     let obj_meta = select_vendor_files(&objects)?;
     let download_url = obj_meta.media_link.as_str();
     log::info!("vendor: Download url {}", download_url);
@@ -37,6 +42,24 @@ pub async fn install(nmk_home: &NmkHome) -> nmk::Result<()> {
     untar_vendor_files(tar_xz_data, &vendor_path).await?;
     log::info!("vendor: Done.");
     Ok(())
+}
+
+fn filter_by_os_release(input: Vec<ObjectMeta>) -> Vec<ObjectMeta> {
+    use crate::os_release_id::OsReleaseId::*;
+    if let Some(os_release_id) = OsReleaseId::parse_os_release() {
+        let filter_key = match os_release_id {
+            Amazon => "amazon",
+            CentOs => "centos",
+            Debian => "debian",
+            Ubuntu => "ubuntu",
+        };
+        input
+            .into_iter()
+            .filter(|o| o.name.contains(filter_key))
+            .collect()
+    } else {
+        input
+    }
 }
 
 fn get_display_name(objects: &[ObjectMeta]) -> Vec<&str> {
@@ -69,7 +92,12 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
     loop {
         println!("Pick vendor files to use?");
         for (index, name) in display_names.iter().enumerate() {
-            println!(" [{:2}] {}", index + 1, name);
+            let numeric_choice = index + 1;
+            if max_index < 10 {
+                println!(" [{}] {}", numeric_choice, name);
+            } else {
+                println!(" [{:2}] {}", numeric_choice, name);
+            }
         }
         print!("Enter numeric choice:  ");
         std::io::stdout().flush().expect("Flush fail");

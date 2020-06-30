@@ -8,6 +8,7 @@ mod cmdline;
 mod dotfiles;
 mod entrypoint;
 mod logging;
+mod os_release_id;
 mod settings;
 mod updater;
 mod vendor;
@@ -23,7 +24,7 @@ async fn main_task(opt: cmdline::Opt, _settings: settings::Settings) -> nmk::Res
         let entrypoint_updated = entrypoint::install_or_update(&opt, &nmk_home).await?;
         updater::self_setup(&nmk_home, is_nmkup_init(), entrypoint_updated).await?;
         if opt.vendor {
-            vendor::install(&nmk_home).await?;
+            vendor::install(&opt, &nmk_home).await?;
         }
     }
     Ok(())
