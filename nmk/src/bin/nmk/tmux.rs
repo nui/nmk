@@ -6,7 +6,6 @@ use std::time::Instant;
 
 use crate::cmdline::Opt;
 use crate::core::*;
-use crate::terminal;
 use crate::utils::is_dev_machine;
 
 const TMUX: &str = "tmux";
@@ -78,7 +77,7 @@ impl Tmux {
         }
     }
 
-    pub fn setup_environment(&self, arg: &Opt) {
+    pub fn setup_environment(&self, arg: &Opt, is_color_term: bool) {
         set_env(
             "NMK_TMUX_DEFAULT_SHELL",
             which::which("zsh").expect("zsh not found"),
@@ -86,12 +85,13 @@ impl Tmux {
         set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
         set_env("NMK_TMUX_VERSION", &self.version);
-        let color = terminal::support_256_color(arg);
-        set_env(
-            "NMK_TMUX_DEFAULT_TERMINAL",
-            if color { "screen-256color" } else { "screen" },
-        );
-        set_env("NMK_TMUX_256_COLOR", one_hot!(color));
+        let default_term = if is_color_term {
+            "screen-256color"
+        } else {
+            "screen"
+        };
+        set_env("NMK_TMUX_DEFAULT_TERMINAL", default_term);
+        set_env("NMK_TMUX_256_COLOR", one_hot!(is_color_term));
     }
 
     fn print_usage_time(&self, arg: &Opt, start: &Instant) {
@@ -103,10 +103,10 @@ impl Tmux {
         }
     }
 
-    pub fn login_shell(&self, arg: &Opt, start: &Instant) -> ! {
+    pub fn login_shell(&self, arg: &Opt, start: &Instant, is_color_term: bool) -> ! {
         let mut cmd = Command::new(&self.bin);
         cmd.args(&["-L", &arg.socket]);
-        if arg.force_256_color {
+        if is_color_term {
             cmd.arg("-2");
         }
         cmd.arg("-f");
@@ -118,10 +118,10 @@ impl Tmux {
         panic!("exec fail with {:?}", err);
     }
 
-    pub fn exec(&self, arg: &Opt, start: &Instant) -> ! {
+    pub fn exec(&self, arg: &Opt, start: &Instant, is_color_term: bool) -> ! {
         let mut cmd = Command::new(&self.bin);
         cmd.args(&["-L", &arg.socket]);
-        if arg.force_256_color {
+        if is_color_term {
             cmd.arg("-2");
         }
         if is_server_running(&arg.socket) {
