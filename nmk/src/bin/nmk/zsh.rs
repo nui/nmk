@@ -9,12 +9,12 @@ fn has_vendored_zsh(nmk_home: &Path) -> bool {
     nmk_home.join("vendor").join("bin").join("zsh").exists()
 }
 
-pub fn use_global_rcs(arg: &Opt, nmk_home: &Path) -> bool {
-    // Some linux distribution global zprofile contains a line that will source everything
-    // from /etc/profile. And they do reset $PATH completely.
-    // It makes PATH set by nmk unusable
-    let hostile = is_mac() || is_alpine() || is_arch();
-    let no_global_rcs = !arg.no_autofix && hostile && !has_vendored_zsh(nmk_home);
+pub fn use_global_rcs(_arg: &Opt, nmk_home: &Path) -> bool {
+    // Disable global resource files on some platform
+    //   - Some linux distributions force sourcing /etc/profile, they do reset PATH set by nmk.
+    //   - MacOs doesn't respect PATH set by nmk, it change the order.
+    let not_friendly_global_rcs = is_mac() || is_alpine() || is_arch();
+    let no_global_rcs = not_friendly_global_rcs && !has_vendored_zsh(nmk_home);
     !no_global_rcs
 }
 
