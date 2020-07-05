@@ -1,6 +1,6 @@
 use structopt::StructOpt;
 
-#[structopt(name = "nmkup", about = "All in one binary to setup nmk")]
+#[structopt(name = "nmkup", about = "The NMK installer/updater")]
 #[derive(Debug, StructOpt)]
 pub struct Opt {
     #[structopt(short, long, help = "Force install")]

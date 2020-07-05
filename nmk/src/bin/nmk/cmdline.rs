@@ -5,10 +5,17 @@ use crate::version::get_verbose_version;
 
 static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().unwrap_or_default());
 
+#[structopt(
+    name = "nmk",
+    about = "Start tmux/zsh with custom configuration from dotfiles",
+    version = VERSION.as_str()
+)]
 #[derive(Debug, StructOpt)]
-#[structopt(name = "nmk", about = "An entrypoint for nmk", version = VERSION.as_str())]
 pub struct Opt {
-    #[structopt(short = "2", help = "Assume the terminal supports 256 colours")]
+    #[structopt(
+        short = "2",
+        help = "Force tmux to assume the terminal supports 256 colours"
+    )]
     pub force_256_color: bool,
     #[structopt(
         short = "L",
@@ -28,6 +35,8 @@ pub struct Opt {
     pub inception: bool,
     #[structopt(short, parse(from_occurrences), help = "Request verbose logging")]
     pub verbosity: u8,
+    #[structopt(short, help = "Explicitly informs tmux that UTF-8 is supported")]
+    pub unicode: bool,
     #[structopt(long, help = "Prints usage time")]
     pub usage: bool,
     #[structopt(long)]

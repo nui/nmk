@@ -109,6 +109,9 @@ impl Tmux {
         if is_color_term {
             cmd.arg("-2");
         }
+        if arg.unicode {
+            cmd.arg("-u");
+        }
         cmd.arg("-f");
         cmd.arg(&self.config);
         cmd.args(&["-c", "exec zsh --login"]);
@@ -123,6 +126,9 @@ impl Tmux {
         cmd.args(&["-L", &arg.socket]);
         if is_color_term {
             cmd.arg("-2");
+        }
+        if arg.unicode {
+            cmd.arg("-u");
         }
         if is_server_running(&arg.socket) {
             if !arg.tmux_args.is_empty() {
