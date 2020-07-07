@@ -25,22 +25,22 @@ fn find_config(tmux_dir: &PathBuf, version: &str) -> PathBuf {
 }
 
 fn find_version() -> String {
-    if let Ok(output) = Command::new(TMUX).arg("-V").output() {
-        if !output.status.success() {
-            let code = output.status.code().expect("tmux is terminated by signal");
-            panic!("tmux exit with status: {}", code);
-        }
-        let version_output =
-            String::from_utf8(output.stdout).expect("tmux version output contain non utf-8");
-        version_output
-            .trim()
-            .split(" ")
-            .nth(1)
-            .unwrap_or_else(|| panic!("bad output: {}", version_output))
-            .to_string()
-    } else {
-        panic!("{} not found", TMUX);
+    let output = Command::new(TMUX)
+        .arg("-V")
+        .output()
+        .expect("tmux not found");
+    if !output.status.success() {
+        let code = output.status.code().expect("tmux is terminated by signal");
+        panic!("tmux exit with status: {}", code);
     }
+    let unparsed_version =
+        std::str::from_utf8(&output.stdout).expect("tmux version output contain non utf-8");
+    unparsed_version
+        .trim()
+        .split(" ")
+        .nth(1)
+        .unwrap_or_else(|| panic!("bad output: {}", unparsed_version))
+        .to_string()
 }
 
 fn is_server_running(socket: &str) -> bool {
