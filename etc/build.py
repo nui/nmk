@@ -39,7 +39,7 @@ def build_parser():
 def clone_repo(branch):
     repo = Path(tempfile.mkdtemp(suffix=TMPDIR_SUFFIX))
     subprocess.run(['git', 'clone', '--recursive', '-b', branch,
-                    'https://github.com/nuimk/nmk.git', repo])
+                    'https://github.com/nui/nmk.git', repo])
     return repo
 
 

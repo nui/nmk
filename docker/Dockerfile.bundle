@@ -4,7 +4,7 @@ RUN apk --update add coreutils git python3
 
 WORKDIR /root
 
-RUN git clone https://github.com/nuimk/nmk.git ~/.nmk
+RUN git clone https://github.com/nui/nmk.git ~/.nmk
 
 ENTRYPOINT ["python3", "/root/.nmk/etc/build.py", "--no-upload", "--branch", "master"]
 

@@ -24,7 +24,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://nmkup.nuimk.com | sh
 # Or full Github checkout with following steps
 
 # Step 1. Clone repository
-git clone --recursive https://github.com/nuimk/nmk.git ~/.nmk
+git clone --recursive https://github.com/nui/nmk.git ~/.nmk
 
 # Step 2. Build entrypoint and install
 # Use cargo to build entrypoint
