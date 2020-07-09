@@ -39,9 +39,9 @@ pub async fn self_setup(
 pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result<()> {
     let target = Target::try_parse_env().unwrap();
     let tar_file = match target {
-        Target::Amd64Linux => "nmkup-amd64-linux-musl.xz",
-        Target::Arm64Linux => "nmkup-arm64-linux-musl.xz",
-        Target::ArmV7Linux => "nmkup-armv7-linux.xz",
+        Target::Amd64Linux => "nmkup-x86_64-unknown-linux-musl.xz",
+        Target::Arm64Linux => "nmkup-aarch64-unknown-linux-musl.xz",
+        Target::ArmV7Linux => "nmkup-arm-unknown-linux-musleabi.xz",
     };
     let url = format!("{}/{}", ARTIFACT_BASE_URL, tar_file);
     let client = reqwest::Client::new();

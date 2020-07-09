@@ -52,14 +52,14 @@ main() {
 
     local _url
     case "$_arch" in
-        x86_64-unknown-linux-gnu | x86_64-unknown-linux-musl)
-            _url="${NMKUP_UPDATE_ROOT}/nmkup-amd64-linux-musl"
+        x86_64-unknown-linux-*)
+            _url="${NMKUP_UPDATE_ROOT}/nmkup-x86_64-unknown-linux-musl"
             ;;
-        aarch64-unknown-linux-gnu | aarch64-unknown-linux-musl)
-            _url="${NMKUP_UPDATE_ROOT}/nmkup-arm64-linux-musl"
+        aarch64-unknown-linux-*)
+            _url="${NMKUP_UPDATE_ROOT}/nmkup-aarch64-unknown-linux-musl"
             ;;
-        armv7-unknown-linux-gnueabihf)
-            _url="${NMKUP_UPDATE_ROOT}/nmkup-armv7-linux"
+        arm-unknown-linux-* | armv7-unknown-linux-*)
+            _url="${NMKUP_UPDATE_ROOT}/nmkup-arm-unknown-linux-musleabi"
             ;;
         *)
             err "Unsupported arch: $_arch"

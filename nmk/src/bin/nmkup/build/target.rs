@@ -20,7 +20,7 @@ impl FromStr for Target {
         match s {
             "x86_64-unknown-linux-gnu" | "x86_64-unknown-linux-musl" => Ok(Target::Amd64Linux),
             "aarch64-unknown-linux-gnu" | "aarch64-unknown-linux-musl" => Ok(Target::Arm64Linux),
-            "armv7-unknown-linux-gnueabihf" => Ok(Target::ArmV7Linux),
+            "arm-unknown-linux-musleabi" => Ok(Target::ArmV7Linux),
             _ => Err(s.to_string()),
         }
     }
