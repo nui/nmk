@@ -122,7 +122,7 @@ impl Tmux {
     }
 
     pub fn exec(&self, arg: &Opt, start: &Instant, is_color_term: bool) -> ! {
-        let mut cmd = Command::new(&self.bin);
+        let mut cmd = Command::new(TMUX);
         cmd.args(&["-L", &arg.socket]);
         if is_color_term {
             cmd.arg("-2");
