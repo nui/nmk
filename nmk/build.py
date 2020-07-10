@@ -26,6 +26,7 @@ TARGET_TRIPLE = {
     'arm64': ARM64_LINUX_MUSL,
     # We don't use hard-float so it fine to build without it
     'arm': ARM_LINUX_MUSL,
+    'armv7': ARMV7_LINUX_MUSL,
 }
 
 
