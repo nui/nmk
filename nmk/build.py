@@ -70,7 +70,8 @@ def invalidate_cache():
     target_source_files = [
         'src/bin/nmk/main.rs',
         'src/bin/nmkup/main.rs',
-        'src/nmk/lib.rs',
+        # lib doesn't need to invalidate because it doesn't use any env!/option_env!
+        # 'src/nmk/lib.rs',
     ]
     logging.debug("Invalidating cache")
     for file in target_source_files:
