@@ -1,4 +1,5 @@
 pub mod artifact;
+pub mod bin_name;
 pub mod container;
 pub mod env_name;
 pub mod home;

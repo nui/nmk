@@ -4,13 +4,13 @@ use std::fs::File;
 use std::path::Path;
 
 use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, VIRTUAL_ENV, ZDOTDIR};
+use nmk::home::NmkHome;
 
 use crate::cmdline::Opt;
 use crate::core::set_env;
 use crate::pathenv::PathVec;
 use crate::terminal;
 use crate::tmux::Tmux;
-use nmk::home::NmkHome;
 
 fn setup_environment(nmk_home: &Path) {
     let zdotdir = nmk_home.join("zsh");
@@ -87,18 +87,16 @@ pub fn setup_then_exec(start: std::time::Instant, arg: Opt) -> ! {
     log::debug!("Dotfiles directory: {:?}", nmk_home);
     setup_ld_library_path(&nmk_home);
     setup_path(&nmk_home);
-
-    let tmux = Tmux::new(&nmk_home);
-    log::debug!("tmux path = {:?}", tmux.bin);
-    log::debug!("tmux version = {}", tmux.version);
-
     setup_environment(&nmk_home);
     setup_preferred_editor();
     crate::zsh::setup(&arg, &nmk_home);
-    let is_color_term = terminal::support_256_color(&arg);
     if arg.login {
-        tmux.login_shell(&arg, &start, is_color_term);
+        crate::zsh::exec_login_shell(&arg, &start);
     } else {
+        let tmux = Tmux::new(&nmk_home);
+        log::debug!("tmux path = {:?}", tmux.bin);
+        log::debug!("tmux version = {}", tmux.version);
+        let is_color_term = terminal::support_256_color(&arg);
         tmux.setup_environment(&arg, is_color_term);
         tmux.exec(&arg, &start, is_color_term);
     }

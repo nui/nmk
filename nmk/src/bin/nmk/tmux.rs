@@ -4,11 +4,11 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::Instant;
 
+use nmk::bin_name::TMUX;
+
 use crate::cmdline::Opt;
 use crate::core::*;
-use crate::utils::is_dev_machine;
-
-const TMUX: &str = "tmux";
+use crate::utils::{is_dev_machine, print_usage_time};
 
 pub struct Tmux {
     nmk_home: PathBuf,
@@ -94,33 +94,6 @@ impl Tmux {
         set_env("NMK_TMUX_256_COLOR", one_hot!(is_color_term));
     }
 
-    fn print_usage_time(&self, arg: &Opt, start: &Instant) {
-        let before_exec = start.elapsed().as_micros();
-        if arg.usage {
-            println!("{}", before_exec);
-        } else {
-            log::debug!("usage time: {} μs", before_exec);
-        }
-    }
-
-    pub fn login_shell(&self, arg: &Opt, start: &Instant, is_color_term: bool) -> ! {
-        let mut cmd = Command::new(&self.bin);
-        cmd.args(&["-L", &arg.socket]);
-        if is_color_term {
-            cmd.arg("-2");
-        }
-        if arg.unicode {
-            cmd.arg("-u");
-        }
-        cmd.arg("-f");
-        cmd.arg(&self.config);
-        cmd.args(&["-c", "exec zsh --login"]);
-        log::debug!("login command: {:?}", cmd);
-        self.print_usage_time(&arg, &start);
-        let err = cmd.exec();
-        panic!("exec fail with {:?}", err);
-    }
-
     pub fn exec(&self, arg: &Opt, start: &Instant, is_color_term: bool) -> ! {
         let mut cmd = Command::new(TMUX);
         cmd.args(&["-L", &arg.socket]);
@@ -145,7 +118,7 @@ impl Tmux {
             cmd.args(arg.tmux_args.iter());
         }
         log::debug!("exec command: {:?}", cmd);
-        self.print_usage_time(&arg, &start);
+        print_usage_time(&arg, &start);
         if self.is_vendored_tmux() && is_dev_machine() {
             log::warn!("Using vendored tmux on development machine")
         }
