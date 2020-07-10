@@ -95,11 +95,11 @@ impl Tmux {
     }
 
     fn print_usage_time(&self, arg: &Opt, start: &Instant) {
-        let before_exec = start.elapsed().as_millis();
+        let before_exec = start.elapsed().as_micros();
         if arg.usage {
             println!("{}", before_exec);
         } else {
-            log::debug!("usage time: {}ms", before_exec);
+            log::debug!("usage time: {} μs", before_exec);
         }
     }
 
