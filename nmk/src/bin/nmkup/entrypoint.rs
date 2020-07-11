@@ -43,14 +43,15 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
     let metadata = download_file_metadata(&client, &url).await?;
     log::debug!("entrypoint: Received metadata.");
     log::debug!("entrypoint: etag {}", metadata.etag());
-    if !opt.force && is_entrypoint_up2date(&metadata_path, &metadata) {
+    let entrypoint_path = nmk_home.join("bin").join("nmk");
+    if !opt.force && is_entrypoint_up2date(&metadata_path, &metadata, &entrypoint_path) {
         log::info!("entrypoint: Already up to date.");
         Ok(false)
     } else {
         log::debug!("entrypoint: Getting data.");
         let data = download_file(&client, url).await?;
         log::debug!("entrypoint: Received data.");
-        unxz_entrypoint(data, nmk_home.join("bin").join("nmk"))?;
+        unxz_entrypoint(data, entrypoint_path)?;
         metadata
             .write_to_file(metadata_path)
             .expect("Unable to cache entrypoint metadata");
@@ -59,15 +60,21 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
     }
 }
 
-fn is_entrypoint_up2date(src: impl AsRef<Path>, metadata: &Metadata) -> bool {
-    let src = src.as_ref();
-    if !src.exists() {
+fn is_entrypoint_up2date(
+    metadata_path: &Path,
+    metadata: &Metadata,
+    entrypoint_path: &Path,
+) -> bool {
+    if !entrypoint_path.exists() {
+        return false;
+    }
+    if !metadata_path.exists() {
         log::debug!("entrypoint: Not found cached metadata.");
         return false;
     }
 
-    let cache_metadata =
-        Metadata::read_from_file(src).expect("Fail to read or parse cached entrypoint metadata");
+    let cache_metadata = Metadata::read_from_file(metadata_path)
+        .expect("Fail to read or parse cached entrypoint metadata");
     log::debug!("entrypoint: cached etag {}", cache_metadata.etag());
     cache_metadata.etag() == metadata.etag()
 }
