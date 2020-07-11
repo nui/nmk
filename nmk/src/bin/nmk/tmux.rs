@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::Instant;
 
-use nmk::bin_name::TMUX;
+use nmk::bin_name::{TMUX, ZSH};
 
 use crate::cmdline::Opt;
 use crate::core::*;
@@ -80,7 +80,7 @@ impl Tmux {
     pub fn setup_environment(&self, arg: &Opt, is_color_term: bool) {
         set_env(
             "NMK_TMUX_DEFAULT_SHELL",
-            which::which("zsh").expect("zsh not found"),
+            which::which(ZSH).expect("zsh not found"),
         );
         set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
