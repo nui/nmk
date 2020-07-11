@@ -1,17 +1,16 @@
 # POSIX compatible script
 
-check_exec() {
+try_exec_login_shell() {
     if [ -e "$1" ]; then
         exec "$1" --ssh --login
     fi
 }
 
-check_exec "$HOME/.nmk/bin/nmk"
+if [ -e "$HOME" ]; then
+    try_exec_login_shell "$HOME/.nmk/bin/nmk"
+    try_exec_login_shell "$HOME/bin/nmk"
+fi
+try_exec_login_shell "/usr/local/bin/nmk"
 
-for build_type in debug release; do
-    check_exec "$HOME/.nmk/nmkup/target/$build_type/nmk"
-done
-
-check_exec "/usr/local/bin/nmk"
-
-exec $SHELL -l
+# This may not work on dash, but who use dash as a login shell?
+exec -l $SHELL
