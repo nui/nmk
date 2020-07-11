@@ -1,2 +1,2 @@
 # dash, bash, and zsh
-command="_T=$SSH_ORIGINAL_COMMAND;if test -n \"$_T\";then eval \"$_T\";elif _T=~/.nmk/ssh.sh && test -e \"$_T\";then . \"$_T\";else exec $SHELL -l;fi"
+command="c=$SSH_ORIGINAL_COMMAND;if [ -n \"$c\" ];then eval \"$c\";else . ~/.nmk/ssh.sh;fi"
