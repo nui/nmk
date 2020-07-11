@@ -21,17 +21,32 @@ impl NmkHome {
         self.0.join(".git").exists()
     }
 
+    fn _find(canonicalize: bool) -> Option<Self> {
+        env::var_os(NMK_HOME)
+            .map(PathBuf::from)
+            .and_then(|p| {
+                if canonicalize {
+                    p.canonicalize().ok()
+                } else {
+                    Some(p)
+                }
+            })
+            .or_else(|| home_dir().map(|p| p.join(".nmk")))
+            .map(From::from)
+    }
+
     /// Attempt to find correct NMK_HOME candidate
     /// - if NMK_HOME is set, canonicalize it
     /// - otherwise default to $HOME/.nmk
     ///
     /// Absolute path is necessary because we use this value in vendored zsh.
     pub fn find() -> Option<Self> {
-        env::var_os(NMK_HOME)
-            .map(PathBuf::from)
-            .and_then(|p| p.canonicalize().ok())
-            .or_else(|| home_dir().map(|p| p.join(".nmk")))
-            .map(From::from)
+        Self::_find(true)
+    }
+
+    /// Like find but don't canonicalize (it fail if directory doesn't exist)
+    pub fn find_for_install() -> Option<Self> {
+        Self::_find(false)
     }
 }
 
