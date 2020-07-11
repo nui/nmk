@@ -42,7 +42,7 @@ pub fn exec_login_shell(arg: &Opt, start: &Instant) -> ! {
     let (filename, args) = prepare_exec_args().expect("Unable to prepare zsh login args");
     print_usage_time(&arg, &start);
     if let Err(e) = execvp(filename, &args) {
-        panic!("exec fail with {:?}", e);
+        panic!("exec zsh login failed with {:?}", e);
     }
     unreachable!()
 }

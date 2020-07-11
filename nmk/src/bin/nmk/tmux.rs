@@ -123,7 +123,7 @@ impl Tmux {
             log::warn!("Using vendored tmux on development machine")
         }
         let err = cmd.exec();
-        panic!("exec fail with {:?}", err);
+        panic!("exec {:?} fail with {:?}", cmd, err);
     }
 
     pub fn is_vendored_tmux(&self) -> bool {
