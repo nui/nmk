@@ -12,6 +12,7 @@
 /vim/local.vim
 /vim/shada/
 /vim/viminfo
+/zsh/.zcompcache/
 /zsh/.zcompdump
 /zsh/.zsh_history
 /zsh/completion/
