@@ -4,7 +4,7 @@ lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "com.nuimk",
-      scalaVersion := "2.13.1",
+      scalaVersion := "2.13.3",
       version := "0.0.1"
     )),
     name := "nmk",
@@ -13,3 +13,5 @@ lazy val root = (project in file(".")).
       jackson,
     )
   )
+
+scalacOptions += "-deprecation"

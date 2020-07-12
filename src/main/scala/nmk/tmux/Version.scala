@@ -34,5 +34,5 @@ object Version {
 
   private val supportedVersions = allVersions.filterNot(unsupportedVersions.contains)
 
-  def supported: Iterator[Version] = supportedVersions.toIterator
+  def supported: Iterator[Version] = supportedVersions.iterator
 }
