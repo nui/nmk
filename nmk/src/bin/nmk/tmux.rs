@@ -1,60 +1,124 @@
-use std::env;
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::Command;
+use std::str::FromStr;
 use std::time::Instant;
 
 use nmk::bin_name::{TMUX, ZSH};
+use nmk::env_name::NMK_TMUX_VERSION;
 
 use crate::cmdline::Opt;
 use crate::core::*;
 use crate::utils::{is_dev_machine, print_usage_time};
+
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub enum Version {
+    V26,
+    V27,
+    V28,
+    V29,
+    V29a,
+    V30,
+    V30a,
+    V31,
+    V31a,
+    V31b,
+}
+
+impl FromStr for Version {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        use Version::*;
+        let v = match s {
+            "2.6" => V26,
+            "2.7" => V27,
+            "2.8" => V28,
+            "2.9" => V29,
+            "2.9a" => V29a,
+            "3.0" => V30,
+            "3.0a" => V30a,
+            "3.1" => V31,
+            "3.1a" => V31a,
+            "3.1b" => V31b,
+            _ => return Err(()),
+        };
+        Ok(v)
+    }
+}
+
+impl AsRef<str> for Version {
+    fn as_ref(&self) -> &str {
+        use Version::*;
+        match *self {
+            V26 => "2.6",
+            V27 => "2.7",
+            V28 => "2.8",
+            V29 => "2.9",
+            V29a => "2.9a",
+            V30 => "3.0",
+            V30a => "3.0a",
+            V31 => "3.1",
+            V31a => "3.1a",
+            V31b => "3.1b",
+        }
+    }
+}
+
+enum ParseVersionError {
+    BadVersionOutput(String),
+    UnsupportedVersion(String),
+}
+
+impl Version {
+    fn try_from_output(version_output: &str) -> Result<Self, ParseVersionError> {
+        let version_number = version_output
+            .trim()
+            .split(" ")
+            .nth(1)
+            .ok_or_else(|| ParseVersionError::BadVersionOutput(version_output.to_string()))?;
+        version_number
+            .parse()
+            .map_err(|_| ParseVersionError::UnsupportedVersion(version_number.to_string()))
+    }
+}
 
 pub struct Tmux {
     nmk_home: PathBuf,
     tmux_dir: PathBuf,
     config: PathBuf,
     pub bin: PathBuf,
-    pub version: String,
+    pub version: Version,
 }
 
-fn find_config(tmux_dir: &PathBuf, version: &str) -> PathBuf {
+fn find_config(tmux_dir: &PathBuf, version: Version) -> PathBuf {
+    let version: &str = version.as_ref();
     let config = tmux_dir.join(format!("{}.conf", version));
-    assert!(config.exists(), "unsupported tmux version: {}", version);
+    assert!(
+        config.exists(),
+        "Unable to find config for tmux version: {}",
+        version
+    );
     config
 }
 
-fn find_version() -> String {
-    let output = Command::new(TMUX)
-        .arg("-V")
-        .output()
-        .expect("tmux not found");
-    if !output.status.success() {
-        let code = output.status.code().expect("tmux is terminated by signal");
-        panic!("tmux exit with status: {}", code);
+fn find_version() -> Result<Version, ParseVersionError> {
+    if let Ok(s) = std::env::var(NMK_TMUX_VERSION) {
+        log::debug!("Using tmux version from environment variable");
+        Version::try_from_output(&s)
+    } else {
+        let output = Command::new(TMUX)
+            .arg("-V")
+            .output()
+            .expect("tmux not found");
+        if !output.status.success() {
+            let code = output.status.code().expect("tmux is terminated by signal");
+            panic!("tmux exit with status: {}", code);
+        }
+        let unparsed_version =
+            std::str::from_utf8(&output.stdout).expect("tmux version output contain non utf-8");
+        Version::try_from_output(unparsed_version)
     }
-    let unparsed_version =
-        std::str::from_utf8(&output.stdout).expect("tmux version output contain non utf-8");
-    unparsed_version
-        .trim()
-        .split(" ")
-        .nth(1)
-        .unwrap_or_else(|| panic!("bad output: {}", unparsed_version))
-        .to_string()
-}
-
-fn is_server_running(socket: &str) -> bool {
-    let running = Command::new(TMUX)
-        .arg("-L")
-        .arg(socket)
-        .arg("list-sessions")
-        .stderr(Stdio::null())
-        .stdout(Stdio::null())
-        .status()
-        .map(|status| status.success())
-        .unwrap_or(false);
-    log::debug!("server {} running", if running { "is" } else { "is not" });
-    running
 }
 
 impl Tmux {
@@ -66,8 +130,11 @@ impl Tmux {
             tmux_dir.to_string_lossy()
         );
         let bin = which::which(TMUX).expect("Cannot find tmux binary");
-        let version = find_version();
-        let config = find_config(&tmux_dir, &version);
+        let version = find_version().unwrap_or_else(|e| match e {
+            ParseVersionError::BadVersionOutput(s) => panic!("Bad tmux output: {}", s),
+            ParseVersionError::UnsupportedVersion(s) => panic!("Unsupported tmux version: {}", s),
+        });
+        let config = find_config(&tmux_dir, version);
         Tmux {
             nmk_home: nmk_home.to_owned(),
             tmux_dir,
@@ -84,7 +151,7 @@ impl Tmux {
         );
         set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
-        set_env("NMK_TMUX_VERSION", &self.version);
+        set_env("NMK_TMUX_VERSION", &self.version.as_ref());
         let default_term = if is_color_term {
             "screen-256color"
         } else {
@@ -103,18 +170,15 @@ impl Tmux {
         if arg.unicode {
             cmd.arg("-u");
         }
-        if is_server_running(&arg.socket) {
-            if !arg.tmux_args.is_empty() {
-                cmd.args(arg.tmux_args.iter());
-            } else {
-                if env::var_os("TMUX").is_some() && !arg.inception {
-                    panic!("add --inception to allow nested tmux sessions");
-                }
-                cmd.arg("attach");
+        cmd.arg("-f");
+        cmd.arg(&self.config);
+        if arg.tmux_args.is_empty() {
+            // Attach to tmux or create new session
+            cmd.args(&["new-session", "-A"]);
+            if self.version < Version::V31 {
+                cmd.args(&["-s", "0"]);
             }
         } else {
-            cmd.arg("-f");
-            cmd.arg(&self.config);
             cmd.args(arg.tmux_args.iter());
         }
         log::debug!("exec command: {:?}", cmd);

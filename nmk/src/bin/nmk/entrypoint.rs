@@ -95,7 +95,7 @@ pub fn setup_then_exec(start: std::time::Instant, arg: Opt) -> ! {
     } else {
         let tmux = Tmux::new(&nmk_home);
         log::debug!("tmux path = {:?}", tmux.bin);
-        log::debug!("tmux version = {}", tmux.version);
+        log::debug!("tmux version = {}", tmux.version.as_ref());
         let is_color_term = terminal::support_256_color(&arg);
         tmux.setup_environment(&arg, is_color_term);
         tmux.exec(&arg, &start, is_color_term);
