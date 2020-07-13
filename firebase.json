@@ -1,7 +1,7 @@
 {
   "hosting": {
     "target": "nmkup",
-    "public": "etc/nmkup.nuimk.com",
+    "public": "nmk/nmkup.nuimk.com",
     "rewrites": [{
         "source": "**",
         "destination": "/nmkup-init.sh"
