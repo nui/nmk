@@ -31,7 +31,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
     let tar_file = match target {
         Target::Amd64Linux => "nmk-x86_64-unknown-linux-musl.xz",
         Target::Arm64Linux => "nmk-aarch64-unknown-linux-musl.xz",
-        Target::ArmV7Linux => "nmk-arm-unknown-linux-musleabi.xz",
+        Target::ArmLinux | Target::ArmV7Linux => "nmk-arm-unknown-linux-musleabi.xz",
     };
     let url = format!("{}/{}", ARTIFACT_BASE_URL, tar_file);
 

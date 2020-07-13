@@ -41,7 +41,7 @@ pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result
     let tar_file = match target {
         Target::Amd64Linux => "nmkup-x86_64-unknown-linux-musl.xz",
         Target::Arm64Linux => "nmkup-aarch64-unknown-linux-musl.xz",
-        Target::ArmV7Linux => "nmkup-arm-unknown-linux-musleabi.xz",
+        Target::ArmLinux | Target::ArmV7Linux => "nmkup-arm-unknown-linux-musleabi.xz",
     };
     let url = format!("{}/{}", ARTIFACT_BASE_URL, tar_file);
     let client = reqwest::Client::new();
