@@ -76,7 +76,7 @@ fn display_message_of_the_day() {
         });
 }
 
-pub fn setup_then_exec(start: std::time::Instant, arg: Opt) -> ! {
+pub fn main(start: std::time::Instant, arg: Opt) -> ! {
     if arg.ssh {
         display_message_of_the_day();
     }

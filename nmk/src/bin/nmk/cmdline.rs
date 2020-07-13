@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use once_cell::sync::Lazy;
 use structopt::StructOpt;
 
@@ -41,5 +43,35 @@ pub struct Opt {
     pub usage: bool,
     #[structopt(long)]
     pub ssh: bool,
-    pub tmux_args: Vec<String>,
+    #[structopt(subcommand)]
+    pub cmd: Option<SubCommand>,
+}
+
+impl Opt {
+    pub fn tmux_args(&self) -> Vec<&str> {
+        use SubCommand::*;
+        if let Some(Other(ref args)) = self.cmd {
+            args.iter().map(|s| s.as_str()).collect()
+        } else {
+            Vec::new()
+        }
+    }
+}
+
+#[derive(Debug, StructOpt)]
+pub enum SubCommand {
+    #[structopt(about = "Display entrypoint information")]
+    Info,
+    #[structopt(about = "Generate tab-completion scripts for your shell")]
+    Completions(Completion),
+    #[structopt(external_subcommand)]
+    Other(Vec<String>),
+}
+
+#[derive(Debug, StructOpt)]
+pub struct Completion {
+    #[structopt(short, long, help = "output path, default to standard output")]
+    pub output: Option<PathBuf>,
+    #[structopt(help = "possible values: zsh, bash, fish, powershell, elvish")]
+    pub shell: String,
 }
