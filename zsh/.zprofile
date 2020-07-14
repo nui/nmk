@@ -17,7 +17,7 @@ if [[ $NMK_PROFILE_INITIATED != true ]]; then
     #   - JetBrains terminal
     #   - Tmux (already guard by outer if block)
     if [[ -z $TERMINAL_EMULATOR ]] && [[ -z $TERM_PROGRAM ]] && ((${+commands[tmux]})); then
-        export NMK_TMUX_VERSION=$(tmux -V)
+        export NMK_TMUX_VERSION_OUTPUT="$(tmux -V)"
     fi
 fi
 # vi: ft=zsh

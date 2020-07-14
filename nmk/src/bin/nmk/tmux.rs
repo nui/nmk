@@ -5,13 +5,13 @@ use std::str::FromStr;
 use std::time::Instant;
 
 use nmk::bin_name::{TMUX, ZSH};
-use nmk::env_name::NMK_TMUX_VERSION;
+use nmk::env_name::NMK_TMUX_VERSION_OUTPUT;
 
 use crate::cmdline::Opt;
 use crate::core::*;
 use crate::utils::{is_dev_machine, print_usage_time};
 
-#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum Version {
     V26,
     V27,
@@ -65,6 +65,7 @@ impl AsRef<str> for Version {
     }
 }
 
+#[derive(Debug)]
 enum ParseVersionError {
     BadVersionOutput(String),
     UnsupportedVersion(String),
@@ -80,6 +81,10 @@ impl Version {
         version_number
             .parse()
             .map_err(|_| ParseVersionError::UnsupportedVersion(version_number.to_string()))
+    }
+
+    fn to_version_output(&self) -> String {
+        format!("tmux {}", self.as_ref())
     }
 }
 
@@ -103,7 +108,7 @@ fn find_config(tmux_dir: &PathBuf, version: Version) -> PathBuf {
 }
 
 fn find_version() -> Result<Version, ParseVersionError> {
-    if let Ok(s) = std::env::var(NMK_TMUX_VERSION) {
+    if let Ok(s) = std::env::var(NMK_TMUX_VERSION_OUTPUT) {
         log::debug!("Using tmux version from environment variable");
         Version::try_from_output(&s)
     } else {
@@ -151,7 +156,7 @@ impl Tmux {
         );
         set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
-        set_env("NMK_TMUX_VERSION", &self.version.as_ref());
+        set_env("NMK_TMUX_VERSION_OUTPUT", &self.version.to_version_output());
         let default_term = if is_color_term {
             "screen-256color"
         } else {
@@ -193,5 +198,19 @@ impl Tmux {
 
     pub fn is_vendored_tmux(&self) -> bool {
         self.bin.starts_with(&self.nmk_home)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_version() {
+        let tmux_output = "tmux 3.1b";
+
+        let actual = Version::try_from_output(tmux_output);
+        assert!(matches!(actual, Ok(Version::V31b)));
+        assert_eq!(actual.unwrap().to_version_output(), tmux_output);
     }
 }

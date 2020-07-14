@@ -8,5 +8,4 @@ pub mod time;
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
-pub const NMK_INIT_SCRIPT: &'static str =
-    include_str!("../../nmkup.nuimk.com/nmkup-init.sh");
+pub const NMK_INIT_SCRIPT: &'static str = include_str!("../../nmkup.nuimk.com/nmkup-init.sh");
