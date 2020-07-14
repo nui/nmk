@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -5,7 +6,7 @@ use std::str::FromStr;
 use std::time::Instant;
 
 use nmk::bin_name::{TMUX, ZSH};
-use nmk::env_name::NMK_TMUX_VERSION_OUTPUT;
+use nmk::env_name::NMK_TMUX_VERSION;
 
 use crate::cmdline::Opt;
 use crate::core::*;
@@ -48,7 +49,7 @@ impl FromStr for Version {
 }
 
 impl AsRef<str> for Version {
-    fn as_ref(&self) -> &str {
+    fn as_ref(&self) -> &'static str {
         use Version::*;
         match *self {
             V26 => "2.6",
@@ -66,25 +67,32 @@ impl AsRef<str> for Version {
 }
 
 #[derive(Debug)]
-enum ParseVersionError {
+pub enum ParseVersionError {
     BadVersionOutput(String),
     UnsupportedVersion(String),
 }
 
 impl Version {
-    fn try_from_output(version_output: &str) -> Result<Self, ParseVersionError> {
+    // Try parse `tmux -v` result
+    fn try_from_version_output(version_output: &str) -> Result<Self, ParseVersionError> {
         let version_number = version_output
             .trim()
             .split(" ")
             .nth(1)
             .ok_or_else(|| ParseVersionError::BadVersionOutput(version_output.to_string()))?;
-        version_number
-            .parse()
-            .map_err(|_| ParseVersionError::UnsupportedVersion(version_number.to_string()))
+        Self::try_from(version_number)
     }
 
-    fn to_version_output(&self) -> String {
-        format!("tmux {}", self.as_ref())
+    pub fn as_str(&self) -> &str {
+        self.as_ref()
+    }
+}
+
+impl TryFrom<&str> for Version {
+    type Error = ParseVersionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::from_str(value).map_err(|_| ParseVersionError::UnsupportedVersion(value.to_owned()))
     }
 }
 
@@ -108,9 +116,9 @@ fn find_config(tmux_dir: &PathBuf, version: Version) -> PathBuf {
 }
 
 fn find_version() -> Result<Version, ParseVersionError> {
-    if let Ok(s) = std::env::var(NMK_TMUX_VERSION_OUTPUT) {
+    if let Ok(s) = std::env::var(NMK_TMUX_VERSION) {
         log::debug!("Using tmux version from environment variable");
-        Version::try_from_output(&s)
+        Version::try_from(s.as_str())
     } else {
         let output = Command::new(TMUX)
             .arg("-V")
@@ -120,9 +128,9 @@ fn find_version() -> Result<Version, ParseVersionError> {
             let code = output.status.code().expect("tmux is terminated by signal");
             panic!("tmux exit with status: {}", code);
         }
-        let unparsed_version =
+        let version_output =
             std::str::from_utf8(&output.stdout).expect("tmux version output contain non utf-8");
-        Version::try_from_output(unparsed_version)
+        Version::try_from_version_output(version_output)
     }
 }
 
@@ -156,7 +164,7 @@ impl Tmux {
         );
         set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
-        set_env("NMK_TMUX_VERSION_OUTPUT", &self.version.to_version_output());
+        set_env("NMK_TMUX_VERSION", &self.version.as_str());
         let default_term = if is_color_term {
             "screen-256color"
         } else {
@@ -209,8 +217,7 @@ mod tests {
     fn test_version() {
         let tmux_output = "tmux 3.1b";
 
-        let actual = Version::try_from_output(tmux_output);
+        let actual = Version::try_from_version_output(tmux_output);
         assert!(matches!(actual, Ok(Version::V31b)));
-        assert_eq!(actual.unwrap().to_version_output(), tmux_output);
     }
 }

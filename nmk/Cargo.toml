@@ -28,13 +28,12 @@ lto = false
 [lib]
 name = "nmk"
 path = "src/nmk/lib.rs"
+doctest = false
 
 [[bin]]
 name = "nmk"
-test = false
 doc = false
 
 [[bin]]
 name = "nmkup"
-test = false
 doc = false
