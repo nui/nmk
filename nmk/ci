@@ -7,4 +7,4 @@ for target in amd64 arm64 arm; do
     python3 build.py --strip --target $target --dist "$@"
 done
 
-gsutil -m -h "Cache-Control: no-store, no-transform" cp dist/* gs://nmk.nuimk.com/
+gsutil -m -h "Cache-Control: no-store, no-transform" rsync dist/ gs://nmk.nuimk.com/
