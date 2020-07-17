@@ -1,8 +1,7 @@
-use std::ffi::CStr;
+use std::os::unix::process::CommandExt;
 use std::path::Path;
+use std::process::Command;
 use std::time::Instant;
-
-use nix::unistd::execvp;
 
 use nmk::bin_name::ZSH;
 use nmk::platform::{is_alpine, is_arch, is_mac};
@@ -32,17 +31,10 @@ pub fn setup(arg: &Opt, nmk_home: &Path) {
     set_env("NMK_ZSH_GLOBAL_RCS", one_hot!(global_rcs));
 }
 
-fn prepare_exec_args() -> Option<(&'static CStr, [&'static CStr; 1])> {
-    let filename = CStr::from_bytes_with_nul(b"zsh\0").ok()?;
-    let args = [CStr::from_bytes_with_nul(b"-zsh\0").ok()?];
-    Some((filename, args))
-}
-
 pub fn exec_login_shell(arg: &Opt, start: &Instant) -> ! {
-    let (filename, args) = prepare_exec_args().expect("Unable to prepare zsh login args");
+    let mut cmd = Command::new(ZSH);
+    cmd.arg0("-zsh");
     print_usage_time(&arg, &start);
-    if let Err(e) = execvp(filename, &args) {
-        panic!("exec zsh login failed with {:?}", e);
-    }
-    unreachable!()
+    let err = cmd.exec();
+    panic!("exec {:?} fail with {:?}", cmd, err);
 }
