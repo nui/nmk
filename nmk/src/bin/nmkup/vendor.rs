@@ -6,17 +6,19 @@ use std::{fs, io};
 use bytes::{Buf, Bytes};
 use tar::Archive;
 
+use nmk::gcs::{download_file, ObjectMeta};
+use nmk::home::NmkHome;
+
 use crate::cmdline::Opt;
 use crate::os_release_id::OsReleaseId;
-use nmk::artifact::{download_file, ObjectMeta};
-use nmk::home::NmkHome;
 
 const LIST_OBJECTS_URL: &str =
     "https://storage.googleapis.com/storage/v1/b/nmk.nuimk.com/o?delimiter=/&prefix=nmk-vendor/";
+const TAG: &str = "vendor";
 
 pub async fn install(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()> {
     let client = reqwest::Client::new();
-    let mut objects: Vec<_> = nmk::artifact::list_objects(&client, LIST_OBJECTS_URL)
+    let mut objects: Vec<_> = nmk::gcs::list_objects(&client, LIST_OBJECTS_URL)
         .await?
         .into_iter()
         .filter(|o| o.name.ends_with(".tar.xz"))
@@ -26,21 +28,21 @@ pub async fn install(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()> {
     }
     let obj_meta = select_vendor_files(&objects)?;
     let download_url = obj_meta.media_link.as_str();
-    log::info!("vendor: Download url {}", download_url);
+    log::info!("{}: Download url {}", TAG, download_url);
     let client = reqwest::Client::new();
-    log::debug!("vendor: Getting data.");
+    log::debug!("{}: Getting data.", TAG);
     let tar_xz_data = download_file(&client, download_url).await?;
-    log::debug!("vendor: Received data.");
+    log::debug!("{}: Received data.", TAG);
     let vendor_path = nmk_home.join("vendor");
     if vendor_path.exists() {
-        log::debug!("vendor: Removing {:?} content.", vendor_path);
+        log::debug!("{}: Removing {:?} content.", TAG, vendor_path);
         remove_dir_contents(&vendor_path)?;
     } else {
         fs::create_dir(&vendor_path)?;
     }
-    log::debug!("vendor: Extracting data.");
+    log::debug!("{}: Extracting data.", TAG);
     untar_vendor_files(tar_xz_data, &vendor_path).await?;
-    log::info!("vendor: Done.");
+    log::info!("{}: Done.", TAG);
     Ok(())
 }
 
@@ -137,7 +139,7 @@ async fn untar_vendor_files<P: AsRef<Path>>(data: Bytes, dst: P) -> nmk::Result<
     let dst = dst.as_ref();
     let tar_data_stream = xz2::bufread::XzDecoder::new(data.bytes());
     let mut archive = Archive::new(tar_data_stream);
-    log::info!("vendor: Installing to {:?}.", dst);
+    log::info!("{}: Installing to {:?}.", TAG, dst);
     archive.unpack(dst)?;
     Ok(())
 }

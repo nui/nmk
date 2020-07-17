@@ -13,8 +13,6 @@ mod settings;
 mod updater;
 mod vendor;
 
-pub const ARTIFACT_BASE_URL: &str = "https://storage.googleapis.com/nmk.nuimk.com";
-
 async fn main_task(opt: cmdline::Opt, _settings: settings::Settings) -> nmk::Result<()> {
     // Installation should be done in order
     let nmk_home = NmkHome::find_for_install().expect("Unable to locate NMK_HOME");

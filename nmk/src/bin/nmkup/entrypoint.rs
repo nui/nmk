@@ -5,12 +5,13 @@ use std::path::Path;
 
 use bytes::{Buf, Bytes};
 
-use nmk::artifact::{download_file, download_file_metadata, Metadata};
+use nmk::gcs::{download_file, get_object_meta, get_object_meta_url, ObjectMeta};
 use nmk::home::NmkHome;
 
 use crate::build::Target;
 use crate::cmdline::Opt;
-use crate::ARTIFACT_BASE_URL;
+
+const TAG: &str = "entrypoint";
 
 fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
     let mut data_stream = xz2::read::XzDecoder::new(data.bytes());
@@ -22,7 +23,7 @@ fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
     std::io::copy(&mut data_stream, &mut file)
 }
 
-const NMK_METADATA: &str = ".nmk.metadata";
+const NMK_META: &str = ".nmk.meta";
 
 pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<bool> {
     let nmk_home = nmk_home.as_ref();
@@ -33,48 +34,40 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
         Target::Arm64Linux => "nmk-aarch64-unknown-linux-musl.xz",
         Target::ArmLinux | Target::ArmV7Linux => "nmk-arm-unknown-linux-musleabi.xz",
     };
-    let url = format!("{}/{}", ARTIFACT_BASE_URL, tar_file);
-
-    let metadata_path = nmk_home.join(NMK_METADATA);
+    let meta_path = nmk_home.join(NMK_META);
+    let meta_url = get_object_meta_url(tar_file);
 
     let client = reqwest::Client::new();
 
-    log::debug!("entrypoint: Getting metadata.");
-    let metadata = download_file_metadata(&client, &url).await?;
-    log::debug!("entrypoint: Received metadata.");
-    log::debug!("entrypoint: etag {}", metadata.etag());
+    log::debug!("{}: Getting metadata.", TAG);
+    let meta = get_object_meta(&client, &meta_url).await?;
+    log::debug!("{}: Received metadata.", TAG);
     let entrypoint_path = nmk_home.join("bin").join("nmk");
-    if !opt.force && is_entrypoint_up2date(&metadata_path, &metadata, &entrypoint_path) {
-        log::info!("entrypoint: Already up to date.");
+    if !opt.force && is_entrypoint_up2date(&meta_path, &meta, &entrypoint_path) {
+        log::info!("{}: Already up to date.", TAG);
         Ok(false)
     } else {
-        log::debug!("entrypoint: Getting data.");
-        let data = download_file(&client, url).await?;
-        log::debug!("entrypoint: Received data.");
+        log::debug!("{}: Getting data.", TAG);
+        let data = download_file(&client, &meta.media_link).await?;
+        log::debug!("{}: Received data.", TAG);
         unxz_entrypoint(data, entrypoint_path)?;
-        metadata
-            .write_to_file(metadata_path)
-            .expect("Unable to cache entrypoint metadata");
-        log::info!("entrypoint: Done.");
+        meta.write_to_file(&meta_path);
+        log::info!("{}: Done.", TAG);
         Ok(true)
     }
 }
 
-fn is_entrypoint_up2date(
-    metadata_path: &Path,
-    metadata: &Metadata,
-    entrypoint_path: &Path,
-) -> bool {
+fn is_entrypoint_up2date(meta_path: &Path, gcs_meta: &ObjectMeta, entrypoint_path: &Path) -> bool {
     if !entrypoint_path.exists() {
         return false;
     }
-    if !metadata_path.exists() {
-        log::debug!("entrypoint: Not found cached metadata.");
+    if !meta_path.exists() {
+        log::debug!("{}: Not found cached metadata.", TAG);
         return false;
     }
 
-    let cache_metadata = Metadata::read_from_file(metadata_path)
-        .expect("Fail to read or parse cached entrypoint metadata");
-    log::debug!("entrypoint: cached etag {}", cache_metadata.etag());
-    cache_metadata.etag() == metadata.etag()
+    let cached_meta = ObjectMeta::read_from_file(meta_path);
+    log::debug!("{}: gcs generation {}.", TAG, gcs_meta.generation);
+    log::debug!("{}: cached generation {}.", TAG, cached_meta.generation);
+    cached_meta.generation == gcs_meta.generation
 }

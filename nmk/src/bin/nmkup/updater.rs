@@ -5,11 +5,12 @@ use std::{env, fs, io};
 
 use bytes::{Buf, Bytes};
 
-use nmk::artifact::download_file;
+use nmk::gcs::{download_file, get_object_meta, get_object_meta_url};
 use nmk::home::NmkHome;
 
 use crate::build::Target;
-use crate::ARTIFACT_BASE_URL;
+
+const TAG: &str = "updater";
 
 fn is_same_location(a: &PathBuf, b: &PathBuf) -> bool {
     fs::canonicalize(a).unwrap() == fs::canonicalize(b).unwrap()
@@ -27,11 +28,11 @@ pub async fn self_setup(
     if is_self_update {
         if entrypoint_updated {
             perform_self_update_from_remote(target_bin).await?;
-            log::info!("updater: Done.");
+            log::info!("{}: Done.", TAG);
         }
     } else {
         fs::copy(current_exec, target_bin).expect("install nmkup failed");
-        log::info!("updater: Done.");
+        log::info!("{}: Done.", TAG);
     }
     Ok(())
 }
@@ -43,17 +44,20 @@ pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result
         Target::Arm64Linux => "nmkup-aarch64-unknown-linux-musl.xz",
         Target::ArmLinux | Target::ArmV7Linux => "nmkup-arm-unknown-linux-musleabi.xz",
     };
-    let url = format!("{}/{}", ARTIFACT_BASE_URL, tar_file);
     let client = reqwest::Client::new();
-    let data = download_file(&client, url).await?;
+    let meta_url = get_object_meta_url(tar_file);
+    log::debug!("{}: Getting metadata.", TAG);
+    let meta = get_object_meta(&client, &meta_url).await?;
+    log::debug!("{}: Received metadata.", TAG);
+    let data = download_file(&client, &meta.media_link).await?;
 
-    let target_bin = std::fs::canonicalize(target_bin)?;
+    let target_bin = fs::canonicalize(target_bin)?;
     let parent_dir = target_bin
         .parent()
-        .expect("updater: Unable to find parent directory.");
+        .unwrap_or_else(|| panic!("{}: Unable to find parent directory.", TAG));
     let temp_target = parent_dir.join("nmkup.next");
-    unxz_nmkup(data, &temp_target).expect("updater: Unable to extract data");
-    std::fs::rename(temp_target, target_bin)?;
+    unxz_nmkup(data, &temp_target).unwrap_or_else(|_| panic!("{}: Unable to extract data", TAG));
+    fs::rename(temp_target, target_bin)?;
     Ok(())
 }
 
