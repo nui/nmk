@@ -1,7 +1,7 @@
-use std::env;
 use std::ffi::OsString;
 use std::fs::File;
 use std::path::Path;
+use std::{env, io};
 
 use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, VIRTUAL_ENV, ZDOTDIR};
 use nmk::home::NmkHome;
@@ -72,7 +72,7 @@ fn display_message_of_the_day() {
         .filter(|p| p.exists())
         .flat_map(File::open)
         .for_each(|mut f| {
-            std::io::copy(&mut f, &mut stdout).expect("fail to print motd");
+            io::copy(&mut f, &mut stdout).expect("fail to print motd");
         });
 }
 

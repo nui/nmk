@@ -85,7 +85,7 @@ fn remove_dir_contents(path: impl AsRef<Path>) -> io::Result<()> {
 }
 
 fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
-    let stdin = std::io::stdin();
+    let stdin = io::stdin();
     let max_index = objects.len();
     assert!(max_index > 0, "Not found any vendor data to select");
     let display_names = get_display_name(objects);
@@ -102,7 +102,7 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
             }
         }
         print!("Enter numeric choice:  ");
-        std::io::stdout().flush().expect("Flush fail");
+        io::stdout().flush().expect("Flush fail");
         if let Ok(_) = stdin.read_line(&mut input) {
             log::debug!("Input value: {:?}", input);
             if let Ok(index) = input.trim().parse::<usize>() {
@@ -117,7 +117,7 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
 }
 
 fn display_some_os_info() -> nmk::Result<()> {
-    let mut stdout = std::io::stdout();
+    let mut stdout = io::stdout();
     let infos = [
         "/etc/os-release",
         "/etc/centos-release",
@@ -128,7 +128,7 @@ fn display_some_os_info() -> nmk::Result<()> {
         let p = Path::new(s);
         if p.exists() {
             if let Ok(mut f) = File::open(p) {
-                std::io::copy(&mut f, &mut stdout)?;
+                io::copy(&mut f, &mut stdout)?;
             }
         }
     }

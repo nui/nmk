@@ -20,7 +20,7 @@ fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
         .write(true)
         .mode(0o755)
         .open(dst.as_ref())?;
-    std::io::copy(&mut data_stream, &mut file)
+    io::copy(&mut data_stream, &mut file)
 }
 
 const NMK_META: &str = ".nmk.meta";

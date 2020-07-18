@@ -33,6 +33,7 @@ pub fn setup(arg: &Opt, nmk_home: &Path) {
 
 pub fn exec_login_shell(arg: &Opt, start: &Instant) -> ! {
     let mut cmd = Command::new(ZSH);
+    // This told zsh that it is a login shell
     cmd.arg0("-zsh");
     print_usage_time(&arg, &start);
     let err = cmd.exec();

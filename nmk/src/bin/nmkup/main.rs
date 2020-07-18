@@ -1,8 +1,11 @@
+use std::env;
+
 use structopt::StructOpt;
 
 use nmk::home::NmkHome;
 use nmk::platform::is_mac;
 
+mod backup;
 mod build;
 mod cmdline;
 mod dotfiles;
@@ -17,6 +20,9 @@ async fn main_task(opt: cmdline::Opt, _settings: settings::Settings) -> nmk::Res
     // Installation should be done in order
     let nmk_home = NmkHome::find_for_install().expect("Unable to locate NMK_HOME");
     assert!(!nmk_home.is_git(), "NMK_HOME is managed by git. Abort.");
+    if opt.backup {
+        backup::backup_files(&nmk_home);
+    }
     dotfiles::install_or_update(&opt, &nmk_home).await?;
     if !is_mac() {
         let entrypoint_updated = entrypoint::install_or_update(&opt, &nmk_home).await?;
@@ -44,7 +50,7 @@ fn is_nmkup_init() -> bool {
 }
 
 fn current_exec_stem() -> String {
-    std::env::args()
+    env::args()
         .next()
         .map(std::path::PathBuf::from)
         .as_ref()

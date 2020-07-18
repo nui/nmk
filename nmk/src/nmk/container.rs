@@ -1,3 +1,5 @@
+use std::fs;
+
 use crate::platform;
 
 #[allow(dead_code)]
@@ -29,11 +31,13 @@ fn is_container(s: &str) -> bool {
         .any(|cg| cg.is_container())
 }
 
+const INIT_CGROUP: &str = "/proc/1/cgroup";
+
 pub fn detect_container() -> bool {
     if platform::is_mac() {
         return false;
     }
-    let contents = std::fs::read_to_string("/proc/1/cgroup").expect("Cannot open cgroup file");
+    let contents = fs::read_to_string(INIT_CGROUP).expect("Cannot open cgroup file");
     is_container(&contents)
 }
 
