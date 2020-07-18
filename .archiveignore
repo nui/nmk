@@ -1,5 +1,7 @@
 # exclude following files and directories from nmk release
-.gitignore
+
+# Git ignore file is needed by nmkup to preserve file across clean update
+# .gitignore
 .gitmodules
 
 # submodule unnecessary directories and files
