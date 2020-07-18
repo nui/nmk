@@ -157,12 +157,12 @@ impl Tmux {
         }
     }
 
-    pub fn setup_environment(&self, arg: &Opt, is_color_term: bool) {
+    pub fn setup_environment(&self, opt: &Opt, is_color_term: bool) {
         set_env(
             "NMK_TMUX_DEFAULT_SHELL",
             which::which(ZSH).expect("zsh not found"),
         );
-        set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(arg.detach_on_destroy));
+        set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(opt.detach_on_destroy));
         set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
         set_env("NMK_TMUX_VERSION", &self.version.as_str());
         let default_term = if is_color_term {
@@ -174,18 +174,18 @@ impl Tmux {
         set_env("NMK_TMUX_256_COLOR", one_hot!(is_color_term));
     }
 
-    pub fn exec(&self, arg: &Opt, start: &Instant, is_color_term: bool) -> ! {
+    pub fn exec(&self, opt: &Opt, start: &Instant, is_color_term: bool) -> ! {
         let mut cmd = Command::new(TMUX);
-        cmd.args(&["-L", &arg.socket]);
+        cmd.args(&["-L", &opt.socket]);
         if is_color_term {
             cmd.arg("-2");
         }
-        if arg.unicode {
+        if opt.unicode {
             cmd.arg("-u");
         }
         cmd.arg("-f");
         cmd.arg(&self.config);
-        let tmux_args = arg.tmux_args();
+        let tmux_args = opt.args();
         if tmux_args.is_empty() {
             // Attach to tmux or create new session
             cmd.args(&["new-session", "-A"]);
@@ -196,7 +196,7 @@ impl Tmux {
             cmd.args(tmux_args);
         }
         log::debug!("exec command: {:?}", cmd);
-        print_usage_time(&arg, &start);
+        print_usage_time(&opt, &start);
         if self.is_vendored_tmux() && is_dev_machine() {
             log::warn!("Using vendored tmux on development machine")
         }

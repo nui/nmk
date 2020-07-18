@@ -10,7 +10,7 @@ use nmk::gcs::{download_file, ObjectMeta};
 use nmk::home::NmkHome;
 
 use crate::cmdline::Opt;
-use crate::os_release_id::OsReleaseId;
+use crate::os_release::OsReleaseId;
 
 const LIST_OBJECTS_URL: &str =
     "https://storage.googleapis.com/storage/v1/b/nmk.nuimk.com/o?delimiter=/&prefix=nmk-vendor/";
@@ -47,7 +47,7 @@ pub async fn install(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()> {
 }
 
 fn filter_by_os_release(input: Vec<ObjectMeta>) -> Vec<ObjectMeta> {
-    use crate::os_release_id::OsReleaseId::*;
+    use crate::os_release::OsReleaseId::*;
     if let Some(os_release_id) = OsReleaseId::parse_os_release() {
         let filter_key = match os_release_id {
             Amazon => "amazon",

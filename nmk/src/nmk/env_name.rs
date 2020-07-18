@@ -13,6 +13,5 @@ declare!(NMK_HOME);
 declare!(NMK_TMUX_VERSION);
 declare!(PATH);
 declare!(VIMINIT);
-declare!(VIRTUAL_ENV);
 declare!(WINDOWID);
 declare!(ZDOTDIR);

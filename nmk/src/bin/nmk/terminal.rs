@@ -28,11 +28,11 @@ fn is_256_colorterm(term: Option<OsString>) -> bool {
     slice_contains_term(COLOR_TERMS, term)
 }
 
-pub fn support_256_color(arg: &Opt) -> bool {
-    arg.force_256_color
+pub fn support_256_color(opt: &Opt) -> bool {
+    opt.force_256_color
         || is_256_term(env::var_os("TERM"))
         || is_256_colorterm(env::var_os("COLORTERM"))
-        || (!arg.no_autofix && container::detect_container())
+        || (!opt.no_autofix && container::detect_container())
 }
 
 #[cfg(test)]

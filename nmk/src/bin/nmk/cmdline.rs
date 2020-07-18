@@ -48,12 +48,11 @@ pub struct Opt {
 }
 
 impl Opt {
-    pub fn tmux_args(&self) -> Vec<&str> {
+    pub fn args(&self) -> &[String] {
         use SubCommand::*;
-        if let Some(Other(ref args)) = self.cmd {
-            args.iter().map(|s| s.as_str()).collect()
-        } else {
-            Vec::new()
+        match self.cmd {
+            Some(Other(ref args)) => args.as_slice(),
+            _ => Default::default(),
         }
     }
 }

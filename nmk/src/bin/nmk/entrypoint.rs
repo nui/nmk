@@ -3,7 +3,7 @@ use std::fs::File;
 use std::path::Path;
 use std::{env, io};
 
-use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, VIRTUAL_ENV, ZDOTDIR};
+use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
 
 use crate::cmdline::Opt;
@@ -21,8 +21,6 @@ fn setup_environment(nmk_home: &Path) {
     if let Some(path) = init_vim.to_str() {
         set_env(VIMINIT, format!(r"source\ {}", path));
     }
-
-    env::remove_var(VIRTUAL_ENV);
 }
 
 fn setup_preferred_editor() {
@@ -76,8 +74,8 @@ fn display_message_of_the_day() {
         });
 }
 
-pub fn main(start: std::time::Instant, arg: Opt) -> ! {
-    if arg.ssh {
+pub fn main(start: std::time::Instant, opt: Opt) -> ! {
+    if opt.ssh {
         display_message_of_the_day();
     }
 
@@ -89,15 +87,15 @@ pub fn main(start: std::time::Instant, arg: Opt) -> ! {
     setup_path(&nmk_home);
     setup_environment(&nmk_home);
     setup_preferred_editor();
-    crate::zsh::setup(&arg, &nmk_home);
-    if arg.login {
-        crate::zsh::exec_login_shell(&arg, &start);
+    crate::zsh::setup(&opt, &nmk_home);
+    if opt.login {
+        crate::zsh::exec_login_shell(&opt, &start);
     } else {
         let tmux = Tmux::new(&nmk_home);
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version.as_str());
-        let is_color_term = terminal::support_256_color(&arg);
-        tmux.setup_environment(&arg, is_color_term);
-        tmux.exec(&arg, &start, is_color_term);
+        let is_color_term = terminal::support_256_color(&opt);
+        tmux.setup_environment(&opt, is_color_term);
+        tmux.exec(&opt, &start, is_color_term);
     }
 }

@@ -14,7 +14,7 @@ fn has_vendored_zsh(nmk_home: &Path) -> bool {
     nmk_home.join("vendor").join("bin").join(ZSH).exists()
 }
 
-pub fn use_global_rcs(_arg: &Opt, nmk_home: &Path) -> bool {
+pub fn use_global_rcs(_opt: &Opt, nmk_home: &Path) -> bool {
     // Disable global resource files on some platform
     //   - Some linux distributions force sourcing /etc/profile, they do reset PATH set by nmk.
     //   - MacOs doesn't respect PATH set by nmk, it change the order.
@@ -23,19 +23,19 @@ pub fn use_global_rcs(_arg: &Opt, nmk_home: &Path) -> bool {
     !no_global_rcs
 }
 
-pub fn setup(arg: &Opt, nmk_home: &Path) {
-    let global_rcs = use_global_rcs(arg, nmk_home);
+pub fn setup(opt: &Opt, nmk_home: &Path) {
+    let global_rcs = use_global_rcs(opt, nmk_home);
     if !global_rcs {
         log::debug!("ignore zsh global rcs");
     }
     set_env("NMK_ZSH_GLOBAL_RCS", one_hot!(global_rcs));
 }
 
-pub fn exec_login_shell(arg: &Opt, start: &Instant) -> ! {
+pub fn exec_login_shell(opt: &Opt, start: &Instant) -> ! {
     let mut cmd = Command::new(ZSH);
     // This told zsh that it is a login shell
     cmd.arg0("-zsh");
-    print_usage_time(&arg, &start);
+    print_usage_time(&opt, &start);
     let err = cmd.exec();
     panic!("exec {:?} fail with {:?}", cmd, err);
 }

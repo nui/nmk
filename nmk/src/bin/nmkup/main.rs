@@ -11,7 +11,7 @@ mod cmdline;
 mod dotfiles;
 mod entrypoint;
 mod logging;
-mod os_release_id;
+mod os_release;
 mod settings;
 mod updater;
 mod vendor;
