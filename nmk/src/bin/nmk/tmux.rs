@@ -6,7 +6,6 @@ use std::str::FromStr;
 
 use nmk::bin_name::{TMUX, ZSH};
 use nmk::env_name::NMK_TMUX_VERSION;
-use nmk::platform::is_mac;
 
 use crate::cmdline::Opt;
 use crate::core::*;
@@ -181,6 +180,7 @@ impl Tmux {
     //
     // We can't use normal std::fs::File because Rust open file with FD_CLOEXEC flag.
     // That flag is default for a good reason but it doesn't fit our use case.
+    #[allow(dead_code)]
     fn open_config_with_leak_descriptor(&self) -> PathBuf {
         use nix::fcntl::{open, OFlag};
         use nix::sys::stat::Mode;
@@ -199,11 +199,7 @@ impl Tmux {
             cmd.arg("-u");
         }
         cmd.arg("-f");
-        if !is_mac() && std::env::var("SSH_CONNECTION").is_ok() {
-            cmd.arg(self.open_config_with_leak_descriptor());
-        } else {
-            cmd.arg(&self.config);
-        }
+        cmd.arg(&self.config);
         let tmux_args = opt.args();
         if tmux_args.is_empty() {
             // Attach to tmux or create new session
