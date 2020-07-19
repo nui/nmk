@@ -1,7 +1,6 @@
 use std::os::unix::process::CommandExt;
 use std::path::Path;
 use std::process::Command;
-use std::time::Instant;
 
 use nmk::bin_name::ZSH;
 use nmk::platform::{is_alpine, is_arch, is_mac};
@@ -31,11 +30,11 @@ pub fn setup(opt: &Opt, nmk_home: &Path) {
     set_env("NMK_ZSH_GLOBAL_RCS", one_hot!(global_rcs));
 }
 
-pub fn exec_login_shell(opt: &Opt, start: &Instant) -> ! {
+pub fn exec_login_shell(opt: &Opt) -> ! {
     let mut cmd = Command::new(ZSH);
     // This told zsh that it is a login shell
     cmd.arg0("-zsh");
-    print_usage_time(&opt, &start);
+    print_usage_time(&opt);
     let err = cmd.exec();
     panic!("exec {:?} fail with {:?}", cmd, err);
 }

@@ -74,8 +74,8 @@ fn display_message_of_the_day() {
         });
 }
 
-pub fn main(start: std::time::Instant, opt: Opt) -> ! {
-    if opt.ssh {
+pub fn main(opt: Opt) -> ! {
+    if opt.motd {
         display_message_of_the_day();
     }
 
@@ -89,13 +89,13 @@ pub fn main(start: std::time::Instant, opt: Opt) -> ! {
     setup_preferred_editor();
     crate::zsh::setup(&opt, &nmk_home);
     if opt.login {
-        crate::zsh::exec_login_shell(&opt, &start);
+        crate::zsh::exec_login_shell(&opt);
     } else {
         let tmux = Tmux::new(&nmk_home);
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version.as_str());
         let is_color_term = terminal::support_256_color(&opt);
         tmux.setup_environment(&opt, is_color_term);
-        tmux.exec(&opt, &start, is_color_term);
+        tmux.exec(&opt, is_color_term);
     }
 }

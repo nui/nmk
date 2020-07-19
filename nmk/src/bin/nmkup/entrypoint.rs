@@ -5,6 +5,7 @@ use std::path::Path;
 
 use bytes::{Buf, Bytes};
 
+use nmk::bin_name::NMK;
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url, ObjectMeta};
 use nmk::home::NmkHome;
 
@@ -42,7 +43,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
     log::debug!("{}: Getting metadata.", TAG);
     let meta = get_object_meta(&client, &meta_url).await?;
     log::debug!("{}: Received metadata.", TAG);
-    let entrypoint_path = nmk_home.join("bin").join("nmk");
+    let entrypoint_path = nmk_home.join("bin").join(NMK);
     if !opt.force && is_entrypoint_up2date(&meta_path, &meta, &entrypoint_path) {
         log::info!("{}: Already up to date.", TAG);
         Ok(false)

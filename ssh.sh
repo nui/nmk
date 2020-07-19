@@ -2,7 +2,7 @@
 
 try_exec_login_shell() {
     if [ -e "$1" ]; then
-        exec "$1" --ssh --login
+        exec "$1" --motd --login
     fi
 }
 

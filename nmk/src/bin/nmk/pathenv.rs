@@ -1,3 +1,4 @@
+use std::collections::hash_map::RandomState;
 use std::collections::VecDeque;
 use std::ffi::{OsStr, OsString};
 use std::fmt::Formatter;
@@ -8,6 +9,7 @@ use std::{env, fmt};
 use indexmap::IndexSet;
 use nix::NixPath;
 
+#[derive(Clone)]
 pub struct PathVec {
     vec: VecDeque<PathBuf>,
 }
@@ -24,27 +26,21 @@ impl fmt::Debug for PathVec {
 
 impl PathVec {
     pub fn make(&self) -> OsString {
-        return env::join_paths(self.unique()).expect("join path error");
+        return env::join_paths(self.clone().unique()).expect("join path error");
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &PathBuf> {
         self.vec.iter()
     }
 
-    pub fn unique(&self) -> Self {
-        self.vec
-            .iter()
-            .collect::<IndexSet<_>>()
-            .into_iter()
-            .cloned()
-            .collect()
+    pub fn unique(self) -> Self {
+        Self::from_iter(IndexSet::<_, RandomState>::from_iter(self.vec))
     }
 
-    pub fn no_version_managers(&self) -> Self {
+    pub fn no_version_managers(self) -> Self {
         self.vec
-            .iter()
+            .into_iter()
             .filter(|x| !x.ends_with(".pyenv/shims") && !x.ends_with(".rbenv/shims"))
-            .cloned()
             .collect()
     }
 

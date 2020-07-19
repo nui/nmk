@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::time::Instant;
 
 use once_cell::sync::Lazy;
 use structopt::StructOpt;
@@ -41,10 +42,12 @@ pub struct Opt {
     pub unicode: bool,
     #[structopt(long, help = "Prints usage time")]
     pub usage: bool,
-    #[structopt(long)]
-    pub ssh: bool,
+    #[structopt(long, help = "Display Message of The Day")]
+    pub motd: bool,
     #[structopt(subcommand)]
     pub cmd: Option<SubCommand>,
+    #[structopt(skip = Instant::now())]
+    pub start_time: Instant,
 }
 
 impl Opt {

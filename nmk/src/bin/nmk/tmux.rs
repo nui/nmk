@@ -3,7 +3,6 @@ use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::FromStr;
-use std::time::Instant;
 
 use nmk::bin_name::{TMUX, ZSH};
 use nmk::env_name::NMK_TMUX_VERSION;
@@ -174,7 +173,7 @@ impl Tmux {
         set_env("NMK_TMUX_256_COLOR", one_hot!(is_color_term));
     }
 
-    pub fn exec(&self, opt: &Opt, start: &Instant, is_color_term: bool) -> ! {
+    pub fn exec(&self, opt: &Opt, is_color_term: bool) -> ! {
         let mut cmd = Command::new(TMUX);
         cmd.args(&["-L", &opt.socket]);
         if is_color_term {
@@ -196,7 +195,7 @@ impl Tmux {
             cmd.args(tmux_args);
         }
         log::debug!("exec command: {:?}", cmd);
-        print_usage_time(&opt, &start);
+        print_usage_time(&opt);
         if self.is_vendored_tmux() && is_dev_machine() {
             log::warn!("Using vendored tmux on development machine")
         }
