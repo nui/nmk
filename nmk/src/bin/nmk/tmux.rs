@@ -173,6 +173,21 @@ impl Tmux {
         set_env("NMK_TMUX_256_COLOR", one_hot!(is_color_term));
     }
 
+    // On remote server, I don't want to show full tmux config path in `ps` output
+    //
+    // We can do that by leak some file descriptor to tmux server so it can access config by
+    // using /proc/self/fd/<FD number>
+    //
+    // We can't use normal std::fs::File because Rust open file with FD_CLOEXEC flag.
+    // That flag is default for a good reason but it doesn't fit our use case.
+    fn open_config_with_leak_descriptor(&self) -> PathBuf {
+        use nix::fcntl::{open, OFlag};
+        use nix::sys::stat::Mode;
+        let raw_fd =
+            open(&self.config, OFlag::O_RDONLY, Mode::empty()).expect("Unable to open config file");
+        PathBuf::from(format!("/proc/self/fd/{}", raw_fd))
+    }
+
     pub fn exec(&self, opt: &Opt, is_color_term: bool) -> ! {
         let mut cmd = Command::new(TMUX);
         cmd.args(&["-L", &opt.socket]);
@@ -183,7 +198,11 @@ impl Tmux {
             cmd.arg("-u");
         }
         cmd.arg("-f");
-        cmd.arg(&self.config);
+        if std::env::var("SSH_CONNECTION").is_ok() {
+            cmd.arg(self.open_config_with_leak_descriptor());
+        } else {
+            cmd.arg(&self.config);
+        }
         let tmux_args = opt.args();
         if tmux_args.is_empty() {
             // Attach to tmux or create new session
