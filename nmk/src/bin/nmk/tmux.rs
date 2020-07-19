@@ -6,6 +6,7 @@ use std::str::FromStr;
 
 use nmk::bin_name::{TMUX, ZSH};
 use nmk::env_name::NMK_TMUX_VERSION;
+use nmk::platform::is_mac;
 
 use crate::cmdline::Opt;
 use crate::core::*;
@@ -198,7 +199,7 @@ impl Tmux {
             cmd.arg("-u");
         }
         cmd.arg("-f");
-        if std::env::var("SSH_CONNECTION").is_ok() {
+        if !is_mac() && std::env::var("SSH_CONNECTION").is_ok() {
             cmd.arg(self.open_config_with_leak_descriptor());
         } else {
             cmd.arg(&self.config);
