@@ -11,6 +11,7 @@ use crate::core::set_env;
 use crate::pathenv::PathVec;
 use crate::terminal;
 use crate::tmux::Tmux;
+use nmk::time::{human_time, seconds_since_build};
 
 fn setup_environment(nmk_home: &Path) {
     let zdotdir = nmk_home.join("zsh");
@@ -74,9 +75,20 @@ fn display_message_of_the_day() {
         });
 }
 
+const DAY_SECS: i64 = 24 * 60 * 60;
+
+fn check_for_update_suggest() {
+    if let Some(secs) = seconds_since_build() {
+        if secs > 7 * DAY_SECS {
+            println!("\nnmk: I's been {} since build.\n", human_time(secs));
+        }
+    }
+}
+
 pub fn main(opt: Opt) -> ! {
     if opt.motd {
         display_message_of_the_day();
+        check_for_update_suggest()
     }
 
     let nmk_home = NmkHome::find().expect("Unable to locate NMK_HOME");

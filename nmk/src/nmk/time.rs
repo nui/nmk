@@ -26,11 +26,18 @@ pub fn human_time(secs: i64) -> String {
     result.into_iter().take(2).collect::<Vec<_>>().join(" ")
 }
 
-pub fn seconds_since_build(build_epoch: i64) -> Option<i64> {
+pub fn seconds_since_build() -> Option<i64> {
+    let build_epoch = get_build_epoch();
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .ok()
         .map(|x| x.as_secs() as i64 - build_epoch)
+}
+
+fn get_build_epoch() -> i64 {
+    env!("EPOCHSECONDS")
+        .parse()
+        .expect("Unable to get build time")
 }
 
 #[cfg(test)]
