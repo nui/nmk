@@ -13,7 +13,10 @@ use crate::build::Target;
 const TAG: &str = "updater";
 
 fn is_same_location(a: &PathBuf, b: &PathBuf) -> bool {
-    fs::canonicalize(a).unwrap() == fs::canonicalize(b).unwrap()
+    match (fs::canonicalize(a), fs::canonicalize(b)) {
+        (Ok(x), Ok(y)) => x == y,
+        _ => false,
+    }
 }
 
 pub async fn self_setup(

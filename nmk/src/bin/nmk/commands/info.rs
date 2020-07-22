@@ -1,10 +1,10 @@
+use std::convert::identity;
 use std::io::Write;
 use std::process::{Command, Stdio};
 
 use serde::Serialize;
 
 use nmk::NMK_INIT_SCRIPT;
-use std::convert::identity;
 
 #[derive(Serialize)]
 struct Info {
@@ -32,14 +32,14 @@ pub fn display_info() {
 fn get_current_arch_by_script() -> Result<String, String> {
     let detect_arch_script = NMK_INIT_SCRIPT
         .lines()
-        .filter(|l| !l.starts_with("main "))
+        .filter(|line| !line.starts_with("main "))
         .chain(
             ["get_architecture || return 1", "echo $RETVAL"]
                 .iter()
-                .map(|&x| x),
+                .copied(),
         )
         .fold(
-            String::with_capacity(NMK_INIT_SCRIPT.len()),
+            String::with_capacity(NMK_INIT_SCRIPT.len() + 100),
             |mut acc, line| {
                 acc.push_str(line);
                 acc.push('\n');

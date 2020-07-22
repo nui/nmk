@@ -18,8 +18,7 @@ pub fn use_global_rcs(_opt: &Opt, nmk_home: &Path) -> bool {
     //   - Some linux distributions force sourcing /etc/profile, they do reset PATH set by nmk.
     //   - MacOs doesn't respect PATH set by nmk, it change the order.
     let not_friendly_global_rcs = is_mac() || is_alpine() || is_arch();
-    let no_global_rcs = not_friendly_global_rcs && !has_vendored_zsh(nmk_home);
-    !no_global_rcs
+    has_vendored_zsh(nmk_home) || !not_friendly_global_rcs
 }
 
 pub fn setup(opt: &Opt, nmk_home: &Path) {

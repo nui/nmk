@@ -4,6 +4,7 @@ use structopt::StructOpt;
 
 use nmk::home::NmkHome;
 use nmk::platform::is_mac;
+use std::path::Path;
 
 mod backup;
 mod build;
@@ -53,8 +54,8 @@ fn current_exec_stem() -> String {
     env::args()
         .next()
         .map(std::path::PathBuf::from)
-        .as_ref()
-        .and_then(|a| a.file_stem())
+        .as_deref()
+        .and_then(Path::file_stem)
         .and_then(std::ffi::OsStr::to_str)
         .map(String::from)
         .expect("Unable to parse argv[0] as String")
