@@ -1,117 +1,28 @@
 use std::convert::TryFrom;
+use std::io::{BufWriter, Write};
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::str::FromStr;
+use std::{fs, io};
+
+use tempfile::NamedTempFile;
 
 use nmk::bin_name::{TMUX, ZSH};
 use nmk::env_name::NMK_TMUX_VERSION;
+use nmk::tmux::version::{ParseVersionError, Version};
 
 use crate::cmdline::Opt;
 use crate::core::*;
 use crate::utils::{is_dev_machine, print_usage_time};
 
-#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
-pub enum Version {
-    V26,
-    V27,
-    V28,
-    V29,
-    V29a,
-    V30,
-    V30a,
-    V31,
-    V31a,
-    V31b,
-}
-
-impl FromStr for Version {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use Version::*;
-        let v = match s {
-            "2.6" => V26,
-            "2.7" => V27,
-            "2.8" => V28,
-            "2.9" => V29,
-            "2.9a" => V29a,
-            "3.0" => V30,
-            "3.0a" => V30a,
-            "3.1" => V31,
-            "3.1a" => V31a,
-            "3.1b" => V31b,
-            _ => return Err(()),
-        };
-        Ok(v)
-    }
-}
-
-impl AsRef<str> for Version {
-    fn as_ref(&self) -> &'static str {
-        use Version::*;
-        match *self {
-            V26 => "2.6",
-            V27 => "2.7",
-            V28 => "2.8",
-            V29 => "2.9",
-            V29a => "2.9a",
-            V30 => "3.0",
-            V30a => "3.0a",
-            V31 => "3.1",
-            V31a => "3.1a",
-            V31b => "3.1b",
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum ParseVersionError {
-    BadVersionOutput(String),
-    UnsupportedVersion(String),
-}
-
-impl Version {
-    // Try parse `tmux -v` result
-    fn try_from_version_output(version_output: &str) -> Result<Self, ParseVersionError> {
-        let version_number = version_output
-            .trim()
-            .split(" ")
-            .nth(1)
-            .ok_or_else(|| ParseVersionError::BadVersionOutput(version_output.to_string()))?;
-        Self::try_from(version_number)
-    }
-
-    pub fn as_str(&self) -> &str {
-        self.as_ref()
-    }
-}
-
-impl TryFrom<&str> for Version {
-    type Error = ParseVersionError;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        Self::from_str(value).map_err(|_| ParseVersionError::UnsupportedVersion(value.to_owned()))
-    }
-}
+const TMP_FILE_PREFIX: &str = "tmp.nmk.";
+const TMP_FILE_SUFFIX: &str = ".tmux.conf";
 
 pub struct Tmux {
     nmk_home: PathBuf,
     tmux_dir: PathBuf,
-    config: PathBuf,
     pub bin: PathBuf,
     pub version: Version,
-}
-
-fn find_config(tmux_dir: &PathBuf, version: Version) -> PathBuf {
-    let version: &str = version.as_ref();
-    let config = tmux_dir.join(format!("{}.conf", version));
-    assert!(
-        config.exists(),
-        "Unable to find config for tmux version: {}",
-        version
-    );
-    config
 }
 
 fn find_version() -> Result<Version, ParseVersionError> {
@@ -146,13 +57,12 @@ impl Tmux {
             ParseVersionError::BadVersionOutput(s) => panic!("Bad tmux output: {}", s),
             ParseVersionError::UnsupportedVersion(s) => panic!("Unsupported tmux version: {}", s),
         });
-        let config = find_config(&tmux_dir, version);
+
         Tmux {
             nmk_home: nmk_home.to_owned(),
             tmux_dir,
             bin,
             version,
-            config,
         }
     }
 
@@ -173,20 +83,19 @@ impl Tmux {
         set_env("NMK_TMUX_256_COLOR", one_hot!(is_color_term));
     }
 
-    // On remote server, I don't want to show full tmux config path in `ps` output
-    //
-    // We can do that by leak some file descriptor to tmux server so it can access config by
-    // using /proc/self/fd/<FD number>
-    //
-    // We can't use normal std::fs::File because Rust open file with FD_CLOEXEC flag.
-    // That flag is default for a good reason but it doesn't fit our use case.
-    #[allow(dead_code)]
-    fn open_config_with_leak_descriptor(&self) -> PathBuf {
-        use nix::fcntl::{open, OFlag};
-        use nix::sys::stat::Mode;
-        let raw_fd =
-            open(&self.config, OFlag::O_RDONLY, Mode::empty()).expect("Unable to open config file");
-        PathBuf::from(format!("/proc/self/fd/{}", raw_fd))
+    fn clean_old_config_file(&self, config: &Path) {
+        if let Some(parent) = config.parent().and_then(|p| p.to_str()) {
+            let pattern = format!("{}/{}*{}", parent, TMP_FILE_PREFIX, TMP_FILE_SUFFIX);
+            if let Ok(paths) = glob::glob(&pattern) {
+                for entry in paths {
+                    if let Ok(p) = entry {
+                        if p != config {
+                            let _ = fs::remove_file(p);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     pub fn exec(&self, opt: &Opt, is_color_term: bool) -> ! {
@@ -199,7 +108,12 @@ impl Tmux {
             cmd.arg("-u");
         }
         cmd.arg("-f");
-        cmd.arg(&self.config);
+        let named_temp_config = self
+            .create_temporary_config_file()
+            .expect("Unable to create temporary config file");
+        let config_path = named_temp_config.path();
+        cmd.arg(config_path);
+        self.clean_old_config_file(config_path);
         let tmux_args = opt.args();
         if tmux_args.is_empty() {
             // Attach to tmux or create new session
@@ -221,6 +135,18 @@ impl Tmux {
 
     pub fn is_vendored_tmux(&self) -> bool {
         self.bin.starts_with(&self.nmk_home)
+    }
+
+    fn create_temporary_config_file(&self) -> io::Result<NamedTempFile> {
+        let mut builder = tempfile::Builder::new();
+        builder.prefix(TMP_FILE_PREFIX).suffix(TMP_FILE_SUFFIX);
+        let config = builder.tempfile()?;
+        let mut config = BufWriter::new(config);
+        nmk::tmux::config::render(self.version, &mut config)?;
+        config.flush()?;
+        Ok(config
+            .into_inner()
+            .expect("Unable to get inner from BufWriter"))
     }
 }
 

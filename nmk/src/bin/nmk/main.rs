@@ -22,6 +22,7 @@ fn main() {
             match *sub_command {
                 SubCommand::Info => commands::info::display_info(),
                 SubCommand::Completions(ref opt) => commands::completion::completion(opt),
+                SubCommand::Render(ref opt) => commands::render::render(opt),
                 SubCommand::Other(..) => entrypoint::main(opt),
             }
         }

@@ -66,6 +66,8 @@ pub enum SubCommand {
     Info,
     #[structopt(about = "Generate tab-completion scripts for your shell")]
     Completions(Completion),
+    #[structopt(about = "Render tmux config")]
+    Render(Render),
     #[structopt(external_subcommand)]
     Other(Vec<String>),
 }
@@ -76,4 +78,10 @@ pub struct Completion {
     pub output: Option<PathBuf>,
     #[structopt(help = "possible values: zsh, bash, fish, powershell, elvish")]
     pub shell: String,
+}
+
+#[derive(Debug, StructOpt)]
+pub struct Render {
+    #[structopt(short, long, help = "config output directory")]
+    pub output: PathBuf,
 }

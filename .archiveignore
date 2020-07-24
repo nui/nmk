@@ -34,7 +34,6 @@ zsh/src
 .archiveignore
 .firebaserc
 build.sbt
-config.json
 etc/build.py
 firebase.json
 package-lock.json
