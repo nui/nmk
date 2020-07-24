@@ -21,7 +21,7 @@ pub async fn install(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()> {
     let mut objects: Vec<_> = nmk::gcs::list_objects(&client, LIST_OBJECTS_URL)
         .await?
         .into_iter()
-        .filter(|o| o.name.ends_with(".tar.xz"))
+        .filter(|obj| obj.name.ends_with(".tar.xz"))
         .collect();
     if !opt.no_filter {
         objects = filter_by_os_release(objects);
@@ -57,7 +57,7 @@ fn filter_by_os_release(input: Vec<ObjectMeta>) -> Vec<ObjectMeta> {
         };
         input
             .into_iter()
-            .filter(|o| o.name.contains(filter_key))
+            .filter(|obj| obj.name.contains(filter_key))
             .collect()
     } else {
         input

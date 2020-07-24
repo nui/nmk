@@ -70,6 +70,6 @@ fn unxz_nmkup(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
         .create(true)
         .write(true)
         .mode(0o755)
-        .open(dst.as_ref())?;
+        .open(dst)?;
     io::copy(&mut xz, &mut file)
 }

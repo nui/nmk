@@ -18,7 +18,7 @@ serde_json = "1.0.56"
 simplelog = "0.8.0"
 structopt = "0.3.15"
 tar = "0.4.29"
-tokio = { version = "0.2.21", features = ["full"] }
+tokio = { version = "0.2.22", features = ["full"] }
 which = "4.0.1"
 xz2 = "0.1.6"
 

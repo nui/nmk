@@ -38,6 +38,7 @@ fn get_current_arch_by_script() -> Result<String, String> {
                 .iter()
                 .copied(),
         )
+        // +100 is for last two lines to avoid reallocation
         .fold(
             String::with_capacity(NMK_INIT_SCRIPT.len() + 100),
             |mut acc, line| {
