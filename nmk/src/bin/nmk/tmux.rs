@@ -1,11 +1,9 @@
 use std::convert::TryFrom;
 use std::io;
-use std::io::{BufWriter, Write};
+use std::io::BufWriter;
 use std::os::unix::process::CommandExt;
 use std::path::PathBuf;
 use std::process::Command;
-
-use tempfile::NamedTempFile;
 
 use nmk::bin_name::{TMUX, ZSH};
 use nmk::env_name::NMK_TMUX_VERSION;
@@ -70,14 +68,13 @@ impl Tmux {
         }
         cmd.arg("-f");
         let render_context = make_config_context(&self.nmk_home, opt, is_color_term);
-        let named_temp_config = self
-            .create_temporary_config_file(&render_context)
+        let named_temp_config_path = self
+            .create_temporary_config(&render_context)
             .expect("Unable to create temporary config file");
         if !opt.keep {
-            set_env("NMK_TMUX_TEMP_CONF", named_temp_config.path().as_os_str());
+            set_env("NMK_TMUX_TEMP_CONF", &named_temp_config_path);
         }
-        let config_path = named_temp_config.path();
-        cmd.arg(config_path);
+        cmd.arg(named_temp_config_path);
         let tmux_args = opt.args();
         if tmux_args.is_empty() {
             // Attach to tmux or create new session
@@ -101,16 +98,17 @@ impl Tmux {
         self.bin.starts_with(&self.nmk_home)
     }
 
-    fn create_temporary_config_file(&self, context: &Context) -> io::Result<NamedTempFile> {
+    fn create_temporary_config(&self, context: &Context) -> io::Result<PathBuf> {
         let mut builder = tempfile::Builder::new();
         builder.prefix(TMP_FILE_PREFIX).suffix(TMP_FILE_SUFFIX);
         let config = builder.tempfile()?;
         let mut config = BufWriter::new(config);
         nmk::tmux::config::render(&mut config, context, self.version)?;
-        config.flush()?;
-        Ok(config
-            .into_inner()
-            .expect("Unable to get inner from BufWriter"))
+        config
+            .into_inner()?
+            .into_temp_path()
+            .keep()
+            .map_err(|e| e.error)
     }
 }
 
