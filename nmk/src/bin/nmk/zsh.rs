@@ -3,6 +3,7 @@ use std::path::Path;
 use std::process::Command;
 
 use nmk::bin_name::ZSH;
+use nmk::one_hot;
 use nmk::platform::{is_alpine, is_arch, is_mac};
 
 use crate::cmdline::Opt;

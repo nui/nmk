@@ -1,5 +1,6 @@
 use std::io;
 use std::io::Write;
+use std::path::PathBuf;
 
 use indoc::indoc;
 
@@ -17,10 +18,10 @@ const NEXT_SESSION: &str = "switch-client -n";
 #[allow(dead_code)]
 const PREV_SESSION: &str = "switch-client -p";
 
-pub fn render(v: Version, w: &mut dyn Write) -> Result<(), io::Error> {
+pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> Result<(), io::Error> {
     writeln!(w, "# tmux {} configuration", v.as_str())?;
-    section(w, "tmux options", render_options)?;
-    section(w, "prefix keys", |w| {
+    section(w, c, "tmux options", render_options)?;
+    section(w, c, "prefix keys", |w, _| {
         writeln!(w, "unbind-key C-b")?;
         writeln!(w, "bind-key -r C-b send-prefix")?;
         writeln!(w, "bind-key -r b {}", NEXT_PANE)
@@ -28,7 +29,7 @@ pub fn render(v: Version, w: &mut dyn Write) -> Result<(), io::Error> {
     writeln!(w, "bind-key C-c command-prompt")?;
     writeln!(w, "bind-key C-l {}", LAST_SESSION)?;
     writeln!(w, "{}", "bind-key C-t display-message '#{pane_tty}'")?;
-    section(w, "function key binding", |w| {
+    section(w, c, "function key binding", |w, _| {
         writeln!(w, "bind-key -n F1 {}", NEXT_PANE)?;
         writeln!(w, "bind-key -n F2 last-window")?;
         writeln!(w, "bind-key -n F3 previous-window")?;
@@ -41,7 +42,7 @@ pub fn render(v: Version, w: &mut dyn Write) -> Result<(), io::Error> {
         }
         Ok(())
     })?;
-    section(w, "F12 Key table", |w| {
+    section(w, c, "F12 Key table", |w, _| {
         writeln!(w, "bind-key F12 send-keys F12")?;
         writeln!(w, "bind-key -n F12 switch-client -T {}", TABLE)?;
         for n in 1..=11 {
@@ -54,49 +55,35 @@ pub fn render(v: Version, w: &mut dyn Write) -> Result<(), io::Error> {
         }
         Ok(())
     })?;
-    section(w, "Pane current path", pane_current_path)?;
-    section(w, "Copy mode", |w| {
+    section(w, c, "Pane current path", pane_current_path)?;
+    section(w, c, "Copy mode", |w, _| {
         writeln!(w, "bind-key C-u {}", COPY_MODE)?;
         copy_to_system_clipboard(w)?;
-        {
-            // Fix mouse scrolling in 2.1 and later, https://github.com/tmux/tmux/issues/145
-            write!(
-                w,
-                "{}",
-                r##"bind-key -T root WheelUpPane if-shell -F "#{mouse_any_flag}" "send-keys -M" "if-shell -F "##
-            )?;
-            writeln!(
-                w,
-                "'{}' 'send-keys -M' '{}'\"",
-                NO_ENTER_COPY_MODE, COPY_MODE_BOTTOM_EXIT
-            )?;
-        }
-        {
-            // PageUp and PageDown special behaviors
-            //  If the condition is match, PageUp should enter copy mode
-            //  see https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/
-            writeln!(
-                w,
-                r##"bind-key -T root PageUp if-shell -F "{}" "send-keys PageUp" "{}""##,
-                NO_ENTER_COPY_MODE, COPY_MODE_BOTTOM_EXIT
-            )?;
-        }
+        // PageUp and PageDown special behaviors
+        //  If the condition is match, PageUp should enter copy mode
+        //  see https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/
+        writeln!(
+            w,
+            r##"bind-key -T root PageUp if-shell -F "{}" "send-keys PageUp" "{}""##,
+            NO_ENTER_COPY_MODE, COPY_MODE_BOTTOM_EXIT
+        )?;
         half_pageup_pagedown(w)
     })?;
     // Colors
-    writeln!(w, "{}", "if-shell '[ x$NMK_TMUX_256_COLOR = x1 ]' 'source-file $NMK_HOME/tmux/256color.conf' 'source-file $NMK_HOME/tmux/8color.conf'")?;
-    section(w, "Unset tmux environments", unset_tmux_envs)
+    section(w, c, "colors", |w, c| {
+        if c.support_256_color {
+            writeln!(w, "{}", include_str!("256color.conf"))
+        } else {
+            writeln!(w, "{}", include_str!("8color.conf"))
+        }
+    })
 }
 
-fn render_options(w: &mut dyn Write) -> io::Result<()> {
+fn render_options(w: &mut dyn Write, c: &Context) -> io::Result<()> {
     let options = indoc!(
         r###"
         set-option -g base-index 0
-        set-option -g default-shell "$NMK_TMUX_DEFAULT_SHELL"
-        set-option -g default-terminal "$NMK_TMUX_DEFAULT_TERMINAL"
-        set-option -g detach-on-destroy "$NMK_TMUX_DETACH_ON_DESTROY"
         set-option -g display-time 1200
-        set-option -g history-file "$NMK_TMUX_HISTORY"
         set-option -g history-limit 2500
         set-option -g status-keys emacs
         set-option -g status-left-length 20
@@ -105,15 +92,30 @@ fn render_options(w: &mut dyn Write) -> io::Result<()> {
         set-window-option -g mode-keys vi
     "###
     );
-    write!(w, "{}", options)
+    write!(w, "{}", options)?;
+    writeln!(
+        w,
+        r#"set-option -g default-shell "{}""#,
+        c.default_shell.display()
+    )?;
+    writeln!(w, r#"set-option -g default-terminal "{}""#, c.default_term)?;
+    writeln!(
+        w,
+        r#"set-option -g detach-on-destroy "{}""#,
+        on_off!(c.detach_on_destroy)
+    )?;
+    if let Some(ref path) = c.tmux_history_file {
+        writeln!(w, r#"set-option -g history-file "{}""#, path.display())?;
+    }
+    Ok(())
 }
 
-fn section<F>(w: &mut dyn Write, name: &str, mut f: F) -> io::Result<()>
+fn section<F>(w: &mut dyn Write, c: &Context, name: &str, mut f: F) -> io::Result<()>
 where
-    F: FnMut(&mut dyn Write) -> io::Result<()>,
+    F: FnMut(&mut dyn Write, &Context) -> io::Result<()>,
 {
     write_start_section(w, name)?;
-    f(w)?;
+    f(w, c)?;
     write_end_section(w, name)
 }
 
@@ -127,7 +129,7 @@ fn write_end_section(c: &mut dyn Write, name: &str) -> io::Result<()> {
     writeln!(c, "# {:-^100}", label)
 }
 
-fn pane_current_path(w: &mut dyn Write) -> io::Result<()> {
+fn pane_current_path(w: &mut dyn Write, _: &Context) -> io::Result<()> {
     let key_binding = &[
         ("%", "split-window -h "),
         ("|", "split-window -h "),
@@ -183,16 +185,22 @@ fn half_pageup_pagedown(w: &mut dyn Write) -> io::Result<()> {
     Ok(())
 }
 
-fn unset_tmux_envs(w: &mut dyn Write) -> io::Result<()> {
-    let envs = &[
-        "NMK_TMUX_256_COLOR",
-        "NMK_TMUX_DEFAULT_SHELL",
-        "NMK_TMUX_DEFAULT_TERMINAL",
-        "NMK_TMUX_DETACH_ON_DESTROY",
-        "NMK_TMUX_HISTORY",
-    ];
-    for e in envs {
-        writeln!(w, "set-environment -gr {}", e)?;
+pub struct Context {
+    pub detach_on_destroy: bool,
+    pub support_256_color: bool,
+    pub default_shell: PathBuf,
+    pub default_term: String,
+    pub tmux_history_file: Option<PathBuf>,
+}
+
+impl Default for Context {
+    fn default() -> Self {
+        Context {
+            detach_on_destroy: false,
+            support_256_color: false,
+            default_shell: PathBuf::from("/bin/zsh"),
+            default_term: String::from("screen"),
+            tmux_history_file: None,
+        }
     }
-    Ok(())
 }

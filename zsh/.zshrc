@@ -7,6 +7,12 @@
     FPATH=${next_path#"$prefix"}
 }
 
+# Remove temporary tmux configuration file
+if [[ -n $TMUX && -n $NMK_TMUX_TEMP_CONF ]]; then
+    tmux set-environment -gr NMK_TMUX_TEMP_CONF
+    rm $NMK_TMUX_TEMP_CONF
+    unset NMK_TMUX_TEMP_CONF
+fi
 () {
     local file
     for file ($ZDOTDIR/zshrc.pre.d/*.zsh(N)) source $file

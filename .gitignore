@@ -5,7 +5,7 @@
 .idea/
 .netrwhist
 /.cache/
-/tmux/.tmux_history
+/.tmux_history
 /vendor
 /vim/NERDTreeBookmarks
 /vim/bundle/

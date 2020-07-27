@@ -1,9 +1,8 @@
 use structopt::StructOpt;
 
 mod cmdline;
-#[macro_use]
-mod core;
 mod commands;
+mod core;
 mod entrypoint;
 mod logging;
 mod pathenv;

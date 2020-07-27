@@ -1,14 +1,16 @@
 use std::convert::TryFrom;
+use std::io;
 use std::io::{BufWriter, Write};
 use std::os::unix::process::CommandExt;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::Command;
-use std::{fs, io};
 
 use tempfile::NamedTempFile;
 
 use nmk::bin_name::{TMUX, ZSH};
 use nmk::env_name::NMK_TMUX_VERSION;
+use nmk::home::NmkHome;
+use nmk::tmux::config::Context;
 use nmk::tmux::version::{ParseVersionError, Version};
 
 use crate::cmdline::Opt;
@@ -19,8 +21,7 @@ const TMP_FILE_PREFIX: &str = "tmp.nmk.";
 const TMP_FILE_SUFFIX: &str = ".tmux.conf";
 
 pub struct Tmux {
-    nmk_home: PathBuf,
-    tmux_dir: PathBuf,
+    nmk_home: NmkHome,
     pub bin: PathBuf,
     pub version: Version,
 }
@@ -45,56 +46,16 @@ fn find_version() -> Result<Version, ParseVersionError> {
 }
 
 impl Tmux {
-    pub fn new(nmk_home: &Path) -> Tmux {
-        let tmux_dir = nmk_home.join("tmux");
-        assert!(
-            tmux_dir.is_dir(),
-            "{} is not directory",
-            tmux_dir.to_string_lossy()
-        );
+    pub fn new(nmk_home: NmkHome) -> Tmux {
         let bin = which::which(TMUX).expect("Cannot find tmux binary");
         let version = find_version().unwrap_or_else(|e| match e {
             ParseVersionError::BadVersionOutput(s) => panic!("Bad tmux output: {}", s),
             ParseVersionError::UnsupportedVersion(s) => panic!("Unsupported tmux version: {}", s),
         });
-
         Tmux {
-            nmk_home: nmk_home.to_owned(),
-            tmux_dir,
+            nmk_home,
             bin,
             version,
-        }
-    }
-
-    pub fn setup_environment(&self, opt: &Opt, is_color_term: bool) {
-        set_env(
-            "NMK_TMUX_DEFAULT_SHELL",
-            which::which(ZSH).expect("zsh not found"),
-        );
-        set_env("NMK_TMUX_DETACH_ON_DESTROY", on_off!(opt.detach_on_destroy));
-        set_env("NMK_TMUX_HISTORY", self.tmux_dir.join(".tmux_history"));
-        set_env("NMK_TMUX_VERSION", &self.version.as_str());
-        let default_term = if is_color_term {
-            "screen-256color"
-        } else {
-            "screen"
-        };
-        set_env("NMK_TMUX_DEFAULT_TERMINAL", default_term);
-        set_env("NMK_TMUX_256_COLOR", one_hot!(is_color_term));
-    }
-
-    fn clean_old_config_file(&self, config: &Path) {
-        if let Some(parent) = config.parent().and_then(|p| p.to_str()) {
-            let pattern = format!("{}/{}*{}", parent, TMP_FILE_PREFIX, TMP_FILE_SUFFIX);
-            if let Ok(paths) = glob::glob(&pattern) {
-                for entry in paths {
-                    if let Ok(p) = entry {
-                        if p != config {
-                            let _ = fs::remove_file(p);
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -108,12 +69,15 @@ impl Tmux {
             cmd.arg("-u");
         }
         cmd.arg("-f");
+        let render_context = make_config_context(&self.nmk_home, opt, is_color_term);
         let named_temp_config = self
-            .create_temporary_config_file()
+            .create_temporary_config_file(&render_context)
             .expect("Unable to create temporary config file");
+        if !opt.keep {
+            set_env("NMK_TMUX_TEMP_CONF", named_temp_config.path().as_os_str());
+        }
         let config_path = named_temp_config.path();
         cmd.arg(config_path);
-        self.clean_old_config_file(config_path);
         let tmux_args = opt.args();
         if tmux_args.is_empty() {
             // Attach to tmux or create new session
@@ -137,16 +101,31 @@ impl Tmux {
         self.bin.starts_with(&self.nmk_home)
     }
 
-    fn create_temporary_config_file(&self) -> io::Result<NamedTempFile> {
+    fn create_temporary_config_file(&self, context: &Context) -> io::Result<NamedTempFile> {
         let mut builder = tempfile::Builder::new();
         builder.prefix(TMP_FILE_PREFIX).suffix(TMP_FILE_SUFFIX);
         let config = builder.tempfile()?;
         let mut config = BufWriter::new(config);
-        nmk::tmux::config::render(self.version, &mut config)?;
+        nmk::tmux::config::render(&mut config, context, self.version)?;
         config.flush()?;
         Ok(config
             .into_inner()
             .expect("Unable to get inner from BufWriter"))
+    }
+}
+
+fn make_config_context(nmk_home: &NmkHome, opt: &Opt, is_color_term: bool) -> Context {
+    let default_term = if is_color_term {
+        "screen-256color"
+    } else {
+        "screen"
+    };
+    Context {
+        support_256_color: is_color_term,
+        detach_on_destroy: opt.detach_on_destroy,
+        default_term: default_term.to_owned(),
+        default_shell: which::which(ZSH).expect("zsh not found").to_owned(),
+        tmux_history_file: Some(nmk_home.join(".tmux_history")),
     }
 }
 

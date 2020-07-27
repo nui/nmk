@@ -26,7 +26,7 @@ fn should_backup_dir(dir_path: &Path) -> bool {
 
 #[rustfmt::skip]
 const BACKUP_FILES: &[&str] = &[
-    "tmux/.tmux_history",
+    ".tmux_history",
     "zsh/.zsh_history",
     "zsh/zprofile",
     "zsh/zshenv.extra",

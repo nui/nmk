@@ -1,6 +1,9 @@
-use crate::cmdline::Render;
-use nmk::tmux::version::Version::*;
 use std::io::BufWriter;
+
+use nmk::tmux::config::Context;
+use nmk::tmux::version::Version::*;
+
+use crate::cmdline::Render;
 
 pub fn render(opt: &Render) {
     let versions = vec![V26, V27, V28, V29, V29a, V30, V30a, V31, V31a, V31b];
@@ -9,6 +12,7 @@ pub fn render(opt: &Render) {
         let f = std::fs::File::create(opt.output.join(version_file_name))
             .expect("Unable to create version file");
         let mut f = BufWriter::new(f);
-        nmk::tmux::config::render(v, &mut f).expect("Unable to render tmux config");
+        let context = Context::default();
+        nmk::tmux::config::render(&mut f, &context, v).expect("Unable to render tmux config");
     }
 }

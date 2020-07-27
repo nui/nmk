@@ -5,13 +5,13 @@ use std::{env, io};
 
 use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
+use nmk::time::{human_time, seconds_since_build};
 
 use crate::cmdline::Opt;
 use crate::core::set_env;
 use crate::pathenv::PathVec;
 use crate::terminal;
 use crate::tmux::Tmux;
-use nmk::time::{human_time, seconds_since_build};
 
 fn setup_environment(nmk_home: &Path) {
     let zdotdir = nmk_home.join("zsh");
@@ -103,11 +103,10 @@ pub fn main(opt: Opt) -> ! {
     if opt.login {
         crate::zsh::exec_login_shell(&opt);
     } else {
-        let tmux = Tmux::new(&nmk_home);
+        let tmux = Tmux::new(nmk_home);
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version.as_str());
         let is_color_term = terminal::support_256_color(&opt);
-        tmux.setup_environment(&opt, is_color_term);
         tmux.exec(&opt, is_color_term);
     }
 }
