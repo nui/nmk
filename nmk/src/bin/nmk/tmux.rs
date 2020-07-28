@@ -1,6 +1,7 @@
 use std::convert::TryFrom;
+use std::fs::File;
 use std::io;
-use std::io::BufWriter;
+use std::io::{BufWriter, Write};
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -13,9 +14,6 @@ use nmk::tmux::version::{ParseVersionError, Version};
 
 use crate::cmdline::Opt;
 use crate::utils::{is_dev_machine, print_usage_time};
-
-const TMP_FILE_PREFIX: &str = "tmp.nmk.";
-const TMP_FILE_SUFFIX: &str = ".tmux.conf";
 
 pub struct Tmux {
     nmk_home: NmkHome,
@@ -90,17 +88,16 @@ impl Tmux {
         self.bin.starts_with(&self.nmk_home)
     }
 
-    pub fn render_config_in_temp_dir(&self, context: Context) -> io::Result<PathBuf> {
-        let mut builder = tempfile::Builder::new();
-        builder.prefix(TMP_FILE_PREFIX).suffix(TMP_FILE_SUFFIX);
-        let config = builder.tempfile()?;
+    pub fn render_config_in_temp_dir(&self, opt: &Opt, context: Context) -> io::Result<PathBuf> {
+        let uid = nix::unistd::Uid::current().as_raw();
+        let tmp_dir = std::env::var("TMPDIR").unwrap_or_else(|_| "/tmp".to_owned());
+        let config_name = format!("nmk.{}.{}.tmux.conf", uid, opt.socket);
+        let config_path = Path::new(&tmp_dir).join(&config_name);
+        let config = File::create(&config_path)?;
         let mut config = BufWriter::new(config);
         nmk::tmux::config::render(&mut config, &context, self.version)?;
-        config
-            .into_inner()?
-            .into_temp_path()
-            .keep()
-            .map_err(|e| e.error)
+        config.flush()?;
+        Ok(config_path)
     }
 }
 

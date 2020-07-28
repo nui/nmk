@@ -110,10 +110,10 @@ pub fn main(opt: Opt) -> ! {
         let is_color_term = terminal::support_256_color(&opt);
         let config = {
             let context = make_config_context(&opt, is_color_term);
-            tmux.render_config_in_temp_dir(context)
+            tmux.render_config_in_temp_dir(&opt, context)
                 .expect("Unable to create temporary config file")
         };
-        set_env("NMK_TMUX_TEMP_CONF", &config);
+        set_env("NMK_TMUX_CONF", &config);
         if opt.print_config {
             print_config_then_remove(&config).expect("Unable to print config");
             exit(0);
