@@ -1,9 +1,11 @@
+use std::io;
 use std::io::Write;
 use std::path::PathBuf;
-use std::{fmt, io};
+use std::process::{Command, Stdio};
 
 use indoc::indoc;
 
+use crate::bin_name::XCLIP;
 use crate::platform::is_mac;
 
 use super::version::Version;
@@ -13,8 +15,8 @@ const COPY_MODE_BOTTOM_EXIT: &str = "copy-mode -eu";
 const CWD: &str = "#{pane_current_path}";
 const F12_TABLE: &str = "F12";
 const LAST_SESSION: &str = "switch-client -l";
-const NEXT_PANE: &str = r###"select-pane -t :.+ \; display-panes"###;
-const NO_ENTER_COPY_MODE: &str = r###"#{?pane_in_mode,1,}#{?alternate_on,1,}"###;
+const NEXT_PANE: &str = r#"select-pane -t :.+ \; display-panes"#;
+const NO_ENTER_COPY_MODE: &str = r##"#{?pane_in_mode,1,}#{?alternate_on,1,}"##;
 
 pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
     writeln!(w, "# Tmux {} configuration", v.as_str())?;
@@ -67,7 +69,7 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
         //  see https://www.reddit.com/r/tmux/comments/3paqoi/tmux_21_has_been_released/
         writeln!(
             w,
-            r##"bind-key -T root PageUp if-shell -F "{}" "send-keys PageUp" "{}""##,
+            r#"bind-key -T root PageUp if-shell -F "{}" "send-keys PageUp" "{}""#,
             NO_ENTER_COPY_MODE, COPY_MODE_BOTTOM_EXIT
         )?;
         half_pageup_pagedown(w)
@@ -141,44 +143,44 @@ fn pane_current_path(w: &mut dyn Write, _: &Context) -> io::Result<()> {
     }
     writeln!(
         w,
-        r##"bind-key C command-prompt "new-session -c '{}' -s '%%'""##,
+        r#"bind-key C command-prompt "new-session -c '{}' -s '%%'""#,
         CWD
     )
 }
 
 fn choose_tree(v: Version) -> String {
-    let mut vec = vec!["choose-tree"];
-    if v >= Version::V26 {
-        vec.push("-s");
-    }
+    let mut vec = Vec::with_capacity(4);
+    vec.extend_from_slice(&["choose-tree", "-s"]);
     if v >= Version::V27 {
         vec.push("-Z");
     }
     vec.join(" ")
 }
 
-fn copy_to_system_clipboard(w: &mut dyn Write) -> io::Result<()> {
-    fn write_config(w: &mut dyn Write, arguments: fmt::Arguments<'_>) -> io::Result<()> {
-        if is_mac() {
-            writeln!(w, "{}", arguments)
-        } else {
-            writeln!(w, "if-shell 'xclip -o > /dev/null 2>&1' '{}'", arguments)
-        }
-    }
-    let copy_cmd = if is_mac() {
-        "pbcopy"
+fn is_system_clipboard_available() -> bool {
+    let mut cmd = Command::new(XCLIP);
+    cmd.arg("-o").stdout(Stdio::null()).stderr(Stdio::null());
+    if let Ok(output) = cmd.output() {
+        output.status.success()
     } else {
-        "xclip -selection clipboard"
-    };
-    // We use format_args! to avoid allocation.
-    // See this comment why we can't use let binding, https://stackoverflow.com/a/56304571
-    write_config(
-        w,
-        format_args!(
+        false
+    }
+}
+
+fn copy_to_system_clipboard(w: &mut dyn Write) -> io::Result<()> {
+    fn write_bind_config(w: &mut dyn Write, cmd: &str) -> io::Result<()> {
+        writeln!(
+            w,
             r#"bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "{}""#,
-            copy_cmd
-        ),
-    )
+            cmd
+        )
+    }
+    if is_mac() {
+        write_bind_config(w, "pbcopy")?;
+    } else if is_system_clipboard_available() {
+        write_bind_config(w, "xclip -selection clipboard")?;
+    }
+    Ok(())
 }
 
 fn half_pageup_pagedown(w: &mut dyn Write) -> io::Result<()> {
