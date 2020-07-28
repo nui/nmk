@@ -8,6 +8,7 @@ use dirs::home_dir;
 use crate::env_name::NMK_HOME;
 
 /// Main directory of dotfiles
+#[derive(Clone)]
 pub struct NmkHome(PathBuf);
 
 impl fmt::Debug for NmkHome {

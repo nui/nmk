@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 use std::io;
 use std::io::BufWriter;
 use std::os::unix::process::CommandExt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use nmk::bin_name::{TMUX, ZSH};
@@ -12,7 +12,6 @@ use nmk::tmux::config::Context;
 use nmk::tmux::version::{ParseVersionError, Version};
 
 use crate::cmdline::Opt;
-use crate::core::*;
 use crate::utils::{is_dev_machine, print_usage_time};
 
 const TMP_FILE_PREFIX: &str = "tmp.nmk.";
@@ -57,7 +56,7 @@ impl Tmux {
         }
     }
 
-    pub fn exec(&self, opt: &Opt, is_color_term: bool) -> ! {
+    pub fn exec(&self, opt: &Opt, config: &Path, is_color_term: bool) -> ! {
         let mut cmd = Command::new(TMUX);
         cmd.args(&["-L", &opt.socket]);
         if is_color_term {
@@ -67,14 +66,7 @@ impl Tmux {
             cmd.arg("-u");
         }
         cmd.arg("-f");
-        let render_context = make_config_context(&self.nmk_home, opt, is_color_term);
-        let named_temp_config_path = self
-            .create_temporary_config(&render_context)
-            .expect("Unable to create temporary config file");
-        if !opt.keep {
-            set_env("NMK_TMUX_TEMP_CONF", &named_temp_config_path);
-        }
-        cmd.arg(named_temp_config_path);
+        cmd.arg(config);
         let tmux_args = opt.args();
         if tmux_args.is_empty() {
             // Attach to tmux or create new session
@@ -98,12 +90,12 @@ impl Tmux {
         self.bin.starts_with(&self.nmk_home)
     }
 
-    fn create_temporary_config(&self, context: &Context) -> io::Result<PathBuf> {
+    pub fn render_config_in_temp_dir(&self, context: Context) -> io::Result<PathBuf> {
         let mut builder = tempfile::Builder::new();
         builder.prefix(TMP_FILE_PREFIX).suffix(TMP_FILE_SUFFIX);
         let config = builder.tempfile()?;
         let mut config = BufWriter::new(config);
-        nmk::tmux::config::render(&mut config, context, self.version)?;
+        nmk::tmux::config::render(&mut config, &context, self.version)?;
         config
             .into_inner()?
             .into_temp_path()
@@ -112,7 +104,7 @@ impl Tmux {
     }
 }
 
-fn make_config_context(nmk_home: &NmkHome, opt: &Opt, is_color_term: bool) -> Context {
+pub fn make_config_context(opt: &Opt, is_color_term: bool) -> Context {
     let default_term = if is_color_term {
         "screen-256color"
     } else {
@@ -123,7 +115,6 @@ fn make_config_context(nmk_home: &NmkHome, opt: &Opt, is_color_term: bool) -> Co
         detach_on_destroy: opt.detach_on_destroy,
         default_term: default_term.to_owned(),
         default_shell: which::which(ZSH).expect("zsh not found").to_owned(),
-        tmux_history_file: Some(nmk_home.join(".tmux_history")),
     }
 }
 

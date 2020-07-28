@@ -1,7 +1,8 @@
 use std::ffi::OsString;
 use std::fs::File;
 use std::path::Path;
-use std::{env, io};
+use std::process::exit;
+use std::{env, fs, io};
 
 use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
@@ -11,7 +12,7 @@ use crate::cmdline::Opt;
 use crate::core::set_env;
 use crate::pathenv::PathVec;
 use crate::terminal;
-use crate::tmux::Tmux;
+use crate::tmux::{make_config_context, Tmux};
 
 fn setup_environment(nmk_home: &Path) {
     let zdotdir = nmk_home.join("zsh");
@@ -103,10 +104,25 @@ pub fn main(opt: Opt) -> ! {
     if opt.login {
         crate::zsh::exec_login_shell(&opt);
     } else {
-        let tmux = Tmux::new(nmk_home);
+        let tmux = Tmux::new(nmk_home.clone());
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version.as_str());
         let is_color_term = terminal::support_256_color(&opt);
-        tmux.exec(&opt, is_color_term);
+        let config = {
+            let context = make_config_context(&opt, is_color_term);
+            tmux.render_config_in_temp_dir(context)
+                .expect("Unable to create temporary config file")
+        };
+        set_env("NMK_TMUX_TEMP_CONF", &config);
+        if opt.print_config {
+            print_config_then_remove(&config).expect("Unable to print config");
+            exit(0);
+        }
+        tmux.exec(&opt, &config, is_color_term);
     }
+}
+
+fn print_config_then_remove(config: &Path) -> io::Result<()> {
+    io::copy(&mut File::open(&config)?, &mut io::stdout())?;
+    fs::remove_file(config)
 }

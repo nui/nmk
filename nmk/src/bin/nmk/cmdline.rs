@@ -44,8 +44,8 @@ pub struct Opt {
     pub usage: bool,
     #[structopt(long, help = "Display Message of The Day")]
     pub motd: bool,
-    #[structopt(long, help = "Do not remove tmux temporary config file")]
-    pub keep: bool,
+    #[structopt(long, help = "Print tmux config then exit")]
+    pub print_config: bool,
     #[structopt(subcommand)]
     pub cmd: Option<SubCommand>,
     #[structopt(skip = Instant::now())]

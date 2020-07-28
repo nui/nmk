@@ -4,6 +4,8 @@ use std::path::PathBuf;
 
 use indoc::indoc;
 
+use crate::platform::is_mac;
+
 use super::version::Version;
 
 const TABLE: &str = "F12";
@@ -19,9 +21,9 @@ const NEXT_SESSION: &str = "switch-client -n";
 const PREV_SESSION: &str = "switch-client -p";
 
 pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> Result<(), io::Error> {
-    writeln!(w, "# tmux {} configuration", v.as_str())?;
-    section(w, c, "tmux options", render_options)?;
-    section(w, c, "prefix keys", |w, _| {
+    writeln!(w, "# Tmux {} configuration", v.as_str())?;
+    section(w, c, "Tmux Options", render_options)?;
+    section(w, c, "Prefix Keys", |w, _| {
         writeln!(w, "unbind-key C-b")?;
         writeln!(w, "bind-key -r C-b send-prefix")?;
         writeln!(w, "bind-key -r b {}", NEXT_PANE)
@@ -29,7 +31,7 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> Result<(), io::Erro
     writeln!(w, "bind-key C-c command-prompt")?;
     writeln!(w, "bind-key C-l {}", LAST_SESSION)?;
     writeln!(w, "{}", "bind-key C-t display-message '#{pane_tty}'")?;
-    section(w, c, "function key binding", |w, _| {
+    section(w, c, "Function Key Binding", |w, _| {
         writeln!(w, "bind-key -n F1 {}", NEXT_PANE)?;
         writeln!(w, "bind-key -n F2 last-window")?;
         writeln!(w, "bind-key -n F3 previous-window")?;
@@ -42,7 +44,7 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> Result<(), io::Erro
         }
         Ok(())
     })?;
-    section(w, c, "F12 Key table", |w, _| {
+    section(w, c, "F12 Key Table", |w, _| {
         writeln!(w, "bind-key F12 send-keys F12")?;
         writeln!(w, "bind-key -n F12 switch-client -T {}", TABLE)?;
         for n in 1..=11 {
@@ -55,8 +57,8 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> Result<(), io::Erro
         }
         Ok(())
     })?;
-    section(w, c, "Pane current path", pane_current_path)?;
-    section(w, c, "Copy mode", |w, _| {
+    section(w, c, "Pane Current Path", pane_current_path)?;
+    section(w, c, "Copy Mode", |w, _| {
         writeln!(w, "bind-key C-u {}", COPY_MODE)?;
         copy_to_system_clipboard(w)?;
         // PageUp and PageDown special behaviors
@@ -70,7 +72,7 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> Result<(), io::Erro
         half_pageup_pagedown(w)
     })?;
     // Colors
-    section(w, c, "colors", |w, c| {
+    section(w, c, "Colors", |w, c| {
         if c.support_256_color {
             writeln!(w, "{}", include_str!("256color.conf"))
         } else {
@@ -80,8 +82,7 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> Result<(), io::Erro
 }
 
 fn render_options(w: &mut dyn Write, c: &Context) -> io::Result<()> {
-    let options = indoc!(
-        r###"
+    let options = indoc! {r##"
         set-option -g base-index 0
         set-option -g display-time 1200
         set-option -g history-limit 2500
@@ -90,8 +91,7 @@ fn render_options(w: &mut dyn Write, c: &Context) -> io::Result<()> {
         set-option -g status-right-length 60
         set-option -g status-right "#{?client_prefix,^B ,}'#[fg=colour51]#{=40:pane_title}#[default]' %H:%M %Z %a, %d"
         set-window-option -g mode-keys vi
-    "###
-    );
+    "##};
     write!(w, "{}", options)?;
     writeln!(
         w,
@@ -104,9 +104,7 @@ fn render_options(w: &mut dyn Write, c: &Context) -> io::Result<()> {
         r#"set-option -g detach-on-destroy "{}""#,
         on_off!(c.detach_on_destroy)
     )?;
-    if let Some(ref path) = c.tmux_history_file {
-        writeln!(w, r#"set-option -g history-file "{}""#, path.display())?;
-    }
+    writeln!(w, r#"set-option -g history-file "$NMK_HOME/.tmux_history""#)?;
     Ok(())
 }
 
@@ -120,13 +118,13 @@ where
 }
 
 fn write_start_section(c: &mut dyn Write, name: &str) -> io::Result<()> {
-    let label = format!(" start {} ", name);
-    writeln!(c, "# {:-^100}", label)
+    let label = format!(" Start {} ", name);
+    writeln!(c, "# {:-^120}", label)
 }
 
 fn write_end_section(c: &mut dyn Write, name: &str) -> io::Result<()> {
-    let label = format!(" end {} ", name);
-    writeln!(c, "# {:-^100}", label)
+    let label = format!(" End {} ", name);
+    writeln!(c, "# {:-^120}", label)
 }
 
 fn pane_current_path(w: &mut dyn Write, _: &Context) -> io::Result<()> {
@@ -137,8 +135,10 @@ fn pane_current_path(w: &mut dyn Write, _: &Context) -> io::Result<()> {
         ("c", "new-window"),
         ("'\"'", "split-window"),
     ];
-    for (key, binding) in key_binding {
+    for (key, _) in key_binding {
         writeln!(w, "unbind-key {}", key)?;
+    }
+    for (key, binding) in key_binding {
         writeln!(w, "bind-key {} {} -c '{}'", key, binding, CWD)?;
     }
     writeln!(
@@ -160,15 +160,25 @@ fn choose_tree(v: Version) -> String {
 }
 
 fn copy_to_system_clipboard(w: &mut dyn Write) -> io::Result<()> {
-    let to_system_clipboard = "xclip -selection clipboard";
-    writeln!(
+    let to_system_clipboard;
+    if is_mac() {
+        to_system_clipboard = "pbcopy";
+    } else {
+        to_system_clipboard = "xclip -selection clipboard";
+    }
+    fn write_config_line(w: &mut dyn Write, fmt_args: std::fmt::Arguments) -> io::Result<()> {
+        if is_mac() {
+            writeln!(w, "{}", fmt_args)
+        } else {
+            writeln!(w, "if-shell 'xclip -o > /dev/null 2>&1' '{}'", fmt_args)
+        }
+    }
+    write_config_line(
         w,
-        "{head} {tail}",
-        head = "if-shell 'xclip -o > /dev/null 2>&1'",
-        tail = format_args!(
-            r#"'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "{}"'"#,
+        format_args!(
+            r#"bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "{}""#,
             to_system_clipboard
-        )
+        ),
     )
 }
 
@@ -190,7 +200,6 @@ pub struct Context {
     pub support_256_color: bool,
     pub default_shell: PathBuf,
     pub default_term: String,
-    pub tmux_history_file: Option<PathBuf>,
 }
 
 impl Default for Context {
@@ -200,7 +209,6 @@ impl Default for Context {
             support_256_color: false,
             default_shell: PathBuf::from("/bin/zsh"),
             default_term: String::from("screen"),
-            tmux_history_file: None,
         }
     }
 }
