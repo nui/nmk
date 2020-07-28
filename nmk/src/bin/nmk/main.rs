@@ -21,7 +21,9 @@ fn main() {
             match *sub_command {
                 SubCommand::Info => commands::info::display_info(),
                 SubCommand::Completions(ref opt) => commands::completion::completion(opt),
-                SubCommand::Render(ref opt) => commands::render::render(opt),
+                SubCommand::Render(ref opt) => {
+                    commands::render::render(opt).expect("Unable to render config")
+                }
                 SubCommand::Other(..) => entrypoint::main(opt),
             }
         }

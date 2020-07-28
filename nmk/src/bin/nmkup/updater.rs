@@ -24,7 +24,7 @@ pub async fn self_setup(
     is_init: bool,
     entrypoint_updated: bool,
 ) -> nmk::Result<()> {
-    let current_exec = env::current_exe().expect("current_exe() failed");
+    let current_exec = env::current_exe()?;
     let target_bin = nmk_home.join("bin").join("nmkup");
     let is_self_update =
         !is_init && target_bin.exists() && is_same_location(&current_exec, &target_bin);
@@ -34,7 +34,7 @@ pub async fn self_setup(
             log::info!("{}: Done.", TAG);
         }
     } else {
-        fs::copy(current_exec, target_bin).expect("install nmkup failed");
+        fs::copy(current_exec, target_bin)?;
         log::info!("{}: Done.", TAG);
     }
     Ok(())

@@ -102,7 +102,7 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
             }
         }
         print!("Enter numeric choice:  ");
-        io::stdout().flush().expect("Flush fail");
+        io::stdout().flush()?;
         if let Ok(_) = stdin.read_line(&mut input) {
             log::debug!("Input value: {:?}", input);
             if let Ok(index) = input.trim().parse::<usize>() {

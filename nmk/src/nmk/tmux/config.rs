@@ -20,7 +20,7 @@ const NEXT_SESSION: &str = "switch-client -n";
 #[allow(dead_code)]
 const PREV_SESSION: &str = "switch-client -p";
 
-pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> Result<(), io::Error> {
+pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
     writeln!(w, "# Tmux {} configuration", v.as_str())?;
     section(w, c, "Tmux Options", render_options)?;
     section(w, c, "Prefix Keys", |w, _| {
