@@ -1,6 +1,6 @@
-use std::io;
 use std::io::Write;
 use std::path::PathBuf;
+use std::{fmt, io};
 
 use indoc::indoc;
 
@@ -8,26 +8,22 @@ use crate::platform::is_mac;
 
 use super::version::Version;
 
-const TABLE: &str = "F12";
 const COPY_MODE: &str = "copy-mode -u";
 const COPY_MODE_BOTTOM_EXIT: &str = "copy-mode -eu";
 const CWD: &str = "#{pane_current_path}";
+const F12_TABLE: &str = "F12";
+const LAST_SESSION: &str = "switch-client -l";
 const NEXT_PANE: &str = r###"select-pane -t :.+ \; display-panes"###;
 const NO_ENTER_COPY_MODE: &str = r###"#{?pane_in_mode,1,}#{?alternate_on,1,}"###;
-const LAST_SESSION: &str = "switch-client -l";
-#[allow(dead_code)]
-const NEXT_SESSION: &str = "switch-client -n";
-#[allow(dead_code)]
-const PREV_SESSION: &str = "switch-client -p";
 
 pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
     writeln!(w, "# Tmux {} configuration", v.as_str())?;
     section(w, c, "Tmux Options", render_options)?;
     section(w, c, "Prefix Keys", |w, _| {
-        writeln!(w, "unbind-key C-b")?;
-        writeln!(w, "bind-key -r C-b send-prefix")?;
-        writeln!(w, "bind-key -r b {}", NEXT_PANE)
+        writeln!(w, "bind-key -r C-b send-prefix")
     })?;
+    writeln!(w, "bind-key -r o {}", NEXT_PANE)?;
+    writeln!(w, "bind-key -r C-o {}", "rotate-window")?;
     writeln!(w, "bind-key C-c command-prompt")?;
     writeln!(w, "bind-key C-l {}", LAST_SESSION)?;
     writeln!(w, "{}", "bind-key C-t display-message '#{pane_tty}'")?;
@@ -46,14 +42,19 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
     })?;
     section(w, c, "F12 Key Table", |w, _| {
         writeln!(w, "bind-key F12 send-keys F12")?;
-        writeln!(w, "bind-key -n F12 switch-client -T {}", TABLE)?;
+        writeln!(w, "bind-key -n F12 switch-client -T {}", F12_TABLE)?;
         for n in 1..=11 {
-            writeln!(w, "bind-key -T {} F{n} send-keys F{n}", TABLE, n = n)?;
+            writeln!(w, "bind-key -T {} F{n} send-keys F{n}", F12_TABLE, n = n)?;
         }
-        writeln!(w, "bind-key -T {} F12 detach-client", TABLE)?;
-        writeln!(w, "bind-key -T {} -r Space next-layout", TABLE)?;
+        writeln!(w, "bind-key -T {} F12 detach-client", F12_TABLE)?;
+        writeln!(w, "bind-key -T {} -r Space next-layout", F12_TABLE)?;
         for n in 1..=9 {
-            writeln!(w, "bind-key -T {} {n} select-window -t {n}", TABLE, n = n)?;
+            writeln!(
+                w,
+                "bind-key -T {} {n} select-window -t {n}",
+                F12_TABLE,
+                n = n
+            )?;
         }
         Ok(())
     })?;
@@ -135,9 +136,6 @@ fn pane_current_path(w: &mut dyn Write, _: &Context) -> io::Result<()> {
         ("c", "new-window"),
         ("'\"'", "split-window"),
     ];
-    for (key, _) in key_binding {
-        writeln!(w, "unbind-key {}", key)?;
-    }
     for (key, binding) in key_binding {
         writeln!(w, "bind-key {} {} -c '{}'", key, binding, CWD)?;
     }
@@ -160,24 +158,25 @@ fn choose_tree(v: Version) -> String {
 }
 
 fn copy_to_system_clipboard(w: &mut dyn Write) -> io::Result<()> {
-    let to_system_clipboard;
-    if is_mac() {
-        to_system_clipboard = "pbcopy";
-    } else {
-        to_system_clipboard = "xclip -selection clipboard";
-    }
-    fn write_config_line(w: &mut dyn Write, fmt_args: std::fmt::Arguments) -> io::Result<()> {
+    fn write_config(w: &mut dyn Write, arguments: fmt::Arguments<'_>) -> io::Result<()> {
         if is_mac() {
-            writeln!(w, "{}", fmt_args)
+            writeln!(w, "{}", arguments)
         } else {
-            writeln!(w, "if-shell 'xclip -o > /dev/null 2>&1' '{}'", fmt_args)
+            writeln!(w, "if-shell 'xclip -o > /dev/null 2>&1' '{}'", arguments)
         }
     }
-    write_config_line(
+    let copy_cmd = if is_mac() {
+        "pbcopy"
+    } else {
+        "xclip -selection clipboard"
+    };
+    // We use format_args! to avoid allocation.
+    // See this comment why we can't use let binding, https://stackoverflow.com/a/56304571
+    write_config(
         w,
         format_args!(
             r#"bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "{}""#,
-            to_system_clipboard
+            copy_cmd
         ),
     )
 }
@@ -185,7 +184,6 @@ fn copy_to_system_clipboard(w: &mut dyn Write) -> io::Result<()> {
 fn half_pageup_pagedown(w: &mut dyn Write) -> io::Result<()> {
     let key_binding = &[("PageUp", "halfpage-up"), ("PageDown", "halfpage-down")];
     for (key, binding) in key_binding {
-        writeln!(w, "unbind-key -T copy-mode-vi {}", key)?;
         writeln!(
             w,
             "bind-key -T copy-mode-vi {} send-keys -X {}",
