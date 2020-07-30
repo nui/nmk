@@ -108,16 +108,21 @@ pub fn main(opt: Opt) -> ! {
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version.as_str());
         let is_color_term = terminal::support_256_color(&opt);
-        let config = {
-            let context = make_config_context(&opt, is_color_term);
-            tmux.render_config_in_temp_dir(&opt, context)
-                .expect("Unable to create temporary config file")
+        let config = match opt.tmux_conf {
+            Some(ref config) => config.clone(),
+            None => {
+                let context = make_config_context(&opt, is_color_term);
+                let config = tmux
+                    .render_config_in_temp_dir(&opt, context)
+                    .expect("Unable to create temporary config file");
+                if opt.render {
+                    print_config_then_remove(&config).expect("Unable to print config");
+                    exit(0);
+                }
+                set_env("NMK_TMP_TMUX_CONF", &config);
+                config
+            }
         };
-        set_env("NMK_TMUX_CONF", &config);
-        if opt.print_config {
-            print_config_then_remove(&config).expect("Unable to print config");
-            exit(0);
-        }
         tmux.exec(&opt, &config, is_color_term);
     }
 }

@@ -28,14 +28,14 @@ pub struct Opt {
         help = "Use a different tmux socket name"
     )]
     pub socket: String,
+    #[structopt(long = "file", help = "Specify an alternative tmux configuration file")]
+    pub tmux_conf: Option<PathBuf>,
     #[structopt(short = "l", long, help = "Start zsh login shell")]
     pub login: bool,
     #[structopt(long, help = "Detach the client when the session is destroyed")]
     pub detach_on_destroy: bool,
     #[structopt(long, help = "Disable automatically fix")]
     pub no_autofix: bool,
-    #[structopt(long, help = "Allow nested tmux sessions")]
-    pub inception: bool,
     #[structopt(short, parse(from_occurrences), help = "Request verbose logging")]
     pub verbosity: u8,
     #[structopt(short, help = "Explicitly informs tmux that UTF-8 is supported")]
@@ -44,8 +44,8 @@ pub struct Opt {
     pub usage: bool,
     #[structopt(long, help = "Display Message of The Day")]
     pub motd: bool,
-    #[structopt(long, help = "Print tmux config then exit")]
-    pub print_config: bool,
+    #[structopt(long, help = "Render tmux config then exit")]
+    pub render: bool,
     #[structopt(subcommand)]
     pub cmd: Option<SubCommand>,
     #[structopt(skip = Instant::now())]
@@ -68,8 +68,6 @@ pub enum SubCommand {
     Info,
     #[structopt(about = "Generate tab-completion scripts for your shell")]
     Completions(Completion),
-    #[structopt(about = "Render tmux config")]
-    Render(Render),
     #[structopt(external_subcommand)]
     Other(Vec<String>),
 }
