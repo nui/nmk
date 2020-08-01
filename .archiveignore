@@ -23,20 +23,13 @@ zsh/plugins/zsh-syntax-highlighting/images
 # our directories
 docker
 docs
-etc/nmkup.nuimk.com
+etc/systemd
 nmk
-project
 src
-systemd
-tools
 zsh/src
 # our files
 .archiveignore
 .firebaserc
-build.sbt
 etc/build.py
 firebase.json
-package-lock.json
-package.json
-settings.js
 vim/update-plugins
