@@ -160,11 +160,7 @@ fn choose_tree(v: Version) -> String {
 fn is_system_clipboard_available() -> bool {
     let mut cmd = Command::new(XCLIP);
     cmd.arg("-o").stdout(Stdio::null()).stderr(Stdio::null());
-    if let Ok(output) = cmd.output() {
-        output.status.success()
-    } else {
-        false
-    }
+    cmd.output().map_or(false, |output| output.status.success())
 }
 
 fn copy_to_system_clipboard(w: &mut dyn Write) -> io::Result<()> {

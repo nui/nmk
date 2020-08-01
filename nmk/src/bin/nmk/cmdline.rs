@@ -52,16 +52,7 @@ pub struct Opt {
     pub cmd: Option<SubCommand>,
     #[structopt(skip = Instant::now())]
     pub start_time: Instant,
-}
-
-impl Opt {
-    pub fn args(&self) -> &[String] {
-        use SubCommand::*;
-        match self.cmd {
-            Some(Other(ref args)) => args.as_slice(),
-            _ => Default::default(),
-        }
-    }
+    pub args: Vec<String>,
 }
 
 #[derive(Debug, StructOpt)]
@@ -70,8 +61,6 @@ pub enum SubCommand {
     Info,
     #[structopt(about = "Generate tab-completion scripts for your shell")]
     Completions(Completion),
-    #[structopt(external_subcommand)]
-    Other(Vec<String>),
 }
 
 #[derive(Debug, StructOpt)]

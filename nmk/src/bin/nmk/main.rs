@@ -22,7 +22,6 @@ fn main() {
             match *sub_command {
                 SubCommand::Info => commands::info::display_info(),
                 SubCommand::Completions(ref opt) => commands::completion::completion(opt),
-                SubCommand::Other(..) => entrypoint::main(opt),
             }
         }
         None => entrypoint::main(opt),

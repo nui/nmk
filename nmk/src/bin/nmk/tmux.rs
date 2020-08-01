@@ -65,15 +65,15 @@ impl Tmux {
         }
         cmd.arg("-f");
         cmd.arg(config);
-        let tmux_args = opt.args();
-        if tmux_args.is_empty() {
+        if opt.args.is_empty() {
             // Attach to tmux or create new session
             cmd.args(&["new-session", "-A"]);
             if self.version < Version::V31 {
                 cmd.args(&["-s", "0"]);
             }
         } else {
-            cmd.args(tmux_args);
+            log::debug!("positional arguments: {:?}", opt.args);
+            cmd.args(opt.args.iter());
         }
         log::debug!("exec command: {:?}", cmd);
         print_usage_time(&opt);
