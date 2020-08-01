@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use once_cell::sync::Lazy;
+use structopt::clap::Shell;
 use structopt::StructOpt;
 
 use crate::version::get_verbose_version;
@@ -50,9 +51,11 @@ pub struct Opt {
     pub render: bool,
     #[structopt(subcommand)]
     pub cmd: Option<SubCommand>,
+    #[structopt(value_name = "command", help = "Tmux command")]
+    pub args: Vec<String>,
+
     #[structopt(skip = Instant::now())]
     pub start_time: Instant,
-    pub args: Vec<String>,
 }
 
 #[derive(Debug, StructOpt)]
@@ -67,6 +70,6 @@ pub enum SubCommand {
 pub struct Completion {
     #[structopt(short, long, help = "output path, default to standard output")]
     pub output: Option<PathBuf>,
-    #[structopt(help = "possible values: zsh, bash, fish, powershell, elvish")]
+    #[structopt(possible_values = &Shell::variants())]
     pub shell: String,
 }
