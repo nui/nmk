@@ -13,15 +13,15 @@ struct Info {
 
 #[derive(Serialize)]
 struct Cargo {
-    compiled_target: &'static str,
-    detect_target: String,
+    cargo_target: &'static str,
+    rustup_get_architecture: String,
 }
 
 pub fn display_info() {
     let info = Info {
         cargo: Cargo {
-            compiled_target: env!("CARGO_TARGET"),
-            detect_target: get_current_arch_by_script().unwrap_or_else(identity),
+            cargo_target: env!("CARGO_TARGET"),
+            rustup_get_architecture: get_current_arch_by_script().unwrap_or_else(identity),
         },
     };
     if let Ok(json) = serde_json::to_string_pretty(&info) {
@@ -32,12 +32,8 @@ pub fn display_info() {
 fn get_current_arch_by_script() -> Result<String, String> {
     let detect_arch_script = NMK_INIT_SCRIPT
         .lines()
-        .filter(|line| !line.starts_with("main "))
-        .chain(
-            ["get_architecture || return 1", "echo $RETVAL"]
-                .iter()
-                .copied(),
-        )
+        .take_while(|line| !line.starts_with(r##"main "$@""##))
+        .chain(vec!["get_architecture || return 1", "echo $RETVAL"])
         // +100 is for last two lines to avoid reallocation
         .fold(
             String::with_capacity(NMK_INIT_SCRIPT.len() + 100),

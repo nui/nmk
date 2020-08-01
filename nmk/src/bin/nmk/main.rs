@@ -15,6 +15,7 @@ mod zsh;
 fn main() {
     let opt = cmdline::Opt::from_args();
     logging::setup(opt.verbosity);
+    log::debug!("options: {:#?}", opt);
     match opt.cmd {
         Some(ref sub_command) => {
             use cmdline::SubCommand;

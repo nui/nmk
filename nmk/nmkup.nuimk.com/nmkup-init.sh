@@ -17,16 +17,19 @@ NMKUP_UPDATE_ROOT="${NMKUP_UPDATE_ROOT:-https://storage.googleapis.com/nmk.nuimk
 usage() {
     cat 1>&2 <<EOF
 nmkup 0.1.0
-All in one binary to setup nmk
+The NMK installer/updater
 
 USAGE:
     nmkup [FLAGS]
 
 FLAGS:
-    -f, --force      Force install
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-    -v               Request verbose logging
+    -b, --backup       Backup important files before update
+    -f, --force        Force install
+    -h, --help         Prints help information
+        --no-filter    Do not filter items based on /etc/os-release data
+    -V, --version      Prints version information
+        --vendor       Install vendored files
+    -v                 Request verbose logging
 EOF
 }
 
@@ -406,9 +409,9 @@ downloader() {
         if [ -n "$_ciphersuites" ]; then
             curl --proto '=https' --tlsv1.2 --ciphers "$_ciphersuites" --silent --show-error --fail --location "$1" --output "$2"
         else
-            echo "Warning: Not forcing strong cipher suites for TLS, this is potentially less secure"
+            echo "Warning: Not enforcing strong cipher suites for TLS, this is potentially less secure"
             if ! check_help_for "$3" curl --proto --tlsv1.2; then
-                echo "Warning: Not forcing TLS v1.2, this is potentially less secure"
+                echo "Warning: Not enforcing TLS v1.2, this is potentially less secure"
                 curl --silent --show-error --fail --location "$1" --output "$2"
             else
                 curl --proto '=https' --tlsv1.2 --silent --show-error --fail --location "$1" --output "$2"
@@ -420,9 +423,9 @@ downloader() {
         if [ -n "$_ciphersuites" ]; then
             wget --https-only --secure-protocol=TLSv1_2 --ciphers "$_ciphersuites" "$1" -O "$2"
         else
-            echo "Warning: Not forcing strong cipher suites for TLS, this is potentially less secure"
+            echo "Warning: Not enforcing strong cipher suites for TLS, this is potentially less secure"
             if ! check_help_for "$3" wget --https-only --secure-protocol; then
-                echo "Warning: Not forcing TLS v1.2, this is potentially less secure"
+                echo "Warning: Not enforcing TLS v1.2, this is potentially less secure"
                 wget "$1" -O "$2"
             else
                 wget --https-only --secure-protocol=TLSv1_2 "$1" -O "$2"
