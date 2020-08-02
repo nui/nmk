@@ -1,5 +1,7 @@
-#!/bin/sh
+#!/bin/zsh
 set -ex
+
+cd ${0:a:h}
 
 export CLOUDSDK_ACTIVE_CONFIG_NAME=nui
 
