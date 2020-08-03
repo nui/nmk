@@ -9,35 +9,39 @@ alias help=run-help
 () {
     local -a ls_options
     local color_auto
-    local color_never
 
     local prog=ls
     local version=gnu
 
-    case $OSTYPE in
-        linux*) ;;
-        darwin*)
-            if (( ${+commands[gls]} )); then
-                prog=gls
-            else
-                version=bsd
-            fi
-            ;;
-        freebsd*) version=bsd ;;
-    esac
-
-    if [[ $version == gnu ]]; then
-        ls_options+=--group-directories-first
-        color_auto='--color=auto'
-        color_never='--color=never'
+    if ((${+commands[lsd]})); then
+        ls_options+=(--group-dirs first)
+        alias la=" lsd -lah $ls_options"
+        alias lh="lsd -lh $ls_options"
+        alias ls="lsd"
     else
-        color_auto='-G'
-    fi
+        case $OSTYPE in
+            linux*) ;;
+            darwin*)
+                if (( ${+commands[gls]} )); then
+                    prog=gls
+                else
+                    version=bsd
+                fi
+                ;;
+            freebsd*) version=bsd ;;
+        esac
 
-    alias la=" command $prog $color_auto $ls_options -lha"
-    alias lh="command $prog $color_auto $ls_options -lh"
-    alias LH=" command $prog $color_never $ls_options -lhF"
-    alias ls="command $prog $color_auto"
+        if [[ $version == gnu ]]; then
+            ls_options+=--group-directories-first
+            color_auto='--color=auto'
+        else
+            color_auto='-G'
+        fi
+
+        alias la=" command $prog $color_auto $ls_options -lha"
+        alias lh="command $prog $color_auto $ls_options -lh"
+        alias ls="command $prog $color_auto"
+    fi
 }
 
 autoload -Uz rf
