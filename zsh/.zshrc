@@ -82,15 +82,18 @@ alias grep='grep --color=auto'
 alias help=run-help
 () {
     local -a ls_options
-    local color_auto
+    local color
 
     local prog=ls
     local version=gnu
 
     if ((${+commands[lsd]})); then
         ls_options+=(--group-dirs first)
-        alias la=" lsd -lah $ls_options"
-        alias lh="lsd -lh $ls_options"
+        if [[ $TERMINAL_EMULATOR = JetBrains-JediTerm ]]; then
+            color="--color=never"
+        fi
+        alias la=" lsd -lah $color $ls_options"
+        alias lh="lsd -lh $color $ls_options"
         alias ls="lsd"
     else
         case $OSTYPE in
@@ -107,14 +110,14 @@ alias help=run-help
 
         if [[ $version == gnu ]]; then
             ls_options+=--group-directories-first
-            color_auto='--color=auto'
+            color='--color=auto'
         else
-            color_auto='-G'
+            color='-G'
         fi
 
-        alias la=" command $prog $color_auto $ls_options -lha"
-        alias lh="command $prog $color_auto $ls_options -lh"
-        alias ls="command $prog $color_auto"
+        alias la=" command $prog $color $ls_options -lha"
+        alias lh="command $prog $color $ls_options -lh"
+        alias ls="command $prog $color"
     fi
 }
 
