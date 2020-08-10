@@ -80,7 +80,7 @@ const DAY_SECS: i64 = 24 * 60 * 60;
 
 fn check_for_update_suggest() {
     if let Some(secs) = seconds_since_build() {
-        if secs > 7 * DAY_SECS {
+        if secs > 30 * DAY_SECS {
             println!("\nnmk: I's been {} since build.\n", human_time(secs));
         }
     }
