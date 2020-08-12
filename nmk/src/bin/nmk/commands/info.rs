@@ -9,23 +9,39 @@ use nmk::NMK_INIT_SCRIPT;
 #[derive(Serialize)]
 struct Info {
     cargo: Cargo,
+    rustup: Rustup,
+    nmk: Nmk,
 }
 
 #[derive(Serialize)]
 struct Cargo {
-    cargo_target: &'static str,
-    rustup_get_architecture: String,
+    target: &'static str,
+}
+
+#[derive(Serialize)]
+struct Rustup {
+    get_architecture: String,
+}
+
+#[derive(Serialize)]
+struct Nmk {
+    commit: Option<&'static str>,
 }
 
 pub fn display_info() {
     let info = Info {
         cargo: Cargo {
-            cargo_target: env!("CARGO_TARGET"),
-            rustup_get_architecture: get_current_arch_by_script().unwrap_or_else(identity),
+            target: env!("CARGO_TARGET"),
+        },
+        rustup: Rustup {
+            get_architecture: get_current_arch_by_script().unwrap_or_else(identity),
+        },
+        nmk: Nmk {
+            commit: option_env!("GIT_SHORT_SHA"),
         },
     };
-    if let Ok(json) = serde_json::to_string_pretty(&info) {
-        println!("{}", json);
+    if let Ok(s) = toml::to_string_pretty(&info) {
+        println!("{}", s);
     }
 }
 
