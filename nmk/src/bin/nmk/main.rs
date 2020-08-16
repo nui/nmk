@@ -17,11 +17,11 @@ fn main() {
     logging::setup(opt.verbosity);
     log::debug!("options: {:#?}", opt);
     match opt.cmd {
-        Some(ref sub_command) => {
+        Some(sub_command) => {
             use cmdline::SubCommand;
-            match *sub_command {
+            match sub_command {
                 SubCommand::Info => commands::info::display_info(),
-                SubCommand::Completions(ref opt) => commands::completion::completion(opt),
+                SubCommand::Completions(ref x) => commands::completion::completion(x),
             }
         }
         None => entrypoint::main(opt),
