@@ -1,10 +1,10 @@
 use std::env;
+use std::path::Path;
 
 use structopt::StructOpt;
 
 use nmk::home::NmkHome;
 use nmk::platform::is_mac;
-use std::path::Path;
 
 mod backup;
 mod build;

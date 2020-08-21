@@ -1,4 +1,3 @@
-use std::collections::hash_map::RandomState;
 use std::collections::VecDeque;
 use std::ffi::{OsStr, OsString};
 use std::fmt::Formatter;
@@ -34,7 +33,7 @@ impl PathVec {
     }
 
     pub fn unique(self) -> Self {
-        Self::from_iter(IndexSet::<_, RandomState>::from_iter(self.vec))
+        Self::from_iter(IndexSet::<_>::from_iter(self.vec))
     }
 
     pub fn no_version_managers(self) -> Self {
