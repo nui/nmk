@@ -53,7 +53,6 @@ pub struct Opt {
     pub cmd: Option<SubCommand>,
     #[structopt(value_name = "command", help = "Tmux command")]
     pub args: Vec<String>,
-
     #[structopt(skip = Instant::now())]
     pub start_time: Instant,
 }
