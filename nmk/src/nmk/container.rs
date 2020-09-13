@@ -2,9 +2,10 @@ use std::fs;
 
 use crate::platform;
 
-#[allow(dead_code)]
 struct CGroup<'a> {
+    #[allow(dead_code)]
     hierarchy_id: &'a str,
+    #[allow(dead_code)]
     subsystems: &'a str,
     control_group: &'a str,
 }
@@ -31,14 +32,12 @@ fn is_container(s: &str) -> bool {
         .any(|cg| cg.is_container())
 }
 
-const INIT_CONTROL_GROUP: &str = "/proc/1/cgroup";
-
 pub fn detect_container() -> bool {
     if platform::is_mac() {
         return false;
     }
-    let contents =
-        fs::read_to_string(INIT_CONTROL_GROUP).expect("Cannot open cgroup of init process");
+    let self_cgroup = format!("/proc/{}/cgroup", std::process::id());
+    let contents = fs::read_to_string(self_cgroup).expect("Cannot read self cgroup");
     is_container(&contents)
 }
 

@@ -1,9 +1,9 @@
 use std::collections::VecDeque;
+use std::env;
 use std::ffi::{OsStr, OsString};
-use std::fmt::Formatter;
+use std::fmt::{self, Debug, Formatter};
 use std::iter::FromIterator;
 use std::path::PathBuf;
-use std::{env, fmt};
 
 use indexmap::IndexSet;
 use nix::NixPath;
@@ -13,7 +13,7 @@ pub struct PathVec {
     vec: VecDeque<PathBuf>,
 }
 
-impl fmt::Debug for PathVec {
+impl Debug for PathVec {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut f = f.debug_list();
         for p in self.iter() {
@@ -39,7 +39,7 @@ impl PathVec {
     pub fn no_version_managers(self) -> Self {
         self.vec
             .into_iter()
-            .filter(|x| !x.ends_with(".pyenv/shims") && !x.ends_with(".rbenv/shims"))
+            .filter(|p| !p.ends_with(".pyenv/shims") && !p.ends_with(".rbenv/shims"))
             .collect()
     }
 

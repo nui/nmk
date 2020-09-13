@@ -1,5 +1,6 @@
+use std::fmt::{self, Debug, Display};
+use std::fs;
 use std::path::Path;
-use std::{fmt, fs};
 
 use bytes::{Buf, Bytes};
 use reqwest::Client;
@@ -44,9 +45,10 @@ enum GcsError {
     HttpError { status: u16, url: String },
 }
 
-impl fmt::Display for GcsError {
+impl Display for GcsError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        // This Debug is intentional
+        Debug::fmt(self, f)
     }
 }
 

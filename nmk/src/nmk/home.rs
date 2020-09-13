@@ -1,20 +1,28 @@
-use std::fmt::Formatter;
+use std::env;
+use std::fmt::{self, Debug, Formatter};
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::{env, fmt};
 
 use dirs::home_dir;
 
 use crate::env_name::NMK_HOME;
 
-/// Main directory of dotfiles
+/// Home directory of dotfiles
 #[derive(Clone)]
 pub struct NmkHome(PathBuf);
 
-impl fmt::Debug for NmkHome {
+impl Debug for NmkHome {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        fmt::Debug::fmt(&self.0, f)
+        Debug::fmt(&self.0, f)
     }
+}
+
+fn find_path_from_homedir() -> Option<PathBuf> {
+    home_dir().map(|p| p.join(".nmk"))
+}
+
+fn find_path_from_env() -> Option<PathBuf> {
+    env::var_os(NMK_HOME).map(PathBuf::from)
 }
 
 impl NmkHome {
@@ -22,32 +30,24 @@ impl NmkHome {
         self.0.join(".git").exists()
     }
 
-    fn _find(canonicalize: bool) -> Option<Self> {
-        env::var_os(NMK_HOME)
-            .map(PathBuf::from)
-            .and_then(|p| {
-                if canonicalize {
-                    p.canonicalize().ok()
-                } else {
-                    Some(p)
-                }
-            })
-            .or_else(|| home_dir().map(|p| p.join(".nmk")))
-            .map(From::from)
-    }
-
     /// Attempt to find correct NMK_HOME candidate
     /// - if NMK_HOME is set, canonicalize it
     /// - otherwise default to $HOME/.nmk
     ///
-    /// Absolute path is necessary because we use this value in vendored zsh.
+    /// Canonicalization is necessary because we use this value in vendored zsh which required
+    /// absolute path.
     pub fn find() -> Option<Self> {
-        Self::_find(true)
+        find_path_from_env()
+            .and_then(|p| p.canonicalize().ok())
+            .or_else(find_path_from_homedir)
+            .map(Self::from)
     }
 
     /// Like find but don't canonicalize (it fail if directory doesn't exist)
     pub fn find_for_install() -> Option<Self> {
-        Self::_find(false)
+        find_path_from_env()
+            .or_else(find_path_from_homedir)
+            .map(Self::from)
     }
 }
 

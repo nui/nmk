@@ -1,7 +1,8 @@
+#[macro_use]
+#[path = "macros.rs"]
+mod _macros;
 pub mod bin_name;
 pub mod container;
-#[macro_use]
-pub mod core;
 pub mod env_name;
 pub mod gcs;
 pub mod home;
