@@ -53,12 +53,9 @@ impl PathVec {
     }
 
     pub fn parse<T: AsRef<OsStr>>(input: T) -> Self {
-        let unparsed = input.as_ref();
-        if !unparsed.is_empty() {
-            env::split_paths(unparsed).filter(|p| p.len() > 0).collect()
-        } else {
-            Self::new()
-        }
+        env::split_paths(input.as_ref())
+            .filter(|p| p.len() > 0)
+            .collect()
     }
 
     pub fn new() -> Self {
