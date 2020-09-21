@@ -15,21 +15,13 @@ pub struct PathVec {
 
 impl Debug for PathVec {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let mut f = f.debug_list();
-        for p in self.iter() {
-            f.entry(p);
-        }
-        f.finish()
+        Debug::fmt(&self.vec, f)
     }
 }
 
 impl PathVec {
     pub fn make(&self) -> OsString {
         return env::join_paths(self.clone().unique()).expect("join path error");
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &PathBuf> {
-        self.vec.iter()
     }
 
     pub fn unique(self) -> Self {
