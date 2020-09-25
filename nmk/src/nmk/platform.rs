@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use once_cell::sync::Lazy;
 
 #[allow(dead_code)]
@@ -24,17 +22,7 @@ pub fn is_mac() -> bool {
     *PLATFORM == PlatformType::OSX
 }
 
-static PLATFORM: Lazy<PlatformType> = Lazy::new(|| {
-    let mut platform = what_platform();
-    if platform == PlatformType::Linux {
-        if PathBuf::from("/etc/alpine-release").exists() {
-            platform = PlatformType::Alpine
-        } else if PathBuf::from("/etc/arch-release").exists() {
-            platform = PlatformType::Arch
-        }
-    }
-    platform
-});
+static PLATFORM: Lazy<PlatformType> = Lazy::new(what_platform);
 
 #[cfg(target_os = "macos")]
 fn what_platform() -> PlatformType {
@@ -43,7 +31,14 @@ fn what_platform() -> PlatformType {
 
 #[cfg(target_os = "linux")]
 fn what_platform() -> PlatformType {
-    PlatformType::Linux
+    use std::path::PathBuf;
+    if PathBuf::from("/etc/alpine-release").exists() {
+        PlatformType::Alpine
+    } else if PathBuf::from("/etc/arch-release").exists() {
+        PlatformType::Arch
+    } else {
+        PlatformType::Linux
+    }
 }
 
 #[cfg(not(any(target_os = "linux", target_os = "macos")))]

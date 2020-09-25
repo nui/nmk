@@ -32,7 +32,7 @@ fn is_container(s: &str) -> bool {
         .any(|cg| cg.is_container())
 }
 
-pub fn detect_container() -> bool {
+pub fn is_containerized() -> bool {
     if platform::is_mac() {
         return false;
     }

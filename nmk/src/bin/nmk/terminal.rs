@@ -32,7 +32,7 @@ pub fn support_256_color(opt: &Opt) -> bool {
     opt.force_256_color
         || is_256_color_term(env::var_os("TERM"))
         || is_256_color_colorterm(env::var_os("COLORTERM"))
-        || container::detect_container()
+        || container::is_containerized()
 }
 
 #[cfg(test)]
