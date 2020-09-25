@@ -104,26 +104,27 @@ pub fn main(opt: Opt) -> ! {
     if opt.login {
         crate::zsh::exec_login_shell(&opt);
     } else {
-        let tmux = Tmux::new(nmk_home.clone());
+        let tmux = Tmux::new(nmk_home);
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version.as_str());
-        let is_color_term = terminal::support_256_color(&opt);
+        let is_color_term = opt.force_256_color || terminal::support_256_color();
+        let tmp_config;
         let config = match opt.tmux_conf {
-            Some(ref config) => config.clone(),
+            Some(ref config) => config,
             None => {
                 let context = make_config_context(&opt, is_color_term);
-                let config = tmux
+                tmp_config = tmux
                     .render_config_in_temp_dir(&opt, context)
                     .expect("Unable to create temporary config file");
                 if opt.render {
-                    print_config_then_remove(&config).expect("Unable to print config");
+                    print_config_then_remove(&tmp_config).expect("Unable to print config");
                     exit(0);
                 }
-                set_env("NMK_TMP_TMUX_CONF", &config);
-                config
+                set_env("NMK_TMP_TMUX_CONF", &tmp_config);
+                &tmp_config
             }
         };
-        tmux.exec(&opt, &config, is_color_term);
+        tmux.exec(&opt, config, is_color_term);
     }
 }
 

@@ -4,8 +4,6 @@ use std::ops::Deref;
 
 use nmk::container;
 
-use crate::cmdline::Opt;
-
 fn slice_contains_term<T: Deref<Target = OsStr>>(slice: &[&str], term: Option<T>) -> bool {
     term.as_deref()
         .and_then(OsStr::to_str)
@@ -28,9 +26,8 @@ fn is_256_color_colorterm(term: Option<OsString>) -> bool {
     slice_contains_term(COLORTERM_LIST, term)
 }
 
-pub fn support_256_color(opt: &Opt) -> bool {
-    opt.force_256_color
-        || is_256_color_term(env::var_os("TERM"))
+pub fn support_256_color() -> bool {
+    is_256_color_term(env::var_os("TERM"))
         || is_256_color_colorterm(env::var_os("COLORTERM"))
         || container::is_containerized()
 }
