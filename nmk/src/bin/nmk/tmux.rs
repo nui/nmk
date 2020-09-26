@@ -89,7 +89,7 @@ impl Tmux {
     }
 
     pub fn render_config_in_temp_dir(&self, opt: &Opt, context: Context) -> io::Result<PathBuf> {
-        let uid = nix::unistd::Uid::current().as_raw();
+        let uid = nix::unistd::Uid::current();
         let tmp_dir = std::env::var("TMPDIR").unwrap_or_else(|_| "/tmp".to_owned());
         let config_name = format!("nmk.{}.{}.tmux.conf", uid, opt.socket);
         let config_path = Path::new(&tmp_dir).join(&config_name);
@@ -112,18 +112,5 @@ pub fn make_config_context(opt: &Opt, is_color_term: bool) -> Context {
         detach_on_destroy: opt.detach_on_destroy,
         default_term: default_term.to_owned(),
         default_shell: which::which(ZSH).expect("zsh not found").to_owned(),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_version() {
-        let tmux_output = "tmux 3.1b";
-
-        let actual = Version::try_from_version_output(tmux_output);
-        assert!(matches!(actual, Ok(Version::V31b)));
     }
 }

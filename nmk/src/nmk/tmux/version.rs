@@ -84,3 +84,16 @@ impl TryFrom<&str> for Version {
         Self::from_str(value).map_err(|_| ParseVersionError::UnsupportedVersion(value.to_owned()))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_version() {
+        let tmux_output = "tmux 3.1b";
+
+        let actual = Version::try_from_version_output(tmux_output);
+        assert!(matches!(actual, Ok(Version::V31b)));
+    }
+}
