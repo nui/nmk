@@ -101,7 +101,9 @@ def build_release(target, strip=False, lto=False, commit_id=None):
     logging.info("Building %s target", target)
     logging.debug("env: %s", env)
     logging.debug("cmd: %s", " ".join(args))
-    subprocess.call(args, env=dict(os.environ.copy(), **env))
+    exit_code = subprocess.call(args, env=dict(os.environ.copy(), **env))
+    if exit_code != 0:
+        exit(exit_code)
 
 
 def get_version_from_manifest(manifest_path):
