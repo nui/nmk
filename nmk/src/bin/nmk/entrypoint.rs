@@ -1,4 +1,4 @@
-use std::ffi::OsString;
+use std::ffi::OsStr;
 use std::fs::File;
 use std::path::Path;
 use std::process::exit;
@@ -29,8 +29,9 @@ fn setup_preferred_editor() {
     const PREFERRED_EDITORS: &[&str] = &["nvim", "vim"];
 
     match env::var_os(EDITOR)
+        .as_deref()
         .into_iter()
-        .chain(PREFERRED_EDITORS.iter().map(OsString::from))
+        .chain(PREFERRED_EDITORS.iter().map(OsStr::new))
         .find(|bin| which::which(bin).is_ok())
     {
         Some(editor) => {
