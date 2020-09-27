@@ -4,6 +4,7 @@ use std::ops::Deref;
 use std::path::{Path, PathBuf};
 
 use dirs::home_dir;
+use nix::NixPath;
 
 use crate::env_name::NMK_HOME;
 
@@ -22,7 +23,9 @@ fn find_path_from_homedir() -> Option<PathBuf> {
 }
 
 fn find_path_from_env() -> Option<PathBuf> {
-    env::var_os(NMK_HOME).map(PathBuf::from)
+    env::var_os(NMK_HOME)
+        .map(PathBuf::from)
+        .filter(PathBuf::is_empty)
 }
 
 impl NmkHome {
