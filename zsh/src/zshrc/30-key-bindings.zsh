@@ -42,7 +42,7 @@
     # use emacs keybindings
     bindkey -e
 
-    if [[ -n $NMK_TMUX_VERSION ]]; then
+    if [[ -n $TMUX && -n $NMK_TMUX_VERSION ]]; then
         # PageUp to enter copy mode
         _nmk-tmux-copy-mode() tmux copy-mode -eu
         zle -N _nmk-tmux-copy-mode
