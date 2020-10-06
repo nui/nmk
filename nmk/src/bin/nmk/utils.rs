@@ -1,9 +1,9 @@
 use std::env;
 
 use nmk::env_name::{DISPLAY, WINDOWID};
+use nmk::platform::is_mac;
 
 use crate::cmdline::Opt;
-use nmk::platform::is_mac;
 
 pub fn is_dev_machine() -> bool {
     is_mac() || (env::var_os(DISPLAY).is_some() && env::var_os(WINDOWID).is_some())

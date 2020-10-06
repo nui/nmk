@@ -7,7 +7,7 @@ use structopt::StructOpt;
 
 use crate::version::get_verbose_version;
 
-static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().unwrap_or_default());
+static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().expect("Missing version info"));
 
 #[structopt(
     name = "nmk",
@@ -69,6 +69,6 @@ pub enum SubCommand {
 pub struct Completion {
     #[structopt(short, long, help = "output path, default to standard output")]
     pub output: Option<PathBuf>,
-    #[structopt(possible_values = &Shell::variants())]
+    #[structopt(possible_values = Shell::variants().as_ref())]
     pub shell: String,
 }

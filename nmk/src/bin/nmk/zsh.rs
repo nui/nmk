@@ -17,7 +17,7 @@ fn has_vendored_zsh(nmk_home: &Path) -> bool {
 pub fn use_global_rcs(_opt: &Opt, nmk_home: &Path) -> bool {
     // Disable global resource files on some platform
     //   - Some linux distributions force sourcing /etc/profile, they do reset PATH set by nmk.
-    //   - MacOs doesn't respect PATH set by nmk, it change the order.
+    //   - MacOs doesn't respect PATH set by nmk, it changes the order.
     let not_friendly_global_rcs = is_mac() || is_alpine() || is_arch();
     has_vendored_zsh(nmk_home) || !not_friendly_global_rcs
 }
@@ -32,7 +32,7 @@ pub fn setup(opt: &Opt, nmk_home: &Path) {
 
 pub fn exec_login_shell(opt: &Opt) -> ! {
     let mut cmd = Command::new(ZSH);
-    // This told zsh that it is a login shell
+    // Signal zsh that it is a login shell
     cmd.arg0("-zsh");
     print_usage_time(&opt);
     let err = cmd.exec();
