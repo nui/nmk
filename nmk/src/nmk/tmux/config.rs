@@ -6,6 +6,7 @@ use std::process::{Command, Stdio};
 use indoc::indoc;
 
 use crate::bin_name::XCLIP;
+use crate::env_name::NMK_HOME;
 use crate::platform::is_mac;
 
 use super::version::Version;
@@ -30,26 +31,20 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
     writeln!(w, "bind-key C-l {}", LAST_SESSION)?;
     writeln!(w, "{}", "bind-key C-t display-message '#{pane_tty}'")?;
     section(w, c, "Function Key Binding", |w, _| {
+        for n in 1..=12 {
+            writeln!(w, "bind-key -n S-F{n} send-keys F{n}", n = n)?;
+        }
         writeln!(w, "bind-key -n F1 {}", NEXT_PANE)?;
         writeln!(w, "bind-key -n F2 last-window")?;
         writeln!(w, "bind-key -n F3 previous-window")?;
         writeln!(w, "bind-key -n F4 next-window")?;
         writeln!(w, "bind-key -n F5 resize-pane -Z")?;
         writeln!(w, "bind-key -n F6 {}", choose_tree(v))?;
-        writeln!(w, "bind-key -n F8 switch-client -n")?;
-        for n in 1..=12 {
-            writeln!(w, "bind-key -n S-F{n} send-keys F{n}", n = n)?;
-        }
-        Ok(())
+        writeln!(w, "bind-key -n F8 switch-client -n")
     })?;
     section(w, c, "F12 Key Table", |w, _| {
         writeln!(w, "bind-key F12 send-keys F12")?;
         writeln!(w, "bind-key -n F12 switch-client -T {}", F12_TABLE)?;
-        for n in 1..=11 {
-            writeln!(w, "bind-key -T {} F{n} send-keys F{n}", F12_TABLE, n = n)?;
-        }
-        writeln!(w, "bind-key -T {} F12 detach-client", F12_TABLE)?;
-        writeln!(w, "bind-key -T {} -r Space next-layout", F12_TABLE)?;
         for n in 1..=9 {
             writeln!(
                 w,
@@ -58,7 +53,11 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
                 n = n
             )?;
         }
-        Ok(())
+        for n in 1..=11 {
+            writeln!(w, "bind-key -T {} F{n} send-keys F{n}", F12_TABLE, n = n)?;
+        }
+        writeln!(w, "bind-key -T {} F12 detach-client", F12_TABLE)?;
+        writeln!(w, "bind-key -T {} -r Space next-layout", F12_TABLE)
     })?;
     section(w, c, "Pane Current Path", pane_current_path)?;
     section(w, c, "Copy Mode", |w, _| {
@@ -76,11 +75,12 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
     })?;
     // Colors
     section(w, c, "Colors", |w, c| {
-        if c.support_256_color {
-            writeln!(w, "{}", include_str!("256color.conf"))
+        let color_config = if c.support_256_color {
+            include_str!("256color.conf")
         } else {
-            writeln!(w, "{}", include_str!("8color.conf"))
-        }
+            include_str!("8color.conf")
+        };
+        writeln!(w, "{}", color_config)
     })
 }
 
@@ -107,8 +107,11 @@ fn render_options(w: &mut dyn Write, c: &Context) -> io::Result<()> {
         r#"set-option -g detach-on-destroy "{}""#,
         on_off!(c.detach_on_destroy)
     )?;
-    writeln!(w, r#"set-option -g history-file "$NMK_HOME/.tmux_history""#)?;
-    Ok(())
+    writeln!(
+        w,
+        r#"set-option -g history-file "${}/.tmux_history""#,
+        NMK_HOME
+    )
 }
 
 fn section<F>(w: &mut dyn Write, c: &Context, name: &str, mut f: F) -> io::Result<()>
