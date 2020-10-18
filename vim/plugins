@@ -5,7 +5,7 @@ ack.vim             https://github.com/mileszs/ack.vim.git
 ctrlp.vim           https://github.com/ctrlpvim/ctrlp.vim.git
 dockerfile.vim      https://github.com/ekalinin/Dockerfile.vim.git
 jellybeans.vim      https://github.com/nanotech/jellybeans.vim.git
-nerdtree            https://github.com/scrooloose/nerdtree.git
+nerdtree            https://github.com/preservim/nerdtree.git
 nginx.vim           https://github.com/chr4/nginx.vim.git
 python-syntax       https://github.com/hdima/python-syntax.git
 syntastic           https://github.com/vim-syntastic/syntastic.git
@@ -14,6 +14,6 @@ vim-airline         https://github.com/vim-airline/vim-airline.git
 vim-airline-themes  https://github.com/vim-airline/vim-airline-themes.git
 vim-dispatch        https://github.com/tpope/vim-dispatch.git
 vim-fugitive        https://github.com/tpope/vim-fugitive.git
-vim-multiple-cursors  https://github.com/terryma/vim-multiple-cursors.git
 vim-repeat          https://github.com/tpope/vim-repeat.git
 vim-surround        https://github.com/tpope/vim-surround.git
+vim-visual-multi    https://github.com/mg979/vim-visual-multi.git
