@@ -25,7 +25,7 @@ fn find_path_from_homedir() -> Option<PathBuf> {
 fn find_path_from_env() -> Option<PathBuf> {
     env::var_os(NMK_HOME)
         .map(PathBuf::from)
-        .filter(PathBuf::is_empty)
+        .filter(|p| !p.is_empty())
 }
 
 impl NmkHome {
