@@ -13,6 +13,7 @@ pub enum Version {
     V31,
     V31a,
     V31b,
+    V31c,
 }
 
 impl FromStr for Version {
@@ -31,6 +32,7 @@ impl FromStr for Version {
             "3.1" => V31,
             "3.1a" => V31a,
             "3.1b" => V31b,
+            "3.1c" => V31c,
             _ => return Err(()),
         };
         Ok(v)
@@ -51,6 +53,7 @@ impl AsRef<str> for Version {
             V31 => "3.1",
             V31a => "3.1a",
             V31b => "3.1b",
+            V31c => "3.1c",
         }
     }
 }
