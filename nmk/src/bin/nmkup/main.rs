@@ -1,4 +1,3 @@
-use std::env;
 use std::path::Path;
 
 use structopt::StructOpt;
@@ -47,15 +46,14 @@ fn main() -> nmk::Result<()> {
 }
 
 fn is_nmkup_init() -> bool {
-    current_exec_stem().as_str().starts_with("nmkup-init")
+    current_exec_name().starts_with("nmkup-init")
 }
 
-fn current_exec_stem() -> String {
-    env::args()
-        .next()
-        .map(std::path::PathBuf::from)
+fn current_exec_name() -> String {
+    std::env::current_exe()
+        .ok()
         .as_deref()
-        .and_then(Path::file_stem)
+        .and_then(Path::file_name)
         .and_then(std::ffi::OsStr::to_str)
         .map(String::from)
         .expect("Unable to parse argv[0] as String")
