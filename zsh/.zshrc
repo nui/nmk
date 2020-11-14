@@ -298,17 +298,19 @@ add-zsh-hook preexec _nmk_preexec
 () {
     typeset -a managers
     # Detect nvm
-    [[ -e $HOME/.nvm/nvm.sh ]] && {
+    # nvm recommends git checkout not brew
+    export NVM_DIR=${NVM_DIR:-$HOME/.nvm}
+    [[ -e $NVM_DIR/nvm.sh ]] && {
         managers+=(nvm)
         function init-nvm {
             local cmd
-            cmd='source $HOME/.nvm/nvm.sh'
+            cmd='source $NVM_DIR/nvm.sh'
             # avoid calling `nvm use` again
             (( ${+NVM_BIN} )) && cmd+=' --no-use'
             eval "$cmd"
         }
     }
-    # Detect pyenv
+    # Detect pyenv, both by brew or git
     (( ${+commands[pyenv]} )) && {
         managers+=(pyenv)
         function init-pyenv {
@@ -332,7 +334,7 @@ add-zsh-hook preexec _nmk_preexec
             fi
         }
     }
-    # Detect rbenv
+    # Detect rbenv, both by brew or git
     (( ${+commands[rbenv]} )) && {
         managers+=(rbenv)
         function init-rbenv {
