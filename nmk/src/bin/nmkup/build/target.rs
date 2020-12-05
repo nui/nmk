@@ -10,7 +10,7 @@ pub enum Target {
 
 impl Target {
     pub fn try_parse_env() -> Result<Target, <Self as FromStr>::Err> {
-        FromStr::from_str(env!("CARGO_TARGET"))
+        FromStr::from_str(env!("BUILD_TARGET"))
     }
 }
 

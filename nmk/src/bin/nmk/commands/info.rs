@@ -1,4 +1,3 @@
-use std::convert::identity;
 use std::io::Write;
 use std::process::{Command, Stdio};
 
@@ -9,13 +8,14 @@ use nmk::NMK_INIT_SCRIPT;
 
 #[derive(Serialize)]
 struct Info {
-    cargo: Cargo,
-    rustup: Rustup,
     nmk: Nmk,
+    rustup: Rustup,
+    toolchain: Toolchain,
 }
 
 #[derive(Serialize)]
-struct Cargo {
+struct Toolchain {
+    rustc: &'static str,
     target: &'static str,
 }
 
@@ -31,14 +31,15 @@ struct Nmk {
 
 pub fn display_info() {
     let info = Info {
-        cargo: Cargo {
-            target: env!("CARGO_TARGET"),
-        },
-        rustup: Rustup {
-            get_architecture: get_current_arch_by_script().unwrap_or_else(identity),
-        },
         nmk: Nmk {
             commit: option_env!("GIT_SHORT_SHA"),
+        },
+        rustup: Rustup {
+            get_architecture: detect_current_architecture(),
+        },
+        toolchain: Toolchain {
+            rustc: env!("BUILD_RUSTC_VERSION"),
+            target: env!("BUILD_TARGET"),
         },
     };
     if let Ok(s) = toml::to_string_pretty(&info) {
@@ -51,7 +52,7 @@ const GET_ARCHITECTURE: &str = indoc! {r##"
     echo $RETVAL
 "##};
 
-fn get_current_arch_by_script() -> Result<String, String> {
+fn detect_current_architecture() -> String {
     // capacity should be bigger than final script size to avoid reallocation
     let capacity = NMK_INIT_SCRIPT.len() + GET_ARCHITECTURE.len();
     let mut detect_arch_script = NMK_INIT_SCRIPT
@@ -71,11 +72,11 @@ fn get_current_arch_by_script() -> Result<String, String> {
         .expect("Spawn process failed");
     let stdin = shell.stdin.as_mut().expect("Shell must have stdin");
     write!(stdin, "{}", detect_arch_script)
-        .map_err(|e| format!("Write shell stdin error: {}", e))?;
+        .unwrap_or_else(|e| panic!("Write shell stdin error: {}", e));
     let output = shell
         .wait_with_output()
-        .map_err(|e| format!("Wait shell failed with: {}", e))?;
-    Ok(String::from_utf8_lossy(output.stdout.as_slice())
+        .unwrap_or_else(|e| panic!("Wait shell failed with: {}", e));
+    String::from_utf8_lossy(output.stdout.as_slice())
         .trim()
-        .to_string())
+        .to_string()
 }
