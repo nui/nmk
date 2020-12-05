@@ -2,6 +2,7 @@ use std::convert::identity;
 use std::io::Write;
 use std::process::{Command, Stdio};
 
+use indoc::indoc;
 use serde::Serialize;
 
 use nmk::NMK_INIT_SCRIPT;
@@ -45,20 +46,23 @@ pub fn display_info() {
     }
 }
 
+const GET_ARCHITECTURE: &str = indoc! {r##"
+    get_architecture || return 1
+    echo $RETVAL
+"##};
+
 fn get_current_arch_by_script() -> Result<String, String> {
-    let detect_arch_script = NMK_INIT_SCRIPT
+    // capacity should be bigger than final script size to avoid reallocation
+    let capacity = NMK_INIT_SCRIPT.len() + GET_ARCHITECTURE.len();
+    let mut detect_arch_script = NMK_INIT_SCRIPT
         .lines()
         .take_while(|line| !line.starts_with(r##"main "$@""##))
-        .chain(vec!["get_architecture || return 1", "echo $RETVAL"])
-        // +100 is for last two lines to avoid reallocation
-        .fold(
-            String::with_capacity(NMK_INIT_SCRIPT.len() + 100),
-            |mut acc, line| {
-                acc.push_str(line);
-                acc.push('\n');
-                acc
-            },
-        );
+        .fold(String::with_capacity(capacity), |mut acc, line| {
+            acc.push_str(line);
+            acc.push('\n');
+            acc
+        });
+    detect_arch_script.push_str(GET_ARCHITECTURE);
     let mut shell = Command::new("sh")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
