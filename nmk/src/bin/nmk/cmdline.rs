@@ -70,5 +70,5 @@ pub struct Completion {
     #[structopt(short, long, help = "output path, default to standard output")]
     pub output: Option<PathBuf>,
     #[structopt(possible_values = Shell::variants().as_ref())]
-    pub shell: String,
+    pub shell: Shell,
 }

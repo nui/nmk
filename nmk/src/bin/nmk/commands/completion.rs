@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::Write;
 
-use structopt::clap::Shell;
 use structopt::StructOpt;
 
 use nmk::bin_name::NMK;
@@ -13,5 +12,5 @@ pub fn completion(completion: &Completion) {
         Some(ref p) => Box::new(File::create(p).expect("Cannot create completion output file")),
         None => Box::new(std::io::stdout()),
     };
-    Opt::clap().gen_completions_to(NMK, completion.shell.parse::<Shell>().unwrap(), &mut write);
+    Opt::clap().gen_completions_to(NMK, completion.shell, &mut write);
 }
