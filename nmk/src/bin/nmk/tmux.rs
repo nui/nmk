@@ -1,4 +1,3 @@
-use std::convert::TryFrom;
 use std::fs::File;
 use std::io;
 use std::io::{BufWriter, Write};
@@ -10,7 +9,7 @@ use nmk::bin_name::{TMUX, ZSH};
 use nmk::env_name::NMK_TMUX_VERSION;
 use nmk::home::NmkHome;
 use nmk::tmux::config::Context;
-use nmk::tmux::version::{ParseVersionError, Version};
+use nmk::tmux::version::{TmuxVersionError, Version};
 
 use crate::cmdline::Opt;
 use crate::utils::{is_dev_machine, print_usage_time};
@@ -21,10 +20,10 @@ pub struct Tmux {
     pub version: Version,
 }
 
-fn find_version() -> Result<Version, ParseVersionError> {
+fn find_version() -> Result<Version, TmuxVersionError> {
     if let Ok(s) = std::env::var(NMK_TMUX_VERSION) {
         log::debug!("Using tmux version from environment variable");
-        Version::try_from(s.as_str())
+        Version::from_version_number(&s)
     } else {
         let output = Command::new(TMUX)
             .arg("-V")
@@ -36,7 +35,7 @@ fn find_version() -> Result<Version, ParseVersionError> {
         }
         let version_output =
             std::str::from_utf8(&output.stdout).expect("tmux version output contain non utf-8");
-        Version::try_from_version_output(version_output)
+        Version::from_version_output(version_output)
     }
 }
 
@@ -44,8 +43,8 @@ impl Tmux {
     pub fn new(nmk_home: NmkHome) -> Tmux {
         let bin = which::which(TMUX).expect("Cannot find tmux binary");
         let version = find_version().unwrap_or_else(|e| match e {
-            ParseVersionError::BadVersionOutput(s) => panic!("Bad tmux output: {}", s),
-            ParseVersionError::UnsupportedVersion(s) => panic!("Unsupported tmux version: {}", s),
+            TmuxVersionError::BadOutput(s) => panic!("Bad tmux output: {}", s),
+            TmuxVersionError::Unsupported(s) => panic!("Unsupported tmux version: {}", s),
         });
         Tmux {
             nmk_home,
