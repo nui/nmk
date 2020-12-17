@@ -14,13 +14,13 @@ use crate::pathenv::PathVec;
 use crate::terminal;
 use crate::tmux::{make_config_context, Tmux};
 
-fn setup_environment(nmk_home: &Path) {
-    let zdotdir = nmk_home.join("zsh");
+fn setup_environment_variable(nmk_home: &Path) {
+    let zsh_dir = nmk_home.join("zsh");
     set_env(NMK_HOME, nmk_home);
-    set_env(ZDOTDIR, zdotdir);
+    set_env(ZDOTDIR, zsh_dir);
 
-    let init_vim = nmk_home.join("vim").join("init.vim");
-    if let Some(path) = init_vim.to_str() {
+    let vim_init = nmk_home.join("vim").join("init.vim");
+    if let Some(path) = vim_init.to_str() {
         set_env(VIMINIT, format!(r"source\ {}", path));
     }
 }
@@ -42,33 +42,39 @@ fn setup_preferred_editor() {
     }
 }
 
-fn setup_path(nmk_home: &Path) {
-    let mut bin_path = PathVec::parse(env::var_os(PATH).expect("$PATH not found"));
-    bin_path.push_front(nmk_home.join("vendor").join("bin"));
-    bin_path.push_front(nmk_home.join("bin"));
-    bin_path = bin_path.unique().no_version_managers();
-    log::debug!("{} = {:#?}", PATH, bin_path);
-    set_env(PATH, bin_path.make());
+fn setup_shell_search_path(nmk_home: &Path) {
+    let mut path = PathVec::from(env::var_os(PATH).expect("$PATH not found"));
+    let additional_search_path = vec![nmk_home.join("bin"), nmk_home.join("vendor").join("bin")];
+    for p in additional_search_path
+        .into_iter()
+        .filter(|p| p.exists())
+        .rev()
+    {
+        path.push_front(p)
+    }
+    path = path.unique().without_version_managers();
+    log::debug!("{} = {:#?}", PATH, path);
+    set_env(PATH, path.join());
 }
 
-fn setup_ld_library_path(nmk_home: &Path) {
-    let vendored_lib_dir = nmk_home.join("vendor").join("lib");
-    if vendored_lib_dir.exists() {
-        let mut lib_path = match env::var_os(LD_LIBRARY_PATH) {
-            Some(value) => PathVec::parse(value),
-            None => PathVec::new(),
-        };
-        lib_path.push_front(vendored_lib_dir);
-        log::debug!("{} = {:#?}", LD_LIBRARY_PATH, lib_path);
-        let next_ld = lib_path.make();
-        set_env(LD_LIBRARY_PATH, next_ld);
+/// Setup custom library path for precompiled tmux and zsh
+fn setup_shell_library_path(nmk_home: &Path) {
+    let vendor_dir = nmk_home.join("vendor");
+    let vendor_lib = vendor_dir.join("lib");
+    if vendor_lib.exists() {
+        let mut path = env::var_os(LD_LIBRARY_PATH)
+            .map(PathVec::from)
+            .unwrap_or_default();
+        path.push_front(vendor_lib);
+        log::debug!("{} = {:#?}", LD_LIBRARY_PATH, path);
+        set_env(LD_LIBRARY_PATH, path.join());
     }
 }
 
 fn display_message_of_the_day() {
     let mut stdout = std::io::stdout();
-    ["/var/run/motd.dynamic", "/etc/motd"]
-        .iter()
+    const MOTD: &[&str] = &["/var/run/motd.dynamic", "/etc/motd"];
+    MOTD.iter()
         .map(Path::new)
         .filter(|p| p.exists())
         .flat_map(File::open)
@@ -100,15 +106,15 @@ pub fn main(opt: Opt) -> ! {
     assert!(nmk_home.exists(), "{:?} doesn't exist", nmk_home);
 
     log::debug!("Dotfiles directory: {:?}", nmk_home);
-    setup_ld_library_path(&nmk_home);
-    setup_path(&nmk_home);
-    setup_environment(&nmk_home);
+    setup_shell_library_path(&nmk_home);
+    setup_shell_search_path(&nmk_home);
+    setup_environment_variable(&nmk_home);
     setup_preferred_editor();
     crate::zsh::setup(&opt, &nmk_home);
     if opt.login {
         crate::zsh::exec_login_shell(&opt);
     } else {
-        let tmux = Tmux::new(nmk_home);
+        let tmux = Tmux::new();
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version.as_str());
         let is_color_term = opt.force_256_color || terminal::support_256_color();

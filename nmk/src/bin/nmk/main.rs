@@ -15,15 +15,14 @@ mod zsh;
 fn main() {
     let opt = cmdline::Opt::from_args();
     logging::setup(opt.verbosity);
-    log::debug!("options: {:#?}", opt);
-    match opt.cmd {
-        Some(sub_command) => {
-            use cmdline::SubCommand;
-            match sub_command {
-                SubCommand::Info => commands::info::display_info(),
-                SubCommand::Completions(ref x) => commands::completion::completion(x),
-            }
+    log::debug!("command line options: {:#?}", opt);
+    if let Some(cmd) = opt.cmd {
+        use cmdline::SubCommand;
+        match cmd {
+            SubCommand::Info => commands::info::print_info(),
+            SubCommand::Completions(ref c) => commands::completion::gen_completion(c),
         }
-        None => entrypoint::main(opt),
+    } else {
+        entrypoint::main(opt)
     }
 }

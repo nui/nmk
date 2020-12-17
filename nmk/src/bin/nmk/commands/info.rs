@@ -29,7 +29,7 @@ struct Nmk {
     commit: Option<&'static str>,
 }
 
-pub fn display_info() {
+pub fn print_info() {
     let info = Info {
         nmk: Nmk {
             commit: option_env!("GIT_SHORT_SHA"),
