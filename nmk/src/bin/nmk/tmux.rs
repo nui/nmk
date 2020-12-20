@@ -1,12 +1,10 @@
-use std::fs::File;
-use std::io;
-use std::io::{BufWriter, Write};
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::{fs, io};
 
 use nmk::bin_name::{TMUX, ZSH};
-use nmk::env_name::NMK_TMUX_VERSION;
+use nmk::env_name::{NMK_TMUX_VERSION, TMPDIR};
 use nmk::tmux::config::Context;
 use nmk::tmux::version::{TmuxVersionError, Version};
 
@@ -74,16 +72,13 @@ impl Tmux {
         panic!("exec {:?} fail with {:?}", cmd, err);
     }
 
-    pub fn render_config_in_temp_dir(&self, opt: &Opt, context: Context) -> io::Result<PathBuf> {
+    pub fn save_config_in_temp_dir(&self, opt: &Opt, contents: &[u8]) -> io::Result<PathBuf> {
         let uid = nix::unistd::Uid::current();
-        let tmp_dir = std::env::var("TMPDIR").unwrap_or_else(|_| "/tmp".to_owned());
-        let config_name = format!("nmk.{}.{}.tmux.conf", uid, opt.socket);
-        let config_path = Path::new(&tmp_dir).join(&config_name);
-        let config = File::create(&config_path)?;
-        let mut config = BufWriter::new(config);
-        nmk::tmux::config::render(&mut config, &context, self.version)?;
-        config.flush()?;
-        Ok(config_path)
+        let filename = format!("nmk.{}.{}.tmux.conf", uid, opt.socket);
+        let tmp_dir = std::env::var(TMPDIR).unwrap_or_else(|_| "/tmp".to_owned());
+        let config = Path::new(&tmp_dir).join(filename);
+        fs::write(&config, contents)?;
+        Ok(config)
     }
 }
 

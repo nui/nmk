@@ -1,10 +1,10 @@
 use std::ffi::OsStr;
 use std::fs::File;
+use std::io::Write;
 use std::path::Path;
-use std::process::exit;
-use std::{env, fs, io};
+use std::{env, io};
 
-use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, ZDOTDIR};
+use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, NMK_TMP_TMUX_CONF, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
 use nmk::time::{seconds_since_build, HumanTime};
 
@@ -123,22 +123,24 @@ pub fn main(opt: Opt) -> ! {
             Some(ref config) => config,
             None => {
                 let context = make_config_context(&opt, is_color_term);
-                tmp_config = tmux
-                    .render_config_in_temp_dir(&opt, context)
-                    .expect("Unable to create temporary config file");
+                let mut buf = Vec::with_capacity(8192);
+                nmk::tmux::config::render(&mut buf, &context, tmux.version)
+                    .expect("Unable to render config");
+                log::debug!("Config length: {}, capacity: {}", buf.len(), buf.capacity());
                 if opt.render {
-                    print_config_then_remove(&tmp_config).expect("Unable to print config");
-                    exit(0);
+                    io::stdout()
+                        .write_all(&buf)
+                        .expect("Unable to print config");
+                    std::process::exit(0);
+                } else {
+                    tmp_config = tmux
+                        .save_config_in_temp_dir(&opt, &buf)
+                        .expect("Unable to create temporary config file");
+                    set_env(NMK_TMP_TMUX_CONF, &tmp_config);
+                    &tmp_config
                 }
-                set_env("NMK_TMP_TMUX_CONF", &tmp_config);
-                &tmp_config
             }
         };
         tmux.exec(&opt, config, is_color_term);
     }
-}
-
-fn print_config_then_remove(config: &Path) -> io::Result<()> {
-    io::copy(&mut File::open(&config)?, &mut io::stdout())?;
-    fs::remove_file(config)
 }
