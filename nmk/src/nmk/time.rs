@@ -42,11 +42,9 @@ impl HumanTime {
     }
 
     pub fn to_human(&self, max_parts: usize) -> String {
-        self.to_parts()
-            .into_iter()
-            .take(max_parts)
-            .collect::<Vec<_>>()
-            .join(" ")
+        let mut parts = self.to_parts();
+        parts.truncate(max_parts);
+        parts.join(" ")
     }
 
     pub fn to_parts(&self) -> Vec<String> {
