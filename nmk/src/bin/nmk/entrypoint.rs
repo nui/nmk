@@ -10,7 +10,7 @@ use nmk::time::{seconds_since_build, HumanTime};
 
 use crate::cmdline::Opt;
 use crate::core::set_env;
-use crate::pathenv::PathVec;
+use crate::path_vec::PathVec;
 use crate::terminal;
 use crate::tmux::{make_config_context, Tmux};
 
@@ -42,25 +42,26 @@ fn setup_preferred_editor() {
     }
 }
 
-fn setup_shell_search_path(nmk_home: &Path) {
+fn setup_shell_search_path(nmk_home: &NmkHome) {
     let mut path = PathVec::from(env::var_os(PATH).expect("$PATH not found"));
-    let additional_search_path = vec![nmk_home.join("bin"), nmk_home.join("vendor").join("bin")];
-    for p in additional_search_path
+    let nmk_path = vec![
+        nmk_home.bin_dir(),
+        // vendor directory
+        nmk_home.vendor_bin_dir(),
+    ];
+    path = nmk_path
         .into_iter()
         .filter(|p| p.exists())
-        .rev()
-    {
-        path.push_front(p)
-    }
+        .chain(path)
+        .collect();
     path = path.unique().without_version_managers();
     log::debug!("{} = {:#?}", PATH, path);
     set_env(PATH, path.join());
 }
 
 /// Setup custom library path for precompiled tmux and zsh
-fn setup_shell_library_path(nmk_home: &Path) {
-    let vendor_dir = nmk_home.join("vendor");
-    let vendor_lib = vendor_dir.join("lib");
+fn setup_shell_library_path(nmk_home: &NmkHome) {
+    let vendor_lib = nmk_home.vendor_lib_dir();
     if vendor_lib.exists() {
         let mut path = env::var_os(LD_LIBRARY_PATH)
             .map(PathVec::from)
@@ -134,7 +135,7 @@ pub fn main(opt: Opt) -> ! {
                     std::process::exit(0);
                 } else {
                     tmp_config = tmux
-                        .save_config_in_temp_dir(&opt, &buf)
+                        .write_config_in_temp_dir(&opt, &buf)
                         .expect("Unable to create temporary config file");
                     set_env(NMK_TMP_TMUX_CONF, &tmp_config);
                     &tmp_config

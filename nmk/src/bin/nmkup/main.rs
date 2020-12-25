@@ -19,7 +19,7 @@ mod vendor;
 async fn main_task(opt: cmdline::Opt, _settings: settings::Settings) -> nmk::Result<()> {
     // Installation should be done in order
     let nmk_home = NmkHome::find_for_install().expect("Unable to locate NMK_HOME");
-    assert!(!nmk_home.is_git(), "NMK_HOME is managed by git. Abort.");
+    assert!(!nmk_home.is_git(), "nmk is managed by git. Abort.");
     if opt.backup {
         backup::backup_files(&nmk_home)?;
     }

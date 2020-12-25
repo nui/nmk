@@ -11,6 +11,7 @@ declare!(NMK_BIN);
 declare!(NMK_HOME);
 declare!(NMK_TMP_TMUX_CONF);
 declare!(NMK_TMUX_VERSION);
+declare!(NMK_ZSH_GLOBAL_RCS);
 declare!(PATH);
 declare!(TMPDIR);
 declare!(VIMINIT);

@@ -72,7 +72,7 @@ impl Tmux {
         panic!("exec {:?} fail with {:?}", cmd, err);
     }
 
-    pub fn save_config_in_temp_dir(&self, opt: &Opt, contents: &[u8]) -> io::Result<PathBuf> {
+    pub fn write_config_in_temp_dir(&self, opt: &Opt, contents: &[u8]) -> io::Result<PathBuf> {
         let uid = nix::unistd::Uid::current();
         let filename = format!("nmk.{}.{}.tmux.conf", uid, opt.socket);
         let tmp_dir = std::env::var(TMPDIR).unwrap_or_else(|_| "/tmp".to_owned());

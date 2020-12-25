@@ -52,6 +52,22 @@ impl NmkHome {
             .or_else(find_path_from_homedir)
             .map(Self::from)
     }
+
+    pub fn bin_dir(&self) -> PathBuf {
+        self.0.join("bin")
+    }
+
+    pub fn vendor_dir(&self) -> PathBuf {
+        self.0.join("vendor")
+    }
+
+    pub fn vendor_bin_dir(&self) -> PathBuf {
+        self.vendor_dir().join("bin")
+    }
+
+    pub fn vendor_lib_dir(&self) -> PathBuf {
+        self.vendor_dir().join("lib")
+    }
 }
 
 impl From<PathBuf> for NmkHome {

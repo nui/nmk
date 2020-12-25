@@ -33,15 +33,15 @@ pub async fn install(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()> {
     log::debug!("{}: Getting data.", TAG);
     let tar_xz_data = download_file(&client, download_url).await?;
     log::debug!("{}: Received data.", TAG);
-    let vendor_path = nmk_home.join("vendor");
-    if vendor_path.exists() {
-        log::debug!("{}: Removing {:?} content.", TAG, vendor_path);
-        remove_dir_contents(&vendor_path)?;
+    let vendor_dir = nmk_home.vendor_dir();
+    if vendor_dir.exists() {
+        log::debug!("{}: Removing {:?} content.", TAG, vendor_dir);
+        remove_dir_contents(&vendor_dir)?;
     } else {
-        fs::create_dir(&vendor_path)?;
+        fs::create_dir(&vendor_dir)?;
     }
     log::debug!("{}: Extracting data.", TAG);
-    untar_vendor_files(tar_xz_data, &vendor_path).await?;
+    extract_vendor_files(tar_xz_data, &vendor_dir).await?;
     log::info!("{}: Done.", TAG);
     Ok(())
 }
@@ -135,7 +135,7 @@ fn display_some_os_info() -> nmk::Result<()> {
     Ok(())
 }
 
-async fn untar_vendor_files<P: AsRef<Path>>(data: Bytes, dst: P) -> nmk::Result<()> {
+async fn extract_vendor_files<P: AsRef<Path>>(data: Bytes, dst: P) -> nmk::Result<()> {
     let dst = dst.as_ref();
     let tar_data_stream = xz2::bufread::XzDecoder::new(data.bytes());
     let mut archive = Archive::new(tar_data_stream);

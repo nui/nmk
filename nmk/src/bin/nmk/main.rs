@@ -5,7 +5,7 @@ mod commands;
 mod core;
 mod entrypoint;
 mod logging;
-mod pathenv;
+mod path_vec;
 mod terminal;
 mod tmux;
 mod utils;
