@@ -12,6 +12,7 @@ from shutil import copyfile
 
 AMD64_LINUX_MUSL = 'x86_64-unknown-linux-musl'
 ARM64_LINUX_MUSL = 'aarch64-unknown-linux-musl'
+# We build non hard-float to maximize compatibility in one binary
 ARM_LINUX_MUSL = 'arm-unknown-linux-musleabi'
 
 ARMV7_LINUX_MUSL = 'armv7-unknown-linux-musleabihf'
@@ -24,7 +25,6 @@ TARGET_DIR = GIT_ROOT_DIR / 'target'
 TARGET_TRIPLE = {
     'amd64': AMD64_LINUX_MUSL,
     'arm64': ARM64_LINUX_MUSL,
-    # We don't use hard-float so it fine to build without it
     'arm': ARM_LINUX_MUSL,
     'armv7': ARMV7_LINUX_MUSL,
 }
@@ -78,18 +78,15 @@ def invalidate_cache():
         os.utime(file)
 
 
-def build_rust_flags(target, strip):
+def build_rust_flags(strip):
     flags = []
     if strip:
         flags += ['-C', 'link-arg=-s']
-    if target == ARM64_LINUX_MUSL:
-        # See https://github.com/rust-lang/rust/issues/46651#issuecomment-433611633
-        flags += ['-C', 'link-arg=-lgcc', '-C', 'target-feature=+crt-static']
     return " ".join(flags)
 
 
 def build_release(target, strip=False, lto=False, commit_id=None):
-    rust_flags = build_rust_flags(target, strip=strip)
+    rust_flags = build_rust_flags(strip=strip)
     env = {
         'RUSTFLAGS': rust_flags
     }
