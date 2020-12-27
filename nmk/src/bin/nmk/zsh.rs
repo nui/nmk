@@ -12,7 +12,7 @@ use crate::core::*;
 use crate::utils::print_usage_time;
 
 fn has_vendor_zsh(nmk_home: &NmkHome) -> bool {
-    nmk_home.vendor_bin_dir().join(ZSH).exists()
+    nmk_home.nmk_path().vendor_bin().join(ZSH).exists()
 }
 
 pub fn use_global_rcs(_opt: &Opt, nmk_home: &NmkHome) -> bool {

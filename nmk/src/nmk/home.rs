@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsStr;
 use std::fmt::{self, Debug, Formatter};
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -53,26 +54,26 @@ impl NmkHome {
             .map(Self::from)
     }
 
-    pub fn bin_dir(&self) -> PathBuf {
-        self.0.join("bin")
-    }
-
-    pub fn vendor_dir(&self) -> PathBuf {
-        self.0.join("vendor")
-    }
-
-    pub fn vendor_bin_dir(&self) -> PathBuf {
-        self.vendor_dir().join("bin")
-    }
-
-    pub fn vendor_lib_dir(&self) -> PathBuf {
-        self.vendor_dir().join("lib")
+    pub fn nmk_path(&self) -> NmkPath {
+        NmkPath(self.0.as_path())
     }
 }
 
 impl From<PathBuf> for NmkHome {
     fn from(inner: PathBuf) -> Self {
         Self(inner)
+    }
+}
+
+impl AsRef<Path> for NmkHome {
+    fn as_ref(&self) -> &Path {
+        self.0.as_ref()
+    }
+}
+
+impl AsRef<OsStr> for NmkHome {
+    fn as_ref(&self) -> &OsStr {
+        self.0.as_os_str()
     }
 }
 
@@ -84,8 +85,30 @@ impl Deref for NmkHome {
     }
 }
 
-impl AsRef<Path> for NmkHome {
-    fn as_ref(&self) -> &Path {
-        self.0.as_ref()
+pub struct NmkPath<'a>(&'a Path);
+
+impl<'a> NmkPath<'a> {
+    pub fn bin(&self) -> PathBuf {
+        self.0.join("bin")
+    }
+
+    pub fn vendor(&self) -> PathBuf {
+        self.0.join("vendor")
+    }
+
+    pub fn vendor_bin(&self) -> PathBuf {
+        self.vendor().join("bin")
+    }
+
+    pub fn vendor_lib(&self) -> PathBuf {
+        self.vendor().join("lib")
+    }
+
+    pub fn zsh(&self) -> PathBuf {
+        self.0.join("zsh")
+    }
+
+    pub fn vim(&self) -> PathBuf {
+        self.0.join("vim")
     }
 }

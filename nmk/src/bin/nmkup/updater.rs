@@ -25,7 +25,7 @@ pub async fn self_setup(
     entrypoint_updated: bool,
 ) -> nmk::Result<()> {
     let current_exec = env::current_exe()?;
-    let target_bin = nmk_home.join("bin").join("nmkup");
+    let target_bin = nmk_home.nmk_path().bin().join("nmkup");
     let is_self_update =
         !is_init && target_bin.exists() && is_same_location(&current_exec, &target_bin);
     if is_self_update {

@@ -33,7 +33,7 @@ pub async fn install(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()> {
     log::debug!("{}: Getting data.", TAG);
     let tar_xz_data = download_file(&client, download_url).await?;
     log::debug!("{}: Received data.", TAG);
-    let vendor_dir = nmk_home.vendor_dir();
+    let vendor_dir = nmk_home.nmk_path().vendor();
     if vendor_dir.exists() {
         log::debug!("{}: Removing {:?} content.", TAG, vendor_dir);
         remove_dir_contents(&vendor_dir)?;

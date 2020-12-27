@@ -27,8 +27,6 @@ fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
 const NMK_META: &str = ".nmk.meta";
 
 pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<bool> {
-    let nmk_home = nmk_home.as_ref();
-
     let target = Target::try_parse_env().unwrap();
     let tar_file = match target {
         Target::Amd64Linux => "nmk-x86_64-unknown-linux-musl.xz",
@@ -43,7 +41,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
     log::debug!("{}: Getting metadata.", TAG);
     let meta = get_object_meta(&client, &meta_url).await?;
     log::debug!("{}: Received metadata.", TAG);
-    let entrypoint_path = nmk_home.join("bin").join(NMK);
+    let entrypoint_path = nmk_home.nmk_path().bin().join(NMK);
     if !opt.force && is_entrypoint_up2date(&meta_path, &meta, &entrypoint_path) {
         log::info!("{}: Already up to date.", TAG);
         Ok(false)

@@ -1,4 +1,4 @@
-use std::ffi::OsStr;
+use std::ffi::{OsStr, OsString};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -14,15 +14,17 @@ use crate::path_vec::PathVec;
 use crate::terminal;
 use crate::tmux::{make_config_context, Tmux};
 
-fn setup_environment_variable(nmk_home: &Path) {
-    let zsh_dir = nmk_home.join("zsh");
+fn setup_environment_variable(nmk_home: &NmkHome) {
+    let zdotdir = nmk_home.nmk_path().zsh();
     set_env(NMK_HOME, nmk_home);
-    set_env(ZDOTDIR, zsh_dir);
+    set_env(ZDOTDIR, zdotdir);
 
-    let vim_init = nmk_home.join("vim").join("init.vim");
-    if let Some(path) = vim_init.to_str() {
-        set_env(VIMINIT, format!(r"source\ {}", path));
-    }
+    // Setup Vim
+    let vim_dir = nmk_home.nmk_path().vim();
+    let mut vim_init = OsString::from(r"source\ ");
+    vim_init.push(vim_dir.join("init.vim"));
+    set_env(VIMINIT, vim_init);
+    setup_preferred_editor();
 }
 
 fn setup_preferred_editor() {
@@ -43,25 +45,26 @@ fn setup_preferred_editor() {
 }
 
 fn setup_shell_search_path(nmk_home: &NmkHome) {
-    let mut path = PathVec::from(env::var_os(PATH).expect("$PATH not found"));
-    let nmk_path = vec![
-        nmk_home.bin_dir(),
+    let nmk_path = nmk_home.nmk_path();
+    let mut search_path = PathVec::from(env::var_os(PATH).expect("$PATH not found"));
+    let nmk_search_path = vec![
+        nmk_path.bin(),
         // vendor directory
-        nmk_home.vendor_bin_dir(),
+        nmk_path.vendor_bin(),
     ];
-    path = nmk_path
+    search_path = nmk_search_path
         .into_iter()
         .filter(|p| p.exists())
-        .chain(path)
+        .chain(search_path)
         .collect();
-    path = path.unique().without_version_managers();
-    log::debug!("{} = {:#?}", PATH, path);
-    set_env(PATH, path.join());
+    search_path = search_path.unique().without_version_managers();
+    log::debug!("{} = {:#?}", PATH, search_path);
+    set_env(PATH, search_path.join());
 }
 
 /// Setup custom library path for precompiled tmux and zsh
 fn setup_shell_library_path(nmk_home: &NmkHome) {
-    let vendor_lib = nmk_home.vendor_lib_dir();
+    let vendor_lib = nmk_home.nmk_path().vendor_lib();
     if vendor_lib.exists() {
         let mut path = env::var_os(LD_LIBRARY_PATH)
             .map(PathVec::from)
@@ -110,7 +113,6 @@ pub fn main(opt: Opt) -> ! {
     setup_shell_library_path(&nmk_home);
     setup_shell_search_path(&nmk_home);
     setup_environment_variable(&nmk_home);
-    setup_preferred_editor();
     crate::zsh::setup(&opt, &nmk_home);
     if opt.login {
         crate::zsh::exec_login_shell(&opt);

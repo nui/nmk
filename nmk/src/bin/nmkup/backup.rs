@@ -6,6 +6,8 @@ use std::{fs, io};
 
 use dirs::home_dir;
 
+use nmk::home::NmkHome;
+
 const TAG: &str = "backup";
 
 fn time_since_epoch() -> u64 {
@@ -39,7 +41,7 @@ const BACKUP_DIRS: &[&str] = &[
     "zsh/zshrc.pre.d",
 ];
 
-pub fn backup_files(nmk_home: &Path) -> io::Result<()> {
+pub fn backup_files(nmk_home: &NmkHome) -> io::Result<()> {
     let home = home_dir().expect("Unable to find home directory");
     let ar_path = home.join(format!("nmk-backup-{}.tar", time_since_epoch()));
     let ar = File::create(&ar_path)?;
