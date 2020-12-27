@@ -1,7 +1,7 @@
 use once_cell::sync::Lazy;
 
 #[allow(dead_code)]
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum PlatformType {
     Unknown,
     OSX,
@@ -31,10 +31,10 @@ fn what_platform() -> PlatformType {
 
 #[cfg(target_os = "linux")]
 fn what_platform() -> PlatformType {
-    use std::path::PathBuf;
-    if PathBuf::from("/etc/alpine-release").exists() {
+    let exists = |s: &str| std::path::Path::new(s).exists();
+    if exists("/etc/alpine-release") {
         PlatformType::Alpine
-    } else if PathBuf::from("/etc/arch-release").exists() {
+    } else if exists("/etc/arch-release") {
         PlatformType::Arch
     } else {
         PlatformType::Linux
