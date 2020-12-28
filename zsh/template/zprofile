@@ -1,10 +1,15 @@
 export EDITOR=nvim
 export NMK_DEVELOPMENT=true
+export NMK_HOME=${NMK_HOME:-~/.nmk}
 
-export GOPATH=~/go
-export GOBIN=$GOPATH/bin
+# export GOPATH=~/go
+# export GOBIN=$GOPATH/bin
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 export ANDROID_HOME=~/Android/Sdk
+
+# Override gsutil python version
+export CLOUDSDK_PYTHON=/usr/bin/python3
+
 
 path=(
     ~/bin
@@ -15,14 +20,14 @@ path=(
     ~/.rbenv/bin
     ~/.opt/google-cloud-sdk/bin
     /usr/local/go/bin
-    $GOBIN
+    # $GOBIN
     $ANDROID_HOME/emulator
     $ANDROID_HOME/tools
     $ANDROID_HOME/tools/bin
     $ANDROID_HOME/platform-tools
 )
 
-# vim8 in mac osx need this
+# vim8 on osx need this
 [[ $OSTYPE == darwin* ]] && export LANG=en_US.UTF-8
 
 # use gpg-agent as ssh-agent

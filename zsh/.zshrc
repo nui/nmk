@@ -1,10 +1,11 @@
 # Fix vendored zsh. We have to change fpath at runtime to match installation directory.
 () {
-    local next_path
+    # prefix must end with : to make below hack work for all possible input
     local prefix="/prefix:"
-    next_path=$prefix$FPATH
-    next_path=${next_path:gs#:/nmk-vendor#:${NMK_HOME}/vendor#}
-    FPATH=${next_path#"$prefix"}
+    FPATH=$prefix$FPATH
+    # this is a hacky way to fix path begin with /nmk-vendor
+    FPATH=${FPATH:gs#:/nmk-vendor#:${NMK_HOME}/vendor#}
+    FPATH=${FPATH#"$prefix"}
 }
 
 # Remove temporary tmux configuration file
