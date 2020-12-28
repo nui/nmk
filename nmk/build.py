@@ -22,6 +22,8 @@ GIT_ROOT_DIR = SCRIPT_DIR
 DIST_DIR = GIT_ROOT_DIR / 'dist'
 TARGET_DIR = GIT_ROOT_DIR / 'target'
 
+CROSS = 'cross'
+
 TARGET_TRIPLE = {
     'amd64': AMD64_LINUX_MUSL,
     'arm64': ARM64_LINUX_MUSL,
@@ -61,21 +63,16 @@ def build_parser():
     return parser
 
 
-def invalidate_cache():
+def clean_package(target):
     """
-    Touch some files to force invalidate cache.
+    Clean our package before build
 
     We need to do this to get correct build time & commit id embedded in binary.
     """
-    target_source_files = [
-        'src/bin/nmk/main.rs',
-        'src/bin/nmkup/main.rs',
-        # lib doesn't need to invalidate because it doesn't use any env!/option_env!
-        # 'src/nmk/lib.rs',
-    ]
-    logging.debug("Invalidating cache")
-    for file in target_source_files:
-        os.utime(file)
+    args = [CROSS, 'clean', '--release', '--package', 'nmk', '--target', target]
+    logging.info("Cleaning packages")
+    logging.debug("cmd: %s", " ".join(args))
+    subprocess.call(args)
 
 
 def build_rust_flags(strip):
@@ -94,7 +91,7 @@ def build_release(target, strip=False, lto=False, commit_id=None):
         env['CARGO_PROFILE_RELEASE_LTO'] = 'true'
     if commit_id:
         env['GIT_SHORT_SHA'] = commit_id
-    args = ['cross', 'build', '--release', '--target', target]
+    args = [CROSS, 'build', '--release', '--target', target]
     logging.info("Building %s target", target)
     logging.debug("env: %s", env)
     logging.debug("cmd: %s", " ".join(args))
@@ -143,7 +140,7 @@ def main():
     setup_logging(opt.verbosity)
     target = TARGET_TRIPLE.get(opt.target)
     commit_id = get_build_commit_id()
-    invalidate_cache()
+    clean_package(target)
     build_release(target, lto=opt.lto, commit_id=commit_id, strip=opt.strip)
     release_dir = get_release_dir(target)
     DIST_DIR.mkdir(exist_ok=True)
