@@ -5,13 +5,7 @@ This repository contains my dot files and some scripts that I use everyday.
 ## System dependencies
 ```sh
 # Debian system dependencies
-sudo apt install git python tmux zsh
-
-# Recommended packages
-# For desktop
-sudo apt install vim-gtk xclip
-# For server
-sudo apt install vim-nox
+sudo apt install tmux zsh neovim
 ```
 
 
