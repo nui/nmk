@@ -5,19 +5,27 @@ fi
 (( ! ${+NMK_HOME} )) && export NMK_HOME=${ZDOTDIR:h}
 (( ! ${+VIMINIT} )) && export VIMINIT='source $NMK_HOME/vim/init.vim'
 
-fpath=(
-    $ZDOTDIR/functions
-    $ZDOTDIR/fpath
-    # My completion
-    $ZDOTDIR/completion
-    # My theme
-    $ZDOTDIR/themes
-    # Plugin completion
-    $ZDOTDIR/plugins/zsh-completions/src
+() {
+    setopt localoptions histsubstpattern
+    fpath=(
+        $ZDOTDIR/functions
+        $ZDOTDIR/fpath
+        # My completion
+        $ZDOTDIR/completion
+        # My theme
+        $ZDOTDIR/themes
+        # Plugin completion
+        $ZDOTDIR/plugins/zsh-completions/src
 
-    $fpath
-)
+        # Fix hard-coded path of vendored zsh.
+        # When we compile zsh, installation path is set to /nmk-vendor.
+        # We have to change fpath at runtime to match actual installation directory.
+        ${fpath:s|#/nmk-vendor|${NMK_HOME}/vendor|}
+    )
+}
+
 
 if [[ -e $ZDOTDIR/zshenv.extra ]]; then
     source $ZDOTDIR/zshenv.extra
 fi
+
