@@ -26,19 +26,6 @@ stty -ixon # vim in remote ssh connection need this
 HISTFILE="${ZDOTDIR}/.zsh_history"
 HISTSIZE=2500
 SAVEHIST=$HISTSIZE
-() {
-    # Try to add directory to fpath
-    local -a additional_fpath
-    additional_fpath=(
-        /usr/share/zsh/vendor-completions
-    )
-    for fp in $additional_fpath; do
-        # if $fp not in $fpath and $fp does exists
-        if [[ ${fpath[(ie)$fp]} -gt ${#fpath} ]] && [[ -d $fp ]]; then
-            fpath+=$fp
-        fi
-    done
-}
 autoload -Uz compinit && compinit
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
@@ -62,6 +49,18 @@ zstyle ':completion:*:kill:*' command 'ps -a -o tty,pid,%cpu,cmd k %cpu'
             break
         }
     }
+
+    # Try to add completion directories to fpath
+    local -a completion_dir
+    completion_dir=(
+        /usr/share/zsh/vendor-completions
+    )
+    for fp in $completion_dir; do
+        # if $fp not in $fpath and $fp does exists
+        if [[ ${fpath[(ie)$fp]} -gt ${#fpath} ]] && [[ -d $fp ]]; then
+            fpath+=$fp
+        fi
+    done
 }
 # Aliases and interactive shell configuration
 autoload -Uz cdd
