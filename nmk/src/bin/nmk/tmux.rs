@@ -1,10 +1,13 @@
+use std::os::unix::fs::PermissionsExt;
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::{fs, io};
+use std::{env, fs, io};
+
+use nix::unistd::Uid;
 
 use nmk::bin_name::{TMUX, ZSH};
-use nmk::env_name::{NMK_TMUX_VERSION, TMPDIR};
+use nmk::env_name::NMK_TMUX_VERSION;
 use nmk::tmux::config::Context;
 use nmk::tmux::version::{TmuxVersionError, Version};
 
@@ -73,13 +76,23 @@ impl Tmux {
     }
 
     pub fn write_config_in_temp_dir(&self, opt: &Opt, contents: &[u8]) -> io::Result<PathBuf> {
-        let uid = nix::unistd::Uid::current();
-        let filename = format!("nmk.{}.{}.tmux.conf", uid, opt.socket);
-        let tmp_dir = std::env::var(TMPDIR).unwrap_or_else(|_| "/tmp".to_owned());
-        let config = Path::new(&tmp_dir).join(filename);
+        let nmk_tmp_dir = create_nmk_tmp_dir()?;
+        let config = nmk_tmp_dir.join(format!("{}.tmux.conf", opt.socket));
         fs::write(&config, contents)?;
         Ok(config)
     }
+}
+
+fn create_nmk_tmp_dir() -> io::Result<PathBuf> {
+    let tmp_dir = env::temp_dir();
+    let nmk_tmp_dir = tmp_dir.join(format!("nmk-{}", Uid::current()));
+    if !nmk_tmp_dir.exists() {
+        fs::create_dir(&nmk_tmp_dir)?;
+        let mut permissions = nmk_tmp_dir.metadata()?.permissions();
+        permissions.set_mode(0o700);
+        fs::set_permissions(&nmk_tmp_dir, permissions)?;
+    }
+    Ok(nmk_tmp_dir)
 }
 
 pub fn make_config_context(opt: &Opt, is_color_term: bool) -> Context {

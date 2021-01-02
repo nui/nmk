@@ -4,7 +4,7 @@ use std::io::Write;
 use std::path::Path;
 use std::{env, io};
 
-use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, NMK_TMP_TMUX_CONF, PATH, VIMINIT, ZDOTDIR};
+use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
 use nmk::time::{seconds_since_build, HumanTime};
 
@@ -139,7 +139,6 @@ pub fn main(opt: Opt) -> ! {
                     tmp_config = tmux
                         .write_config_in_temp_dir(&opt, &buf)
                         .expect("Unable to create temporary config file");
-                    set_env(NMK_TMP_TMUX_CONF, &tmp_config);
                     &tmp_config
                 }
             }
