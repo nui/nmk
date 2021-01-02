@@ -27,13 +27,13 @@ impl Default for PathVec {
 
 impl From<OsString> for PathVec {
     fn from(v: OsString) -> Self {
-        Self::from_osstr(&v)
+        Self::from_os_str(&v)
     }
 }
 
 impl From<&OsStr> for PathVec {
     fn from(v: &OsStr) -> Self {
-        Self::from_osstr(v)
+        Self::from_os_str(v)
     }
 }
 
@@ -62,7 +62,7 @@ impl PathVec {
         self.vec.push_back(path.into())
     }
 
-    pub fn from_osstr(input: &OsStr) -> Self {
+    fn from_os_str(input: &OsStr) -> Self {
         env::split_paths(input).filter(|p| p.len() > 0).collect()
     }
 
