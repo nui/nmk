@@ -11,7 +11,7 @@ use nmk::env_name::NMK_TMUX_VERSION;
 use nmk::tmux::config::Context;
 use nmk::tmux::version::{TmuxVersionError, Version};
 
-use crate::cmdline::Opt;
+use crate::cmdline::CmdOpt;
 use crate::utils::print_usage_time;
 
 pub struct Tmux {
@@ -48,36 +48,40 @@ impl Tmux {
         Tmux { bin, version }
     }
 
-    pub fn exec(&self, opt: &Opt, config: &Path, is_color_term: bool) -> ! {
+    pub fn exec(&self, cmd_opt: &CmdOpt, config: &Path, is_color_term: bool) -> ! {
         let mut cmd = Command::new(TMUX);
-        cmd.args(&["-L", &opt.socket]);
+        cmd.args(&["-L", &cmd_opt.socket]);
         if is_color_term {
             cmd.arg("-2");
         }
-        if opt.unicode {
+        if cmd_opt.unicode {
             cmd.arg("-u");
         }
         cmd.arg("-f");
         cmd.arg(config);
-        if opt.args.is_empty() {
+        if cmd_opt.args.is_empty() {
             // Attach to tmux or create new session
             cmd.args(&["new-session", "-A"]);
             if self.version < Version::V31 {
                 cmd.args(&["-s", "0"]);
             }
         } else {
-            log::debug!("positional arguments: {:?}", opt.args);
-            cmd.args(opt.args.iter());
+            log::debug!("positional arguments: {:?}", cmd_opt.args);
+            cmd.args(cmd_opt.args.iter());
         }
         log::debug!("exec command: {:?}", cmd);
-        print_usage_time(&opt);
+        print_usage_time(&cmd_opt);
         let err = cmd.exec();
         panic!("exec {:?} fail with {:?}", cmd, err);
     }
 
-    pub fn write_config_in_temp_dir(&self, opt: &Opt, contents: &[u8]) -> io::Result<PathBuf> {
+    pub fn write_config_in_temp_dir(
+        &self,
+        cmd_opt: &CmdOpt,
+        contents: &[u8],
+    ) -> io::Result<PathBuf> {
         let nmk_tmp_dir = create_nmk_tmp_dir()?;
-        let config = nmk_tmp_dir.join(format!("{}.tmux.conf", opt.socket));
+        let config = nmk_tmp_dir.join(format!("{}.tmux.conf", cmd_opt.socket));
         fs::write(&config, contents)?;
         Ok(config)
     }
@@ -95,7 +99,7 @@ fn create_nmk_tmp_dir() -> io::Result<PathBuf> {
     Ok(nmk_tmp_dir)
 }
 
-pub fn make_config_context(opt: &Opt, is_color_term: bool) -> Context {
+pub fn make_config_context(cmd_opt: &CmdOpt, is_color_term: bool) -> Context {
     let default_term = if is_color_term {
         "screen-256color"
     } else {
@@ -103,7 +107,7 @@ pub fn make_config_context(opt: &Opt, is_color_term: bool) -> Context {
     };
     Context {
         support_256_color: is_color_term,
-        detach_on_destroy: opt.detach_on_destroy,
+        detach_on_destroy: cmd_opt.detach_on_destroy,
         default_term: default_term.to_owned(),
         default_shell: which::which(ZSH).expect("zsh not found").to_owned(),
     }

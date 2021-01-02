@@ -2,7 +2,7 @@ use structopt::StructOpt;
 
 #[structopt(name = "nmkup", about = "The NMK installer/updater")]
 #[derive(Debug, StructOpt)]
-pub struct Opt {
+pub struct CmdOpt {
     #[structopt(short, long, help = "Force install")]
     pub force: bool,
     #[structopt(short, long, help = "Backup important files before update")]

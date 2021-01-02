@@ -10,7 +10,7 @@ use nmk::gcs::{download_file, get_object_meta, get_object_meta_url, ObjectMeta};
 use nmk::home::NmkHome;
 
 use crate::build::Target;
-use crate::cmdline::Opt;
+use crate::cmdline::CmdOpt;
 
 const TAG: &str = "entrypoint";
 
@@ -26,7 +26,7 @@ fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
 
 const NMK_META: &str = ".nmk.meta";
 
-pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<bool> {
+pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<bool> {
     let target = Target::try_parse_env().unwrap();
     let tar_file = match target {
         Target::Amd64Linux => "nmk-x86_64-unknown-linux-musl.xz",
@@ -42,7 +42,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<boo
     let meta = get_object_meta(&client, &meta_url).await?;
     log::debug!("{}: Received metadata.", TAG);
     let entrypoint_path = nmk_home.nmk_path().bin().join(NMK);
-    if !opt.force && is_entrypoint_up2date(&meta_path, &meta, &entrypoint_path) {
+    if !cmd_opt.force && is_entrypoint_up2date(&meta_path, &meta, &entrypoint_path) {
         log::info!("{}: Already up to date.", TAG);
         Ok(false)
     } else {

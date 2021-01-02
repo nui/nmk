@@ -8,41 +8,41 @@ use nmk::platform::is_mac;
 mod backup;
 mod build;
 mod cmdline;
+mod config;
 mod dotfiles;
 mod entrypoint;
 mod logging;
 mod os_release;
-mod settings;
 mod updater;
 mod vendor;
 
-async fn main_task(opt: cmdline::Opt, _settings: settings::Settings) -> nmk::Result<()> {
+async fn main_task(cmd_opt: cmdline::CmdOpt, _settings: config::Config) -> nmk::Result<()> {
     // Installation should be done in order
     let nmk_home = NmkHome::find_for_install().expect("Unable to locate NMK_HOME");
     assert!(!nmk_home.is_git(), "nmk is managed by git. Abort.");
-    if opt.backup {
+    if cmd_opt.backup {
         backup::backup_files(&nmk_home)?;
     }
-    dotfiles::install_or_update(&opt, &nmk_home).await?;
+    dotfiles::install_or_update(&cmd_opt, &nmk_home).await?;
     if !is_mac() {
-        let entrypoint_updated = entrypoint::install_or_update(&opt, &nmk_home).await?;
+        let entrypoint_updated = entrypoint::install_or_update(&cmd_opt, &nmk_home).await?;
         updater::self_setup(&nmk_home, is_nmkup_init(), entrypoint_updated).await?;
-        if opt.vendor {
-            vendor::install(&opt, &nmk_home).await?;
+        if cmd_opt.vendor {
+            vendor::install(&cmd_opt, &nmk_home).await?;
         }
     }
     Ok(())
 }
 
 fn main() -> nmk::Result<()> {
-    let opt = cmdline::Opt::from_args();
-    let settings = settings::Settings::new(&opt);
-    logging::setup(opt.verbosity);
+    let cmd_opt = cmdline::CmdOpt::from_args();
+    let settings = config::Config::new();
+    logging::setup(cmd_opt.verbosity);
     let mut rt = tokio::runtime::Builder::new()
         .basic_scheduler()
         .enable_all()
         .build()?;
-    rt.block_on(main_task(opt, settings))
+    rt.block_on(main_task(cmd_opt, settings))
 }
 
 fn is_nmkup_init() -> bool {

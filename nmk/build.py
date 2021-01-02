@@ -136,15 +136,15 @@ def setup_logging(verbosity):
 
 
 def main():
-    opt = build_parser().parse_args()
-    setup_logging(opt.verbosity)
-    target = TARGET_TRIPLE.get(opt.target)
+    cmd_opt = build_parser().parse_args()
+    setup_logging(cmd_opt.verbosity)
+    target = TARGET_TRIPLE.get(cmd_opt.target)
     commit_id = get_build_commit_id()
     clean_package(target)
-    build_release(target, lto=opt.lto, commit_id=commit_id, strip=opt.strip)
+    build_release(target, lto=cmd_opt.lto, commit_id=commit_id, strip=cmd_opt.strip)
     release_dir = get_release_dir(target)
     DIST_DIR.mkdir(exist_ok=True)
-    if opt.dist:
+    if cmd_opt.dist:
         dist(target=target, release_dir=release_dir)
 
 

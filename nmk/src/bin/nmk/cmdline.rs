@@ -15,7 +15,7 @@ static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().expect("Missin
     version = VERSION.as_str()
 )]
 #[derive(Debug, StructOpt)]
-pub struct Opt {
+pub struct CmdOpt {
     #[structopt(
         short = "2",
         help = "Force tmux to assume the terminal supports 256 colours"

@@ -1,8 +1,7 @@
-use std::env;
 use std::ffi::OsStr;
-use std::fmt::{self, Debug, Formatter};
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
+use std::{env, fmt};
 
 use dirs::home_dir;
 use nix::NixPath;
@@ -13,9 +12,9 @@ use crate::env_name::NMK_HOME;
 #[derive(Clone)]
 pub struct NmkHome(PathBuf);
 
-impl Debug for NmkHome {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        Debug::fmt(&self.0, f)
+impl fmt::Debug for NmkHome {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(&self.0, f)
     }
 }
 

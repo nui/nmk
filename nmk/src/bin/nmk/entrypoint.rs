@@ -8,7 +8,7 @@ use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
 use nmk::time::{seconds_since_build, HumanTime};
 
-use crate::cmdline::Opt;
+use crate::cmdline::CmdOpt;
 use crate::core::set_env;
 use crate::path_vec::PathVec;
 use crate::terminal;
@@ -100,8 +100,8 @@ fn check_for_update_suggest() {
     }
 }
 
-pub fn main(opt: Opt) -> ! {
-    if opt.motd {
+pub fn main(cmd_opt: CmdOpt) -> ! {
+    if cmd_opt.motd {
         display_message_of_the_day();
         check_for_update_suggest()
     }
@@ -113,36 +113,36 @@ pub fn main(opt: Opt) -> ! {
     setup_shell_library_path(&nmk_home);
     setup_shell_search_path(&nmk_home);
     setup_environment_variable(&nmk_home);
-    crate::zsh::setup(&opt, &nmk_home);
-    if opt.login {
-        crate::zsh::exec_login_shell(&opt);
+    crate::zsh::setup(&cmd_opt, &nmk_home);
+    if cmd_opt.login {
+        crate::zsh::exec_login_shell(&cmd_opt);
     } else {
         let tmux = Tmux::new();
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version.as_str());
-        let is_color_term = opt.force_256_color || terminal::support_256_color();
+        let is_color_term = cmd_opt.force_256_color || terminal::support_256_color();
         let tmp_config;
-        let config = match opt.tmux_conf {
+        let config = match cmd_opt.tmux_conf {
             Some(ref config) => config,
             None => {
-                let context = make_config_context(&opt, is_color_term);
+                let context = make_config_context(&cmd_opt, is_color_term);
                 let mut buf = Vec::with_capacity(8192);
                 nmk::tmux::config::render(&mut buf, &context, tmux.version)
                     .expect("Unable to render config");
                 log::debug!("Config length: {}, capacity: {}", buf.len(), buf.capacity());
-                if opt.render {
+                if cmd_opt.render {
                     io::stdout()
                         .write_all(&buf)
                         .expect("Unable to print config");
                     std::process::exit(0);
                 } else {
                     tmp_config = tmux
-                        .write_config_in_temp_dir(&opt, &buf)
+                        .write_config_in_temp_dir(&cmd_opt, &buf)
                         .expect("Unable to create temporary config file");
                     &tmp_config
                 }
             }
         };
-        tmux.exec(&opt, config, is_color_term);
+        tmux.exec(&cmd_opt, config, is_color_term);
     }
 }

@@ -9,21 +9,21 @@ use tar::Archive;
 use nmk::gcs::{download_file, ObjectMeta};
 use nmk::home::NmkHome;
 
-use crate::cmdline::Opt;
+use crate::cmdline::CmdOpt;
 use crate::os_release::OsReleaseId;
 
 const LIST_OBJECTS_URL: &str =
     "https://storage.googleapis.com/storage/v1/b/nmk.nuimk.com/o?delimiter=/&prefix=nmk-vendor/";
 const TAG: &str = "vendor";
 
-pub async fn install(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()> {
+pub async fn install(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
     let client = reqwest::Client::new();
     let mut objects: Vec<_> = nmk::gcs::list_objects(&client, LIST_OBJECTS_URL)
         .await?
         .into_iter()
         .filter(|obj| obj.name.ends_with(".tar.xz"))
         .collect();
-    if !opt.no_filter {
+    if !cmd_opt.no_filter {
         objects = filter_by_os_release(objects);
     }
     let obj_meta = select_vendor_files(&objects)?;

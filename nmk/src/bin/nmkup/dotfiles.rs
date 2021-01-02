@@ -8,7 +8,7 @@ use tar::Archive;
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url, ObjectMeta};
 use nmk::home::NmkHome;
 
-use crate::cmdline::Opt;
+use crate::cmdline::CmdOpt;
 
 const DOTFILES_META: &str = ".dotfiles.meta";
 const TAG: &str = "dotfiles";
@@ -37,7 +37,7 @@ fn is_dotfiles_up2date(meta_path: &Path, gcs_meta: &ObjectMeta) -> bool {
     cached_meta.generation == gcs_meta.generation
 }
 
-pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()> {
+pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
     if !nmk_home.exists() {
         fs::create_dir_all(nmk_home)?;
         log::info!("Created {:?} directory", nmk_home);
@@ -48,7 +48,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()>
     // check if it is safe to install
     let nmk_home_empty = nmk_home.read_dir()?.next().is_none();
     let meta_do_exist = meta_path.exists();
-    if !opt.force && !nmk_home_empty {
+    if !cmd_opt.force && !nmk_home_empty {
         assert!(
             meta_do_exist,
             "{:?} Missing dotfiles metadata or directory is not empty",
@@ -62,7 +62,7 @@ pub async fn install_or_update(opt: &Opt, nmk_home: &NmkHome) -> nmk::Result<()>
     log::debug!("{}: Getting metadata.", TAG);
     let meta = get_object_meta(&client, &meta_url).await?;
     log::debug!("{}: Received metadata.", TAG);
-    if !opt.force && is_dotfiles_up2date(&meta_path, &meta) {
+    if !cmd_opt.force && is_dotfiles_up2date(&meta_path, &meta) {
         log::info!("{}: Already up to date.", TAG);
     } else {
         if meta_do_exist {
