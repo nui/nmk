@@ -8,9 +8,8 @@ try_zsh_login() {
 
 if [ -d "$HOME" ]; then
     try_zsh_login "$HOME/.nmk/bin/nmk"
-    try_zsh_login "$HOME/bin/nmk"
+    try_zsh_login "$HOME/.nmk/nmk/target/debug/nmk"
 fi
-try_zsh_login "/usr/local/bin/nmk"
 
 # This may not work on dash, but who use dash as a login shell?
 exec -l $SHELL
