@@ -1,10 +1,10 @@
 use crate::cmdline::CmdOpt;
 
 pub fn print_usage_time(cmd_opt: &CmdOpt) {
-    let before_exec = cmd_opt.start_time.elapsed().as_micros();
+    let elapsed = cmd_opt.start_time.elapsed().as_millis();
     if cmd_opt.usage {
-        println!("{}", before_exec);
+        println!("{}", elapsed);
     } else {
-        log::debug!("usage time: {} μs", before_exec);
+        log::debug!("usage time: {} ms", elapsed);
     }
 }
