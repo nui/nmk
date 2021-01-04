@@ -5,6 +5,6 @@ pub fn print_usage_time(cmd_opt: &CmdOpt) {
     if cmd_opt.usage {
         println!("{}", elapsed);
     } else {
-        log::debug!("usage time: {} ms", elapsed);
+        log::debug!("Usage time: {} ms", elapsed);
     }
 }

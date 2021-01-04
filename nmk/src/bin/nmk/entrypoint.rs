@@ -2,7 +2,7 @@ use std::ffi::{OsStr, OsString};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use std::{env, io};
+use std::{env, io, process};
 
 use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
@@ -37,7 +37,7 @@ fn setup_preferred_editor() {
         .find(|bin| which::which(bin).is_ok())
     {
         Some(editor) => {
-            log::debug!("using {:?} as preferred editor", editor);
+            log::debug!("Using {:?} as preferred editor", editor);
             set_env(EDITOR, editor);
         }
         None => env::remove_var(EDITOR),
@@ -75,16 +75,18 @@ fn setup_shell_library_path(nmk_home: &NmkHome) {
     }
 }
 
-fn display_message_of_the_day() {
+fn display_message_of_the_day() -> io::Result<()> {
     let mut stdout = std::io::stdout();
     const MOTD: &[&str] = &["/var/run/motd.dynamic", "/etc/motd"];
-    MOTD.iter()
+    let files = MOTD
+        .iter()
         .map(Path::new)
         .filter(|p| p.exists())
-        .flat_map(File::open)
-        .for_each(|mut f| {
-            io::copy(&mut f, &mut stdout).expect("fail to print motd");
-        });
+        .flat_map(File::open);
+    for mut f in files {
+        io::copy(&mut f, &mut stdout)?;
+    }
+    Ok(())
 }
 
 const DAY_SECS: u64 = 24 * 60 * 60;
@@ -100,9 +102,9 @@ fn check_for_update_suggest() {
     }
 }
 
-pub fn main(cmd_opt: CmdOpt) -> ! {
+pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
     if cmd_opt.motd {
-        display_message_of_the_day();
+        display_message_of_the_day()?;
         check_for_update_suggest()
     }
 
@@ -127,18 +129,13 @@ pub fn main(cmd_opt: CmdOpt) -> ! {
             None => {
                 let context = make_config_context(&cmd_opt, is_color_term);
                 let mut buf = Vec::with_capacity(8192);
-                nmk::tmux::config::render(&mut buf, &context, tmux.version)
-                    .expect("Unable to render config");
+                nmk::tmux::config::render(&mut buf, &context, tmux.version)?;
                 log::debug!("Config length: {}, capacity: {}", buf.len(), buf.capacity());
                 if cmd_opt.render {
-                    io::stdout()
-                        .write_all(&buf)
-                        .expect("Unable to print config");
-                    std::process::exit(0);
+                    io::stdout().write_all(&buf)?;
+                    process::exit(0);
                 } else {
-                    tmp_config = tmux
-                        .write_config_in_temp_dir(&cmd_opt, &buf)
-                        .expect("Unable to create temporary config file");
+                    tmp_config = tmux.write_config_in_temp_dir(&cmd_opt, &buf)?;
                     &tmp_config
                 }
             }

@@ -26,7 +26,7 @@ pub fn use_global_rcs(nmk_home: &NmkHome) -> bool {
 pub fn setup(_: &CmdOpt, nmk_home: &NmkHome) {
     let global_rcs = use_global_rcs(nmk_home);
     if !global_rcs {
-        log::debug!("ignore zsh global rcs");
+        log::debug!("Ignored zsh global resource files");
     }
     set_env(NMK_ZSH_GLOBAL_RCS, one_hot!(global_rcs));
 }

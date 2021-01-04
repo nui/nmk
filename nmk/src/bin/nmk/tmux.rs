@@ -66,7 +66,7 @@ impl Tmux {
                 cmd.args(&["-s", "0"]);
             }
         } else {
-            log::debug!("positional arguments: {:?}", cmd_opt.args);
+            log::debug!("Positional arguments: {:?}", cmd_opt.args);
             cmd.args(cmd_opt.args.iter());
         }
         log::debug!("exec command: {:?}", cmd);
