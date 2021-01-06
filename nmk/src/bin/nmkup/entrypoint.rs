@@ -15,7 +15,7 @@ use crate::cmdline::CmdOpt;
 const TAG: &str = "entrypoint";
 
 fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
-    let mut data_stream = xz2::read::XzDecoder::new(data.as_ref());
+    let mut data_stream = xz2::read::XzDecoder::new(&*data);
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)

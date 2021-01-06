@@ -65,7 +65,7 @@ pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result
 }
 
 fn unxz_nmkup(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
-    let mut xz = xz2::read::XzDecoder::new(data.as_ref());
+    let mut xz = xz2::read::XzDecoder::new(&*data);
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
