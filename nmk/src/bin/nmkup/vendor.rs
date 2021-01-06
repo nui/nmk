@@ -3,7 +3,7 @@ use std::io::Write;
 use std::path::Path;
 use std::{fs, io};
 
-use bytes::{Buf, Bytes};
+use bytes::Bytes;
 use tar::Archive;
 
 use nmk::gcs::{download_file, ObjectMeta};
@@ -137,7 +137,7 @@ fn display_some_os_info() -> nmk::Result<()> {
 
 async fn extract_vendor_files<P: AsRef<Path>>(data: Bytes, dst: P) -> nmk::Result<()> {
     let dst = dst.as_ref();
-    let tar_data_stream = xz2::bufread::XzDecoder::new(data.bytes());
+    let tar_data_stream = xz2::bufread::XzDecoder::new(data.as_ref());
     let mut archive = Archive::new(tar_data_stream);
     log::info!("{}: Installing to {:?}.", TAG, dst);
     archive.unpack(dst)?;

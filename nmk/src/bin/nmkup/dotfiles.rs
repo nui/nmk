@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use bytes::{Buf, Bytes};
+use bytes::Bytes;
 use tar::Archive;
 
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url, ObjectMeta};
@@ -15,7 +15,7 @@ const TAG: &str = "dotfiles";
 
 async fn untar_dotfiles<P: AsRef<Path>>(data: Bytes, dst: P) -> nmk::Result<()> {
     let dst = dst.as_ref();
-    let tar_data_stream = xz2::bufread::XzDecoder::new(data.bytes());
+    let tar_data_stream = xz2::bufread::XzDecoder::new(data.as_ref());
     let mut archive = Archive::new(tar_data_stream);
     log::info!("{}: Installing to {:?}.", TAG, dst);
     for entry in archive.entries()? {

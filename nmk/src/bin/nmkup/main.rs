@@ -38,8 +38,7 @@ fn main() -> nmk::Result<()> {
     let cmd_opt = cmdline::CmdOpt::from_args();
     let settings = config::Config::new();
     logging::setup(cmd_opt.verbosity);
-    let mut rt = tokio::runtime::Builder::new()
-        .basic_scheduler()
+    let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()?;
     rt.block_on(main_task(cmd_opt, settings))

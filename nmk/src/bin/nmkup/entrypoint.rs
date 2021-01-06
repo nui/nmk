@@ -3,7 +3,7 @@ use std::io;
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 
-use bytes::{Buf, Bytes};
+use bytes::Bytes;
 
 use nmk::bin_name::NMK;
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url, ObjectMeta};
@@ -15,7 +15,7 @@ use crate::cmdline::CmdOpt;
 const TAG: &str = "entrypoint";
 
 fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
-    let mut data_stream = xz2::read::XzDecoder::new(data.bytes());
+    let mut data_stream = xz2::read::XzDecoder::new(data.as_ref());
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)

@@ -2,7 +2,7 @@ use std::fmt::{self, Debug, Display};
 use std::fs;
 use std::path::Path;
 
-use bytes::{Buf, Bytes};
+use bytes::Bytes;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -78,7 +78,7 @@ pub async fn get_object_meta(client: &Client, url: &str) -> crate::Result<Object
         .into());
     }
     let data = response.bytes().await?;
-    let meta = serde_json::from_slice(data.bytes())?;
+    let meta = serde_json::from_slice(&data)?;
     Ok(meta)
 }
 
@@ -96,6 +96,6 @@ pub async fn list_objects(client: &Client, url: &str) -> crate::Result<Vec<Objec
         })?
     }
     let data = response.bytes().await?;
-    let list_result = serde_json::from_slice::<ListObjectResponse>(data.bytes())?;
+    let list_result = serde_json::from_slice::<ListObjectResponse>(&data)?;
     Ok(list_result.items)
 }
