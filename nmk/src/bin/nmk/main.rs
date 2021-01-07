@@ -10,17 +10,20 @@ mod utils;
 mod version;
 mod zsh;
 
-fn main() {
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+fn main() -> Result<()> {
     let cmd_opt = cmdline::parse();
     logging::setup(cmd_opt.verbosity);
     log::debug!("Command line options: {:#?}", cmd_opt);
     if let Some(cmd) = cmd_opt.cmd {
         use cmdline::SubCommand;
         match cmd {
-            SubCommand::Info => commands::info::print_info(),
+            SubCommand::Info => commands::info::print_info()?,
             SubCommand::Completions(ref c) => commands::completion::gen_completion(c),
         }
     } else {
-        entrypoint::main(cmd_opt).unwrap();
+        entrypoint::main(cmd_opt)?;
     }
+    Ok(())
 }

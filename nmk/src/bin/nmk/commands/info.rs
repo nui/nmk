@@ -29,22 +29,21 @@ struct Nmk {
     commit: Option<&'static str>,
 }
 
-pub fn print_info() {
+pub fn print_info() -> crate::Result<()> {
     let info = Info {
         nmk: Nmk {
             commit: option_env!("GIT_SHORT_SHA"),
         },
         rustup: Rustup {
-            get_architecture: detect_current_architecture(),
+            get_architecture: detect_current_architecture()?,
         },
         toolchain: Toolchain {
             rustc: env!("BUILD_RUSTC_VERSION"),
             target: env!("BUILD_TARGET"),
         },
     };
-    if let Ok(s) = toml::to_string_pretty(&info) {
-        println!("{}", s);
-    }
+    println!("{}", toml::to_string_pretty(&info)?);
+    Ok(())
 }
 
 const GET_ARCHITECTURE: &str = indoc! {r##"
@@ -52,7 +51,7 @@ const GET_ARCHITECTURE: &str = indoc! {r##"
     echo $RETVAL
 "##};
 
-fn detect_current_architecture() -> String {
+fn detect_current_architecture() -> crate::Result<String> {
     // capacity should be bigger than final script size to avoid reallocation
     let capacity = NMK_INIT_SCRIPT.len() + GET_ARCHITECTURE.len();
     let mut detect_arch_script = NMK_INIT_SCRIPT
@@ -68,15 +67,10 @@ fn detect_current_architecture() -> String {
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
-        .spawn()
-        .expect("Spawn process failed");
+        .spawn()?;
     let stdin = shell.stdin.as_mut().expect("Shell must have stdin");
-    write!(stdin, "{}", detect_arch_script)
-        .unwrap_or_else(|e| panic!("Write shell stdin error: {}", e));
-    let output = shell
-        .wait_with_output()
-        .unwrap_or_else(|e| panic!("Wait shell failed with: {}", e));
-    String::from_utf8_lossy(output.stdout.as_slice())
-        .trim()
-        .to_string()
+    write!(stdin, "{}", detect_arch_script)?;
+    let output = shell.wait_with_output()?;
+    let arch = std::str::from_utf8(&output.stdout)?.trim().to_string();
+    Ok(arch)
 }
