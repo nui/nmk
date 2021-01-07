@@ -53,12 +53,12 @@ impl PathVec {
             .collect()
     }
 
-    pub fn push_front<T: Into<PathBuf>>(&mut self, path: T) {
+    pub fn prepend<T: Into<PathBuf>>(&mut self, path: T) {
         self.vec.push_front(path.into())
     }
 
     #[allow(dead_code)]
-    pub fn push_back<T: Into<PathBuf>>(&mut self, path: T) {
+    pub fn append<T: Into<PathBuf>>(&mut self, path: T) {
         self.vec.push_back(path.into())
     }
 
@@ -107,20 +107,20 @@ mod tests {
 
         // no item add one to front
         let mut ps = PathVec::from(OsString::new());
-        ps.push_front(FOO.to_string());
+        ps.prepend(FOO.to_string());
         let actual = ps.join();
         assert_eq!(actual, FOO);
 
         // no item add one to back
         let mut ps = PathVec::from(OsString::new());
-        ps.push_back(FOO.to_string());
+        ps.append(FOO.to_string());
         let actual = ps.join();
         assert_eq!(actual, FOO);
 
         // no item add two items to back
         let mut ps = PathVec::from(OsString::new());
-        ps.push_back(FOO.to_string());
-        ps.push_back(BAR.to_string());
+        ps.append(FOO.to_string());
+        ps.append(BAR.to_string());
         let actual = ps.join();
         let expected = OsString::from(format!("{}:{}", FOO, BAR));
         assert_eq!(actual, expected);
@@ -147,7 +147,7 @@ mod tests {
         // move order correctly
         let input = OsString::from("/a:/b:/c");
         let mut ps = PathVec::from(input);
-        ps.push_front("/c".to_string());
+        ps.prepend("/c".to_string());
         let actual = ps.join();
         let expect = OsString::from("/c:/a:/b");
         assert_eq!(actual, expect);

@@ -1,5 +1,3 @@
-use structopt::StructOpt;
-
 mod cmdline;
 mod commands;
 mod core;
@@ -13,7 +11,7 @@ mod version;
 mod zsh;
 
 fn main() {
-    let cmd_opt = cmdline::CmdOpt::from_args();
+    let cmd_opt = cmdline::parse();
     logging::setup(cmd_opt.verbosity);
     log::debug!("Command line options: {:#?}", cmd_opt);
     if let Some(cmd) = cmd_opt.cmd {

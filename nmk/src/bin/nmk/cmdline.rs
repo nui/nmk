@@ -72,3 +72,7 @@ pub struct Completion {
     #[structopt(possible_values = Shell::variants().as_ref())]
     pub shell: Shell,
 }
+
+pub fn parse() -> CmdOpt {
+    CmdOpt::from_args()
+}

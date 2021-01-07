@@ -69,7 +69,7 @@ fn setup_shell_library_path(nmk_home: &NmkHome) {
         let mut path = env::var_os(LD_LIBRARY_PATH)
             .map(PathVec::from)
             .unwrap_or_default();
-        path.push_front(vendor_lib);
+        path.prepend(vendor_lib);
         log::debug!("{} = {:#?}", LD_LIBRARY_PATH, path);
         set_env(LD_LIBRARY_PATH, path.join());
     }
