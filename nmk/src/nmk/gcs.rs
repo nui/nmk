@@ -54,6 +54,8 @@ impl Display for GcsError {
 
 impl std::error::Error for GcsError {}
 
+impl_from_error_with_caller!(GcsError);
+
 pub async fn download_file(client: &Client, media_link: &str) -> crate::Result<Bytes> {
     let response = client.get(media_link).send().await?;
     let status = response.status();

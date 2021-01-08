@@ -30,7 +30,7 @@ struct Nmk {
     commit: Option<&'static str>,
 }
 
-pub fn print_info() -> crate::Result<()> {
+pub fn print_info() -> nmk::Result<()> {
     let info = Info {
         nmk: Nmk {
             commit: option_env!("GIT_SHORT_SHA"),
@@ -52,7 +52,7 @@ const GET_ARCHITECTURE: &str = indoc! {r##"
     echo $RETVAL
 "##};
 
-fn detect_current_architecture() -> crate::Result<String> {
+fn detect_current_architecture() -> nmk::Result<String> {
     let detect_arch_script = NMK_INIT_SCRIPT
         .lines()
         .take_while(|line| !line.starts_with(r##"main "$@""##))

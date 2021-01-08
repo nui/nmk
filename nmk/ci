@@ -6,7 +6,7 @@ cd ${0:a:h}
 export CLOUDSDK_ACTIVE_CONFIG_NAME=nui
 
 for target in amd64 arm64 arm; do
-    python3 build.py --target $target --dist "$@"
+    python3 build.py --target $target --strip --dist "$@"
 done
 
 gsutil -m -h "Cache-Control: no-store, no-transform" rsync dist/ gs://nmk.nuimk.com/

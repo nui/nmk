@@ -10,9 +10,7 @@ mod utils;
 mod version;
 mod zsh;
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
-fn main() -> Result<()> {
+fn main() -> nmk::Result<()> {
     let cmd_opt = cmdline::parse();
     logging::setup(cmd_opt.verbosity);
     log::debug!("Command line options: {:#?}", cmd_opt);
