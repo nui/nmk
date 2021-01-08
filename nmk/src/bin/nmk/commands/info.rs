@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::iter;
 use std::process::{Command, Stdio};
 
 use indoc::indoc;
@@ -52,17 +53,12 @@ const GET_ARCHITECTURE: &str = indoc! {r##"
 "##};
 
 fn detect_current_architecture() -> crate::Result<String> {
-    // capacity should be bigger than final script size to avoid reallocation
-    let capacity = NMK_INIT_SCRIPT.len() + GET_ARCHITECTURE.len();
-    let mut detect_arch_script = NMK_INIT_SCRIPT
+    let detect_arch_script = NMK_INIT_SCRIPT
         .lines()
         .take_while(|line| !line.starts_with(r##"main "$@""##))
-        .fold(String::with_capacity(capacity), |mut acc, line| {
-            acc.push_str(line);
-            acc.push('\n');
-            acc
-        });
-    detect_arch_script.push_str(GET_ARCHITECTURE);
+        .chain(iter::once(GET_ARCHITECTURE))
+        .collect::<Vec<_>>()
+        .join("\n");
     let mut shell = Command::new("sh")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
