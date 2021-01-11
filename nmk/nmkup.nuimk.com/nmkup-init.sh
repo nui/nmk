@@ -67,6 +67,10 @@ main() {
         x86_64-unknown-linux-*)
             _url="${NMKUP_UPDATE_ROOT}/nmkup-x86_64-unknown-linux-musl"
             ;;
+        armv7-unknown-linux-gnueabihf)
+            # use armv7 for raspberry pi 4
+            _url="${NMKUP_UPDATE_ROOT}/nmkup-armv7-unknown-linux-musleabihf"
+            ;;
         aarch64-unknown-linux-*)
             _url="${NMKUP_UPDATE_ROOT}/nmkup-aarch64-unknown-linux-musl"
             ;;

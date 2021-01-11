@@ -33,6 +33,7 @@ pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Res
         Target::Amd64Linux => "nmk-x86_64-unknown-linux-musl.xz",
         Target::Arm64Linux => "nmk-aarch64-unknown-linux-musl.xz",
         Target::ArmLinux | Target::ArmV7Linux => "nmk-arm-unknown-linux-musleabi.xz",
+        Target::ArmV7LinuxHardFloat => "nmk-armv7-unknown-linux-musleabihf.xz",
     };
     let meta_path = nmk_home.join(NMK_META);
     let meta_url = get_object_meta_url(tar_file);
