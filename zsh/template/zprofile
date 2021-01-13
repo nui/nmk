@@ -1,11 +1,8 @@
 export EDITOR=nvim
 export NMK_DEVELOPMENT=true
-export NMK_HOME=${NMK_HOME:-~/.nmk}
 
-# export GOPATH=~/go
-# export GOBIN=$GOPATH/bin
-export LIBVIRT_DEFAULT_URI="qemu:///system"
-export ANDROID_HOME=~/Android/Sdk
+# export LIBVIRT_DEFAULT_URI="qemu:///system"
+export ANDROID_SDK_ROOT=~/Android/Sdk
 
 # Override gsutil python version
 export CLOUDSDK_PYTHON=/usr/bin/python3
@@ -19,12 +16,10 @@ path=(
     ~/.pyenv/bin
     ~/.rbenv/bin
     ~/.opt/google-cloud-sdk/bin
-    /usr/local/go/bin
-    # $GOBIN
-    $ANDROID_HOME/emulator
-    $ANDROID_HOME/tools
-    $ANDROID_HOME/tools/bin
-    $ANDROID_HOME/platform-tools
+    $ANDROID_SDK_ROOT/emulator
+    $ANDROID_SDK_ROOT/tools
+    $ANDROID_SDK_ROOT/tools/bin
+    $ANDROID_SDK_ROOT/platform-tools
 )
 
 # vim8 on osx need this
