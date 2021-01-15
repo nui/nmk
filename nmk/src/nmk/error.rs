@@ -46,9 +46,9 @@ impl Error {
     }
 }
 
-impl_from_error_with_caller!(std::path::StripPrefixError);
-impl_from_error_with_caller!(std::str::Utf8Error);
-impl_from_error_with_caller!(reqwest::Error);
-impl_from_error_with_caller!(serde_json::Error);
-impl_from_error_with_caller!(std::io::Error);
-impl_from_error_with_caller!(toml::ser::Error);
+impl_from_error!(std::path::StripPrefixError);
+impl_from_error!(std::str::Utf8Error);
+impl_from_error!(reqwest::Error);
+impl_from_error!(serde_json::Error);
+impl_from_error!(std::io::Error);
+impl_from_error!(toml::ser::Error);

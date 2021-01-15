@@ -26,7 +26,7 @@ mod tests {
 }
 
 /// Implement From<Error> to convert any error to Error with caller info
-macro_rules! impl_from_error_with_caller {
+macro_rules! impl_from_error {
     ($ty:ty) => {
         impl From<$ty> for crate::error::Error {
             #[track_caller]
