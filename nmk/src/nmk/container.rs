@@ -12,7 +12,7 @@ struct CGroup<'a> {
 
 impl<'a> CGroup<'a> {
     pub fn parse(line: &'a str) -> Option<Self> {
-        let mut iter = line.split(":");
+        let mut iter = line.split(':');
         Some(Self {
             hierarchy_id: iter.next()?,
             subsystems: iter.next()?,

@@ -67,7 +67,7 @@ fn filter_by_os_release(input: Vec<ObjectMeta>) -> Vec<ObjectMeta> {
 fn get_display_name(objects: &[ObjectMeta]) -> Vec<&str> {
     objects
         .iter()
-        .flat_map(|obj| obj.name.split("/").last())
+        .flat_map(|obj| obj.name.split('/').last())
         .collect()
 }
 
@@ -103,7 +103,7 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
         }
         print!("Enter numeric choice:  ");
         io::stdout().flush()?;
-        if let Ok(_) = stdin.read_line(&mut input) {
+        if stdin.read_line(&mut input).is_ok() {
             log::debug!("Input value: {:?}", input);
             if let Ok(index) = input.trim().parse::<usize>() {
                 if (1..=max_index).contains(&index) {

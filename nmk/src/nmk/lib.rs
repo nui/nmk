@@ -2,6 +2,7 @@
 #[path = "macros.rs"]
 mod _macros;
 pub mod bin_name;
+pub mod config;
 pub mod container;
 pub mod env_name;
 pub mod error;
@@ -13,4 +14,4 @@ pub mod tmux;
 
 pub type Result<T> = std::result::Result<T, error::Error>;
 
-pub const NMK_INIT_SCRIPT: &'static str = include_str!("../../nmkup.nuimk.com/nmkup-init.sh");
+pub const NMK_INIT_SCRIPT: &str = include_str!("../../nmkup.nuimk.com/nmkup-init.sh");

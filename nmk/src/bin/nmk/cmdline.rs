@@ -25,13 +25,13 @@ pub struct CmdOpt {
         short = "L",
         long = "socket",
         default_value = "nmk",
-        value_name = "NAME",
+        value_name = "name",
         help = "Use a different tmux socket name"
     )]
     pub socket: String,
     #[structopt(
-        long = "file",
-        value_name = "PATH",
+        long,
+        value_name = "file",
         help = "Specify an alternative tmux configuration file"
     )]
     pub tmux_conf: Option<PathBuf>,

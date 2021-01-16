@@ -92,10 +92,11 @@ pub async fn list_objects(client: &Client, url: &str) -> crate::Result<Vec<Objec
     let response = client.get(url).send().await?;
     let status = response.status();
     if !status.is_success() {
-        Err(GcsError::HttpError {
+        let err = GcsError::HttpError {
             status: status.as_u16(),
             url: url.to_string(),
-        })?
+        };
+        return Err(err.into());
     }
     let data = response.bytes().await?;
     let list_result = serde_json::from_slice::<ListObjectResponse>(&data)?;

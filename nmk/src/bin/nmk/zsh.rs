@@ -2,13 +2,13 @@ use std::os::unix::process::CommandExt;
 use std::process::Command;
 
 use nmk::bin_name::ZSH;
+use nmk::config::one_hot;
 use nmk::env_name::NMK_ZSH_GLOBAL_RCS;
 use nmk::home::NmkHome;
-use nmk::one_hot;
 use nmk::platform::{is_alpine, is_arch, is_mac};
 
 use crate::cmdline::CmdOpt;
-use crate::core::*;
+use crate::core::set_env;
 use crate::utils::print_usage_time;
 
 fn has_vendor_zsh(nmk_home: &NmkHome) -> bool {
@@ -28,7 +28,7 @@ pub fn setup(_: &CmdOpt, nmk_home: &NmkHome) {
     if !global_rcs {
         log::debug!("Ignored zsh global resource files");
     }
-    set_env(NMK_ZSH_GLOBAL_RCS, one_hot!(global_rcs));
+    set_env(NMK_ZSH_GLOBAL_RCS, one_hot(global_rcs));
 }
 
 pub fn exec_login_shell(cmd_opt: &CmdOpt) -> ! {

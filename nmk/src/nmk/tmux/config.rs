@@ -5,7 +5,7 @@ use std::process::{Command, Stdio};
 
 use indoc::indoc;
 
-use crate::bin_name::XCLIP;
+use crate::config::on_off;
 use crate::env_name::NMK_HOME;
 use crate::platform::is_mac;
 
@@ -26,9 +26,10 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
         writeln!(w, "bind-key -r C-b send-prefix")
     })?;
     writeln!(w, "bind-key -r o {}", NEXT_PANE)?;
-    writeln!(w, "bind-key -r C-o {}", "rotate-window")?;
+    writeln!(w, "bind-key -r C-o rotate-window")?;
     writeln!(w, "bind-key C-c command-prompt")?;
     writeln!(w, "bind-key C-l {}", LAST_SESSION)?;
+    #[allow(clippy::write_literal)]
     writeln!(w, "{}", "bind-key C-t display-message '#{pane_tty}'")?;
     section(w, c, "Function Key Binding", |w, _| {
         for n in 1..=12 {
@@ -105,7 +106,7 @@ fn render_options(w: &mut dyn Write, c: &Context) -> io::Result<()> {
     writeln!(
         w,
         r#"set-option -g detach-on-destroy "{}""#,
-        on_off!(c.detach_on_destroy)
+        on_off(c.detach_on_destroy)
     )?;
     writeln!(
         w,
@@ -161,7 +162,7 @@ fn choose_tree(v: Version) -> String {
 }
 
 fn is_system_clipboard_available() -> bool {
-    let mut cmd = Command::new(XCLIP);
+    let mut cmd = Command::new("xclip");
     cmd.arg("-o").stdout(Stdio::null()).stderr(Stdio::null());
     cmd.output().map_or(false, |output| output.status.success())
 }

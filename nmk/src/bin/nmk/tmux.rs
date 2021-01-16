@@ -109,6 +109,6 @@ pub fn make_config_context(cmd_opt: &CmdOpt, is_color_term: bool) -> Context {
         support_256_color: is_color_term,
         detach_on_destroy: cmd_opt.detach_on_destroy,
         default_term: default_term.to_owned(),
-        default_shell: which::which(ZSH).expect("zsh not found").to_owned(),
+        default_shell: which::which(ZSH).expect("zsh not found"),
     }
 }

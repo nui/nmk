@@ -39,7 +39,7 @@ impl From<&OsStr> for PathVec {
 
 impl PathVec {
     pub fn join(&self) -> OsString {
-        return env::join_paths(self.clone().unique()).expect("join path error");
+        env::join_paths(self.clone().unique()).expect("join path error")
     }
 
     pub fn unique(self) -> Self {

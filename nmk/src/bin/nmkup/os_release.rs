@@ -11,7 +11,7 @@ const OS_RELEASE_PATH: &str = "/etc/os-release";
 
 impl OsReleaseId {
     fn from_os_release_str(s: &str) -> Option<Self> {
-        let id_line = s.lines().filter(|l| l.starts_with("ID=")).next()?;
+        let id_line = s.lines().find(|l| l.starts_with("ID="))?;
         let id = id_line.trim_start_matches("ID=").trim_matches('"');
         match id {
             "amzn" => Some(OsReleaseId::Amazon),
