@@ -9,10 +9,16 @@ use nmk::home::NmkHome;
 use nmk::time::{seconds_since_build, HumanTime};
 
 use crate::cmdline::CmdOpt;
-use crate::core::set_env;
 use crate::path_vec::PathVec;
 use crate::terminal;
 use crate::tmux::{make_config_context, Tmux};
+
+pub fn set_env<K: AsRef<str>, V: AsRef<OsStr>>(key: K, value: V) {
+    let key = key.as_ref();
+    let value = value.as_ref();
+    env::set_var(key, value);
+    log::debug!("export {}={:?}", key, value);
+}
 
 fn setup_environment_variable(nmk_home: &NmkHome) {
     let zdotdir = nmk_home.nmk_path().zsh();

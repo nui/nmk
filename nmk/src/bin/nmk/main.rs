@@ -1,6 +1,5 @@
 mod cmdline;
 mod commands;
-mod core;
 mod entrypoint;
 mod logging;
 mod path_vec;

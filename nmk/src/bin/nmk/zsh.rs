@@ -8,7 +8,7 @@ use nmk::home::NmkHome;
 use nmk::platform::{is_alpine, is_arch, is_mac};
 
 use crate::cmdline::CmdOpt;
-use crate::core::set_env;
+use crate::entrypoint::set_env;
 use crate::utils::print_usage_time;
 
 fn has_vendor_zsh(nmk_home: &NmkHome) -> bool {
