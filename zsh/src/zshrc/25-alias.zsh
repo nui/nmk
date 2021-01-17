@@ -20,7 +20,7 @@ alias help=run-help
         fi
         alias la=" lsd -lah $color $ls_options"
         alias lh="lsd -lh $color $ls_options"
-        alias ls="lsd"
+        alias ls="lsd $color $ls_options"
     else
         case $OSTYPE in
             linux*) ;;
