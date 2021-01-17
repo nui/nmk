@@ -9,11 +9,7 @@ use crate::version::get_verbose_version;
 
 static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().expect("Missing version info"));
 
-#[structopt(
-    name = "nmk",
-    about = "Start tmux/zsh with custom configuration from dotfiles",
-    version = VERSION.as_str()
-)]
+#[structopt(name = "nmk", version = VERSION.as_str())]
 #[derive(Debug, StructOpt)]
 pub struct CmdOpt {
     #[structopt(

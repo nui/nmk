@@ -41,10 +41,7 @@ fn find_version() -> Result<Version, TmuxVersionError> {
 impl Tmux {
     pub fn new() -> Tmux {
         let bin = which::which(TMUX).expect("Cannot find tmux binary");
-        let version = find_version().unwrap_or_else(|e| match e {
-            TmuxVersionError::BadOutput(s) => panic!("Bad tmux output: {}", s),
-            TmuxVersionError::Unsupported(s) => panic!("Unsupported tmux version: {}", s),
-        });
+        let version = find_version().expect("Find tmux version error");
         Tmux { bin, version }
     }
 

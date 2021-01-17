@@ -21,9 +21,8 @@ pub fn set_env<K: AsRef<str>, V: AsRef<OsStr>>(key: K, value: V) {
 }
 
 fn setup_environment_variable(nmk_home: &NmkHome) {
-    let zdotdir = nmk_home.nmk_path().zsh();
     set_env(NMK_HOME, nmk_home);
-    set_env(ZDOTDIR, zdotdir);
+    set_env(ZDOTDIR, nmk_home.nmk_path().zsh());
 
     // Setup Vim
     let vim_dir = nmk_home.nmk_path().vim();
@@ -64,7 +63,6 @@ fn setup_shell_search_path(nmk_home: &NmkHome) {
         .chain(search_path)
         .collect();
     search_path = search_path.unique().without_version_managers();
-    log::debug!("{} = {:#?}", PATH, search_path);
     set_env(PATH, search_path.join());
 }
 
@@ -76,7 +74,6 @@ fn setup_shell_library_path(nmk_home: &NmkHome) {
             .map(PathVec::from)
             .unwrap_or_default();
         path.prepend(vendor_lib);
-        log::debug!("{} = {:#?}", LD_LIBRARY_PATH, path);
         set_env(LD_LIBRARY_PATH, path.join());
     }
 }
@@ -116,12 +113,12 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
 
     let nmk_home = NmkHome::find().expect("Unable to locate NMK_HOME");
     assert!(nmk_home.exists(), "{:?} doesn't exist", nmk_home);
-
     log::debug!("Dotfiles directory: {:?}", nmk_home);
+
     setup_shell_library_path(&nmk_home);
     setup_shell_search_path(&nmk_home);
     setup_environment_variable(&nmk_home);
-    crate::zsh::setup(&cmd_opt, &nmk_home);
+    crate::zsh::setup(&nmk_home);
     if cmd_opt.login {
         crate::zsh::exec_login_shell(&cmd_opt);
     } else {

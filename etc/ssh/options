@@ -1,0 +1,2 @@
+# Prepend this to ssh key in authorized_keys to start login shell
+command="eval ${SSH_ORIGINAL_COMMAND:-. ~/.nmk/login}"

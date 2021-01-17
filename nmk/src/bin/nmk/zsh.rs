@@ -23,7 +23,7 @@ pub fn use_global_rcs(nmk_home: &NmkHome) -> bool {
     has_vendor_zsh(nmk_home) || !not_friendly_global_rcs
 }
 
-pub fn setup(_: &CmdOpt, nmk_home: &NmkHome) {
+pub fn setup(nmk_home: &NmkHome) {
     let global_rcs = use_global_rcs(nmk_home);
     if !global_rcs {
         log::debug!("Ignored zsh global resource files");
@@ -32,7 +32,9 @@ pub fn setup(_: &CmdOpt, nmk_home: &NmkHome) {
 }
 
 pub fn exec_login_shell(cmd_opt: &CmdOpt) -> ! {
-    let mut cmd = Command::new(ZSH);
+    let zsh = which::which(ZSH).expect("Unable to locate zsh");
+    let mut cmd = Command::new(&zsh);
+    cmd.env("SHELL", zsh);
     // Signal zsh that it is a login shell
     cmd.arg0("-zsh");
     print_usage_time(&cmd_opt);

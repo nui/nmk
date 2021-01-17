@@ -9,10 +9,7 @@ vim/bundle/dockerfile.vim/vim-dockerfile-example.png
 vim/bundle/nerdtree/screenshot.png
 vim/bundle/syntastic/_assets
 vim/bundle/tcomment_vim/spec
-vim/bundle/typescript-vim/vimshot01.png
-vim/bundle/vim-colors-solarized/bitmaps/togglebg.png
-vim/bundle/vim-go/assets
-vim/bundle/vim-multiple-cursors/assets
+vim/bundle/vim-visual-multi/test
 zsh/plugins/pure/async.zsh
 zsh/plugins/pure/readme.md
 zsh/plugins/pure/screenshot-title-cmd.png
@@ -23,6 +20,7 @@ zsh/plugins/zsh-syntax-highlighting/images
 # our directories
 docker
 docs
+etc/ssh/docker
 etc/systemd
 nmk
 src

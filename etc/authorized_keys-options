@@ -1,2 +1,0 @@
-# dash, bash, and zsh
-command="c=$SSH_ORIGINAL_COMMAND;if [ -n \"$c\" ];then eval \"$c\";else . ~/.nmk/ssh.sh;fi"
