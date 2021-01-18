@@ -72,16 +72,15 @@ fn get_display_name(objects: &[ObjectMeta]) -> Vec<&str> {
 }
 
 fn remove_dir_contents(path: impl AsRef<Path>) -> io::Result<()> {
-    for entry in fs::read_dir(path)? {
+    fs::read_dir(path)?.try_for_each(|entry| {
         let entry = entry?;
         let p = entry.path();
         if p.is_dir() {
-            fs::remove_dir_all(p)?;
+            fs::remove_dir_all(p)
         } else {
-            fs::remove_file(p)?;
+            fs::remove_file(p)
         }
-    }
-    Ok(())
+    })
 }
 
 fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
@@ -116,7 +115,7 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
     }
 }
 
-fn display_some_os_info() -> nmk::Result<()> {
+fn display_some_os_info() -> io::Result<()> {
     let mut stdout = io::stdout();
     let infos = [
         "/etc/os-release",
@@ -124,22 +123,17 @@ fn display_some_os_info() -> nmk::Result<()> {
         "/etc/debian_version",
     ];
     log::info!("Displaying some useful info..");
-    for s in infos.iter() {
-        let p = Path::new(s);
-        if p.exists() {
-            if let Ok(mut f) = File::open(p) {
-                io::copy(&mut f, &mut stdout)?;
-            }
-        }
-    }
-    Ok(())
+    infos
+        .iter()
+        .map(Path::new)
+        .flat_map(File::open)
+        .try_for_each(|mut f| io::copy(&mut f, &mut stdout).map(drop))
 }
 
-async fn extract_vendor_files<P: AsRef<Path>>(data: Bytes, dst: P) -> nmk::Result<()> {
+async fn extract_vendor_files<P: AsRef<Path>>(data: Bytes, dst: P) -> io::Result<()> {
     let dst = dst.as_ref();
     let tar_data_stream = xz2::bufread::XzDecoder::new(&*data);
     let mut archive = Archive::new(tar_data_stream);
     log::info!("{}: Installing to {:?}.", TAG, dst);
-    archive.unpack(dst)?;
-    Ok(())
+    archive.unpack(dst)
 }

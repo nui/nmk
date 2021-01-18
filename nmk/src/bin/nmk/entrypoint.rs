@@ -2,7 +2,7 @@ use std::ffi::{OsStr, OsString};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use std::{env, io, process};
+use std::{env, io};
 
 use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
@@ -79,17 +79,13 @@ fn setup_shell_library_path(nmk_home: &NmkHome) {
 }
 
 fn display_message_of_the_day() -> io::Result<()> {
-    let mut stdout = std::io::stdout();
-    const MOTD: &[&str] = &["/var/run/motd.dynamic", "/etc/motd"];
-    let files = MOTD
+    let mut stdout = io::stdout();
+    ["/var/run/motd.dynamic", "/etc/motd"]
         .iter()
         .map(Path::new)
         .filter(|p| p.exists())
-        .flat_map(File::open);
-    for mut f in files {
-        io::copy(&mut f, &mut stdout)?;
-    }
-    Ok(())
+        .flat_map(File::open)
+        .try_for_each(|mut f| io::copy(&mut f, &mut stdout).map(drop))
 }
 
 const DAY_SECS: u64 = 24 * 60 * 60;
@@ -113,7 +109,7 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
 
     let nmk_home = NmkHome::find().expect("Unable to locate NMK_HOME");
     assert!(nmk_home.exists(), "{:?} doesn't exist", nmk_home);
-    log::debug!("Dotfiles directory: {:?}", nmk_home);
+    log::debug!("dotfiles directory: {:?}", nmk_home);
 
     setup_shell_library_path(&nmk_home);
     setup_shell_search_path(&nmk_home);
@@ -127,20 +123,18 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
         log::debug!("tmux version = {}", tmux.version.as_str());
         let is_color_term = cmd_opt.force_256_color || terminal::support_256_color();
         let tmp_config;
-        let config = match cmd_opt.tmux_conf {
-            Some(ref config) => config,
-            None => {
-                let context = make_config_context(&cmd_opt, is_color_term);
-                let mut buf = Vec::with_capacity(8192);
-                nmk::tmux::config::render(&mut buf, &context, tmux.version)?;
-                log::debug!("Config length: {}, capacity: {}", buf.len(), buf.capacity());
-                if cmd_opt.render {
-                    io::stdout().write_all(&buf)?;
-                    process::exit(0);
-                } else {
-                    tmp_config = tmux.write_config_in_temp_dir(&cmd_opt, &buf)?;
-                    &tmp_config
-                }
+        let config = if let Some(ref conf) = cmd_opt.tmux_conf {
+            conf
+        } else {
+            let context = make_config_context(&cmd_opt, is_color_term);
+            let mut buf = Vec::with_capacity(8192);
+            nmk::tmux::config::render(&mut buf, &context, tmux.version)?;
+            log::debug!("Config length: {}, capacity: {}", buf.len(), buf.capacity());
+            if cmd_opt.render {
+                return io::stdout().write_all(&buf);
+            } else {
+                tmp_config = tmux.write_config_in_temp_dir(&cmd_opt, &buf)?;
+                &tmp_config
             }
         };
         tmux.exec(&cmd_opt, config, is_color_term);

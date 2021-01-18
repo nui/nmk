@@ -185,14 +185,13 @@ fn copy_to_system_clipboard(w: &mut dyn Write) -> io::Result<()> {
 
 fn half_pageup_pagedown(w: &mut dyn Write) -> io::Result<()> {
     let key_binding = &[("PageUp", "halfpage-up"), ("PageDown", "halfpage-down")];
-    for (key, binding) in key_binding {
+    key_binding.iter().try_for_each(|(key, binding)| {
         writeln!(
             w,
             "bind-key -T copy-mode-vi {} send-keys -X {}",
             key, binding
-        )?;
-    }
-    Ok(())
+        )
+    })
 }
 
 pub struct Context {
