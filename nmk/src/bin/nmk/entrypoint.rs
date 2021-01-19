@@ -114,19 +114,19 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
     setup_shell_library_path(&nmk_home);
     setup_shell_search_path(&nmk_home);
     setup_environment_variable(&nmk_home);
-    crate::zsh::setup(&nmk_home);
+    crate::zsh::init(&nmk_home);
     if cmd_opt.login {
         crate::zsh::exec_login_shell(&cmd_opt);
     } else {
         let tmux = Tmux::new();
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version.as_str());
-        let is_color_term = cmd_opt.force_256_color || terminal::support_256_color();
+        let use_8bit_color = cmd_opt.force_256_color || terminal::support_256_color();
         let tmp_config;
         let config = if let Some(ref conf) = cmd_opt.tmux_conf {
             conf
         } else {
-            let context = make_config_context(&cmd_opt, is_color_term);
+            let context = make_config_context(&cmd_opt, use_8bit_color);
             let mut buf = Vec::with_capacity(8192);
             nmk::tmux::config::render(&mut buf, &context, tmux.version)?;
             log::debug!("Config length: {}, capacity: {}", buf.len(), buf.capacity());
@@ -137,6 +137,6 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
                 &tmp_config
             }
         };
-        tmux.exec(&cmd_opt, config, is_color_term);
+        tmux.exec(&cmd_opt, config, use_8bit_color);
     }
 }

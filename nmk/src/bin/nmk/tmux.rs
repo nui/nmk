@@ -96,14 +96,14 @@ fn create_nmk_tmp_dir() -> io::Result<PathBuf> {
     Ok(nmk_tmp_dir)
 }
 
-pub fn make_config_context(cmd_opt: &CmdOpt, is_color_term: bool) -> Context {
-    let default_term = if is_color_term {
+pub fn make_config_context(cmd_opt: &CmdOpt, use_8bit_color: bool) -> Context {
+    let default_term = if use_8bit_color {
         "screen-256color"
     } else {
         "screen"
     };
     Context {
-        support_256_color: is_color_term,
+        support_256_color: use_8bit_color,
         detach_on_destroy: cmd_opt.detach_on_destroy,
         default_term: default_term.to_owned(),
         default_shell: which::which(ZSH).expect("zsh not found"),

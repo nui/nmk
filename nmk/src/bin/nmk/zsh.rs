@@ -23,7 +23,7 @@ pub fn use_global_rcs(nmk_home: &NmkHome) -> bool {
     has_vendor_zsh(nmk_home) || !not_friendly_global_rcs
 }
 
-pub fn setup(nmk_home: &NmkHome) {
+pub fn init(nmk_home: &NmkHome) {
     let global_rcs = use_global_rcs(nmk_home);
     if !global_rcs {
         log::debug!("Ignored zsh global resource files");
