@@ -79,7 +79,7 @@ pub fn seconds_since_build() -> Option<u64> {
 fn get_build_epoch_seconds() -> u64 {
     env!("EPOCHSECONDS")
         .parse()
-        .expect("Unable to get build time")
+        .expect("Failed to get build time")
 }
 
 #[cfg(test)]

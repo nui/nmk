@@ -64,8 +64,8 @@ fn detect_current_architecture() -> nmk::Result<String> {
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()?;
-    let stdin = shell.stdin.as_mut().expect("Shell must have stdin");
-    write!(stdin, "{}", detect_arch_script)?;
+    let stdin = shell.stdin.as_mut().expect("Failed to open stdin");
+    stdin.write_all(detect_arch_script.as_bytes())?;
     let output = shell.wait_with_output()?;
     let arch = std::str::from_utf8(&output.stdout)?.trim().to_string();
     Ok(arch)

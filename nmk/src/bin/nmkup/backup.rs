@@ -19,7 +19,7 @@ fn time_since_epoch() -> u64 {
 
 fn should_backup_dir(dir_path: &Path) -> bool {
     let all_files = fs::read_dir(dir_path)
-        .unwrap_or_else(|e| panic!("Unable to read dir {:?}. Error\n{:?}", dir_path, e))
+        .unwrap_or_else(|e| panic!("Failed to read dir {:?}. Error\n{:?}", dir_path, e))
         // We ignore unreadable files
         .flatten();
     let normal_files_count = all_files.filter(|p| p.file_name() != ".empty").count();
@@ -42,7 +42,7 @@ const BACKUP_DIRS: &[&str] = &[
 ];
 
 pub fn backup_files(nmk_home: &NmkHome) -> io::Result<()> {
-    let home = home_dir().expect("Unable to find home directory");
+    let home = home_dir().expect("Failed to find home directory");
     let ar_path = home.join(format!("nmk-backup-{}.tar", time_since_epoch()));
     let ar = File::create(&ar_path)?;
     let mut ar = tar::Builder::new(BufWriter::new(ar));

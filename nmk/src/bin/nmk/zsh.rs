@@ -32,10 +32,10 @@ pub fn init(nmk_home: &NmkHome) {
 }
 
 pub fn exec_login_shell(cmd_opt: &CmdOpt) -> ! {
-    let zsh = which::which(ZSH).expect("Unable to locate zsh");
+    let zsh = which::which(ZSH).expect("Failed to locate zsh");
     let mut cmd = Command::new(&zsh);
     cmd.env("SHELL", zsh);
-    // Signal zsh that it is a login shell
+    // Simulate a login shell
     cmd.arg0("-zsh");
     print_usage_time(&cmd_opt);
     let err = cmd.exec();

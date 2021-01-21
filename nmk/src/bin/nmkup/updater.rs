@@ -58,9 +58,9 @@ pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result
     let target_bin = fs::canonicalize(target_bin)?;
     let parent_dir = target_bin
         .parent()
-        .unwrap_or_else(|| panic!("{}: Unable to find parent directory.", TAG));
+        .unwrap_or_else(|| panic!("{}: Failed to find parent directory.", TAG));
     let temp_target = parent_dir.join("nmkup.next");
-    unxz_nmkup(data, &temp_target).unwrap_or_else(|_| panic!("{}: Unable to extract data", TAG));
+    unxz_nmkup(data, &temp_target).unwrap_or_else(|_| panic!("{}: Failed to extract data", TAG));
     fs::rename(temp_target, target_bin)?;
     Ok(())
 }

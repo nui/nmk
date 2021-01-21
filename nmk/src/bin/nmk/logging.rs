@@ -12,6 +12,6 @@ pub fn setup(verbosity: u8) {
         .set_target_level(LevelFilter::Trace)
         .build();
     if TermLogger::init(log_level, config.clone(), TerminalMode::Stderr).is_err() {
-        SimpleLogger::init(log_level, config).expect("Unable to setup logging");
+        SimpleLogger::init(log_level, config).expect("Failed to setup logging");
     }
 }

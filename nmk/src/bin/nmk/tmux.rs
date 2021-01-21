@@ -1,7 +1,7 @@
 use std::os::unix::fs::PermissionsExt;
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Output};
 use std::{env, fs, io};
 
 use nix::unistd::Uid;
@@ -24,16 +24,16 @@ fn find_version() -> Result<Version, TmuxVersionError> {
         log::debug!("Using tmux version from environment variable");
         Version::from_version_number(&s)
     } else {
-        let output = Command::new(TMUX)
+        let Output { status, stdout, .. } = Command::new(TMUX)
             .arg("-V")
             .output()
             .expect("tmux not found");
-        if !output.status.success() {
-            let code = output.status.code().expect("tmux is terminated by signal");
+        if !status.success() {
+            let code = status.code().expect("tmux is terminated by signal");
             panic!("tmux exit with status: {}", code);
         }
         let version_output =
-            std::str::from_utf8(&output.stdout).expect("tmux version output contain non utf-8");
+            std::str::from_utf8(&stdout).expect("tmux version output contain non utf-8");
         Version::from_version_output(version_output)
     }
 }

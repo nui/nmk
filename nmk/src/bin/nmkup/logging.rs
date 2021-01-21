@@ -17,6 +17,6 @@ pub fn setup(verbosity: u8) {
     };
 
     if TermLogger::init(log_level, config.build(), TerminalMode::Stderr).is_err() {
-        SimpleLogger::init(log_level, config.build()).expect("Unable to setup logging");
+        SimpleLogger::init(log_level, config.build()).expect("Failed to setup logging");
     }
 }
