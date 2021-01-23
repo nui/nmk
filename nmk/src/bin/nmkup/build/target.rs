@@ -3,6 +3,8 @@ use std::str::FromStr;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+use nmk::arch::detect_current_architecture;
+
 #[derive(Debug)]
 pub enum Target {
     Amd64Linux,
@@ -13,8 +15,19 @@ pub enum Target {
 }
 
 impl Target {
-    pub fn try_parse_env() -> Result<Target, <Self as FromStr>::Err> {
-        FromStr::from_str(env!("BUILD_TARGET"))
+    pub fn detect() -> Result<Self, String> {
+        let arch = detect_current_architecture().expect("Unable to detect arch");
+        FromStr::from_str(&arch)
+    }
+
+    pub fn get_remote_binary_name(&self, bin: &str) -> String {
+        let bin_suffix = match *self {
+            Target::Amd64Linux => "x86_64-unknown-linux-musl.xz",
+            Target::Arm64Linux => "aarch64-unknown-linux-musl.xz",
+            Target::ArmLinux | Target::ArmV7Linux => "arm-unknown-linux-musleabi.xz",
+            Target::ArmV7LinuxHardFloat => "armv7-unknown-linux-musleabihf.xz",
+        };
+        format!("{}-{}", bin, bin_suffix)
     }
 }
 

@@ -41,15 +41,10 @@ pub async fn self_setup(
 }
 
 pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result<()> {
-    let target = Target::try_parse_env().unwrap();
-    let tar_file = match target {
-        Target::Amd64Linux => "nmkup-x86_64-unknown-linux-musl.xz",
-        Target::Arm64Linux => "nmkup-aarch64-unknown-linux-musl.xz",
-        Target::ArmLinux | Target::ArmV7Linux => "nmkup-arm-unknown-linux-musleabi.xz",
-        Target::ArmV7LinuxHardFloat => "nmkup-armv7-unknown-linux-musleabihf.xz",
-    };
+    let target = Target::detect().expect("Unsupported arch");
+    let tar_file = target.get_remote_binary_name("nmkup");
     let client = reqwest::Client::new();
-    let meta_url = get_object_meta_url(tar_file);
+    let meta_url = get_object_meta_url(&tar_file);
     log::debug!("{}: Getting metadata.", TAG);
     let meta = get_object_meta(&client, &meta_url).await?;
     log::debug!("{}: Received metadata.", TAG);

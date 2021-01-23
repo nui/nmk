@@ -28,15 +28,10 @@ fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
 const NMK_META: &str = ".nmk.meta";
 
 pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<bool> {
-    let target = Target::try_parse_env().unwrap();
-    let tar_file = match target {
-        Target::Amd64Linux => "nmk-x86_64-unknown-linux-musl.xz",
-        Target::Arm64Linux => "nmk-aarch64-unknown-linux-musl.xz",
-        Target::ArmLinux | Target::ArmV7Linux => "nmk-arm-unknown-linux-musleabi.xz",
-        Target::ArmV7LinuxHardFloat => "nmk-armv7-unknown-linux-musleabihf.xz",
-    };
+    let target = Target::detect().expect("Unsupported arch");
+    let tar_file = target.get_remote_binary_name("nmk");
     let meta_path = nmk_home.join(NMK_META);
-    let meta_url = get_object_meta_url(tar_file);
+    let meta_url = get_object_meta_url(&tar_file);
 
     let client = reqwest::Client::new();
 
