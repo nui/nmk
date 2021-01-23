@@ -48,7 +48,9 @@ pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result
     log::debug!("{}: Getting metadata.", TAG);
     let meta = get_object_meta(&client, &meta_url).await?;
     log::debug!("{}: Received metadata.", TAG);
-    let data = download_file(&client, &meta.media_link).await?;
+    let data_url = &meta.media_link;
+    log::debug!("{}: Getting data from {}.", TAG, data_url);
+    let data = download_file(&client, data_url).await?;
 
     let target_bin = fs::canonicalize(target_bin)?;
     let parent_dir = target_bin

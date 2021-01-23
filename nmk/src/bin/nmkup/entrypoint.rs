@@ -43,8 +43,9 @@ pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Res
         log::info!("{}: Already up to date.", TAG);
         Ok(false)
     } else {
-        log::debug!("{}: Getting data.", TAG);
-        let data = download_file(&client, &meta.media_link).await?;
+        let data_url = &meta.media_link;
+        log::debug!("{}: Getting data from {}.", TAG, data_url);
+        let data = download_file(&client, data_url).await?;
         log::debug!("{}: Received data.", TAG);
         unxz_entrypoint(data, entrypoint_path)?;
         meta.write_to_file(&meta_path);
