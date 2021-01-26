@@ -26,7 +26,7 @@ async fn main_task(cmd_opt: cmdline::CmdOpt, _settings: config::Config) -> nmk::
     dotfiles::install_or_update(&cmd_opt, &nmk_home).await?;
     if !is_mac() {
         let entrypoint_updated = entrypoint::install_or_update(&cmd_opt, &nmk_home).await?;
-        updater::self_setup(&nmk_home, is_nmkup_init(), entrypoint_updated).await?;
+        updater::self_setup(&nmk_home, is_init(), entrypoint_updated).await?;
         if cmd_opt.vendor {
             vendor::install(&cmd_opt, &nmk_home).await?;
         }
@@ -44,16 +44,16 @@ fn main() -> nmk::Result<()> {
     rt.block_on(main_task(cmd_opt, settings))
 }
 
-fn is_nmkup_init() -> bool {
-    current_exec_name().starts_with("nmkup-init")
-}
-
-fn current_exec_name() -> String {
+/// Check if this script is run from init script
+///
+/// We copy this behavior from rustup init script
+fn is_init() -> bool {
+    use std::os::unix::ffi::OsStrExt;
     std::env::current_exe()
         .ok()
         .as_deref()
         .and_then(Path::file_name)
-        .and_then(std::ffi::OsStr::to_str)
-        .map(String::from)
-        .expect("Failed to parse argv[0] as String")
+        .expect("Failed to find current executable file name")
+        .as_bytes()
+        .starts_with(b"nmkup-init")
 }
