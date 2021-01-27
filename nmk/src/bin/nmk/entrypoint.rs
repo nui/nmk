@@ -107,8 +107,7 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
         check_for_update_suggest()
     }
 
-    let nmk_home = NmkHome::find().expect("Failed to locate NMK_HOME");
-    assert!(nmk_home.exists(), "{:?} doesn't exist", nmk_home);
+    let nmk_home = NmkHome::locate().expect("Failed to locate dotfiles directory");
     log::debug!("dotfiles directory: {:?}", nmk_home);
 
     setup_shell_library_path(&nmk_home);

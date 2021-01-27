@@ -4,7 +4,6 @@ use std::path::{Path, PathBuf};
 use std::{env, fmt};
 
 use dirs::home_dir;
-use nix::NixPath;
 
 use crate::env_name::NMK_HOME;
 
@@ -24,8 +23,8 @@ fn find_path_from_homedir() -> Option<PathBuf> {
 
 fn find_path_from_env() -> Option<PathBuf> {
     env::var_os(NMK_HOME)
+        .filter(|v| !v.is_empty())
         .map(PathBuf::from)
-        .filter(|p| !p.is_empty())
 }
 
 impl NmkHome {
@@ -33,20 +32,21 @@ impl NmkHome {
         self.0.join(".git").exists()
     }
 
-    /// Attempt to find correct NMK_HOME candidate
+    /// Attempt to locate correct NMK_HOME candidate
     /// - if NMK_HOME is set, canonicalize it
     /// - otherwise default to $HOME/.nmk
     ///
     /// Canonicalization is necessary because we use this value in vendored zsh which required
     /// absolute path.
-    pub fn find() -> Option<Self> {
+    /// If path doesn't exist, return None
+    pub fn locate() -> Option<Self> {
         find_path_from_env()
             .and_then(|p| p.canonicalize().ok())
             .or_else(find_path_from_homedir)
+            .filter(|p| p.exists())
             .map(Self::from)
     }
 
-    /// Like find but don't canonicalize (it fail if directory doesn't exist)
     pub fn find_for_install() -> Option<Self> {
         find_path_from_env()
             .or_else(find_path_from_homedir)
