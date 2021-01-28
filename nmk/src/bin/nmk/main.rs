@@ -11,7 +11,7 @@ mod zsh;
 
 fn main() -> nmk::Result<()> {
     let cmd_opt = cmdline::parse();
-    logging::setup(cmd_opt.verbosity);
+    logging::setup(cmd_opt.verbosity)?;
     log::debug!("Command line options: {:#?}", cmd_opt);
     if let Some(cmd) = cmd_opt.cmd {
         use cmdline::SubCommand;

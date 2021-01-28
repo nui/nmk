@@ -46,9 +46,10 @@ impl Error {
     }
 }
 
-impl_from_error!(std::path::StripPrefixError);
-impl_from_error!(std::str::Utf8Error);
+impl_from_error!(log::SetLoggerError);
 impl_from_error!(reqwest::Error);
 impl_from_error!(serde_json::Error);
 impl_from_error!(std::io::Error);
+impl_from_error!(std::path::StripPrefixError);
+impl_from_error!(std::str::Utf8Error);
 impl_from_error!(toml::ser::Error);
