@@ -1,6 +1,9 @@
 use structopt::StructOpt;
 
-#[structopt(name = "nmkup", about = "The NMK installer/updater")]
+#[structopt(
+    name = "nmkup",
+    about = "Installer/updater for https://github.com/nui/nmk project"
+)]
 #[derive(Debug, StructOpt)]
 pub struct CmdOpt {
     #[structopt(short, long, help = "Force install")]
