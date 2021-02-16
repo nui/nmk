@@ -18,13 +18,10 @@ const TAG: &str = "vendor";
 
 pub async fn install(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
     let client = reqwest::Client::new();
-    let mut objects: Vec<_> = nmk::gcs::list_objects(&client, LIST_OBJECTS_URL)
-        .await?
-        .into_iter()
-        .filter(|obj| obj.name.ends_with(".tar.xz"))
-        .collect();
+    let mut objects: Vec<_> = nmk::gcs::list_objects(&client, LIST_OBJECTS_URL).await?;
+    objects.retain(|obj| obj.name.ends_with(".tar.xz"));
     if !cmd_opt.no_filter {
-        objects = filter_by_os_release(objects);
+        objects.retain(filter_by_os_release());
     }
     let obj_meta = select_vendor_files(&objects)?;
     let download_url = obj_meta.media_link.as_str();
@@ -46,22 +43,15 @@ pub async fn install(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
     Ok(())
 }
 
-fn filter_by_os_release(input: Vec<ObjectMeta>) -> Vec<ObjectMeta> {
+fn filter_by_os_release() -> impl FnMut(&ObjectMeta) -> bool {
     use crate::os_release::OsReleaseId::*;
-    if let Some(os_release_id) = OsReleaseId::parse_os_release() {
-        let filter_key = match os_release_id {
-            Amazon => "amazon",
-            CentOs => "centos",
-            Debian => "debian",
-            Ubuntu => "ubuntu",
-        };
-        input
-            .into_iter()
-            .filter(|obj| obj.name.contains(filter_key))
-            .collect()
-    } else {
-        input
-    }
+    let pattern = OsReleaseId::parse_os_release().map(|id| match id {
+        Amazon => "amazon",
+        CentOs => "centos",
+        Debian => "debian",
+        Ubuntu => "ubuntu",
+    });
+    move |item: &ObjectMeta| pattern.map_or(true, |pat| item.name.contains(pat))
 }
 
 fn get_display_name(objects: &[ObjectMeta]) -> Vec<&str> {
@@ -104,9 +94,10 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
         io::stdout().flush()?;
         if stdin.read_line(&mut input).is_ok() {
             log::debug!("Input value: {:?}", input);
-            if let Ok(index) = input.trim().parse::<usize>() {
-                if (1..=max_index).contains(&index) {
-                    return Ok(&objects[index - 1]);
+            if let Ok(choice) = input.trim().parse::<usize>() {
+                let index = choice.wrapping_sub(1);
+                if let Some(v) = objects.get(index) {
+                    return Ok(v);
                 }
             }
             println!("Invalid index: {}", input);

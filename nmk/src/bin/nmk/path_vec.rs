@@ -46,11 +46,10 @@ impl PathVec {
         Self::from_iter(IndexSet::<_>::from_iter(self.vec))
     }
 
-    pub fn without_version_managers(self) -> Self {
+    pub fn without_version_managers(mut self) -> Self {
         self.vec
-            .into_iter()
-            .filter(|p| !p.ends_with(".pyenv/shims") && !p.ends_with(".rbenv/shims"))
-            .collect()
+            .retain(|p| !p.ends_with(".pyenv/shims") && !p.ends_with(".rbenv/shims"));
+        self
     }
 
     pub fn prepend<T: Into<PathBuf>>(&mut self, path: T) {
