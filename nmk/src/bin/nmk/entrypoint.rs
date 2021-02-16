@@ -83,7 +83,6 @@ fn display_message_of_the_day() -> io::Result<()> {
     ["/var/run/motd.dynamic", "/etc/motd"]
         .iter()
         .map(Path::new)
-        .filter(|p| p.exists())
         .flat_map(File::open)
         .try_for_each(|mut f| io::copy(&mut f, &mut stdout).map(drop))
 }

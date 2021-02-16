@@ -17,13 +17,12 @@ fn time_since_epoch() -> u64 {
         .as_secs()
 }
 
-fn should_backup_dir(dir_path: &Path) -> bool {
-    let all_files = fs::read_dir(dir_path)
-        .unwrap_or_else(|e| panic!("Failed to read dir {:?}. Error\n{:?}", dir_path, e))
+fn should_backup_dir(dir: &Path) -> bool {
+    fs::read_dir(dir)
+        .unwrap_or_else(|e| panic!("Failed to read dir {:?}. Error\n{:?}", dir, e))
         // We ignore unreadable files
-        .flatten();
-    let normal_files_count = all_files.filter(|p| p.file_name() != ".empty").count();
-    normal_files_count > 0
+        .flatten()
+        .any(|p| p.file_name() != ".empty")
 }
 
 #[rustfmt::skip]
@@ -47,18 +46,18 @@ pub fn backup_files(nmk_home: &NmkHome) -> io::Result<()> {
     let ar = File::create(&ar_path)?;
     let mut ar = tar::Builder::new(BufWriter::new(ar));
     ar.follow_symlinks(false);
-    for dir_name in BACKUP_DIRS {
-        let dir_path = nmk_home.join(dir_name);
+    for dir in BACKUP_DIRS {
+        let dir_path = nmk_home.join(dir);
         if dir_path.exists() && should_backup_dir(&dir_path) {
-            ar.append_dir_all(dir_name, &dir_path)?;
-            log::debug!("{}: Added dir: {}", TAG, dir_name);
+            ar.append_dir_all(dir, &dir_path)?;
+            log::debug!("{}: Added dir: {}", TAG, dir);
         }
     }
-    for file_name in BACKUP_FILES {
-        let file_path = nmk_home.join(file_name);
+    for file in BACKUP_FILES {
+        let file_path = nmk_home.join(file);
         if file_path.exists() {
-            ar.append_path_with_name(&file_path, file_name)?;
-            log::debug!("{}: Added file: {}", TAG, file_name);
+            ar.append_path_with_name(&file_path, file)?;
+            log::debug!("{}: Added file: {}", TAG, file);
         }
     }
     ar.finish()?;
