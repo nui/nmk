@@ -15,4 +15,5 @@ pub mod tmux;
 
 pub type Result<T> = std::result::Result<T, error::Error>;
 
+// we could compress this but include-flate doesn't support stable yet (check at version "0.1.3")
 pub const NMK_INIT_SCRIPT: &str = include_str!("../../nmkup.nuimk.com/nmkup-init.sh");

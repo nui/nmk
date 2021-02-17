@@ -1,7 +1,7 @@
-use log::{LevelFilter, SetLoggerError};
+use log::LevelFilter;
 use simplelog::{SimpleLogger, TermLogger, TerminalMode};
 
-pub fn setup(verbosity: u8) -> Result<(), SetLoggerError> {
+pub fn setup(verbosity: u8) {
     let log_level = match verbosity {
         0 => LevelFilter::Info,
         1 => LevelFilter::Debug,
@@ -13,4 +13,5 @@ pub fn setup(verbosity: u8) -> Result<(), SetLoggerError> {
         .build();
     TermLogger::init(log_level, config.clone(), TerminalMode::Stderr)
         .or_else(|_| SimpleLogger::init(log_level, config))
+        .expect("Failed to setup logging");
 }
