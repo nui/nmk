@@ -108,16 +108,14 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
 
 fn display_some_os_info() -> io::Result<()> {
     let mut stdout = io::stdout();
-    let infos = [
-        "/etc/os-release",
-        "/etc/centos-release",
-        "/etc/debian_version",
-    ];
-    log::info!("Displaying some useful info..");
+    // On CentOS, /etc/os-release doesn't show CentOS minor version
+    let infos = ["/etc/centos-release", "/etc/os-release"];
+    log::info!("Displaying os information..");
     infos
         .iter()
         .map(Path::new)
         .flat_map(File::open)
+        .take(1)
         .try_for_each(|mut f| io::copy(&mut f, &mut stdout).map(drop))
 }
 
