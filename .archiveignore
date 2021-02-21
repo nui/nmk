@@ -20,6 +20,7 @@ zsh/plugins/zsh-syntax-highlighting/images
 # our directories
 docker
 docs
+etc/macos
 etc/ssh/docker
 etc/systemd
 nmk

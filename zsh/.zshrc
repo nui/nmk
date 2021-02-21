@@ -139,6 +139,26 @@ alias ssenv=' eval $(tmux show-environment -s)'
 # reset nvidia gpu
 alias gpu-reload="sudo rmmod nvidia_uvm ; sudo modprobe nvidia_uvm"
 
+
+[[ $OSTYPE == darwin* ]] && () {
+    jetbrains-toolbox() {
+        local label
+        local launch_agent_dir
+        local script_dir
+        local target_job
+        label=nmk.jetbrains.toolbox.launcher
+        launch_agent_dir=~/Library/LaunchAgents
+        script_dir=$NMK_HOME/etc/macos
+        target_job=$launch_agent_dir/${label}.plist
+        if [[ ! -e $target_job ]]; then
+            cp $script_dir/${label}.plist $target_job
+            print "Log out and log back in to load jetbrains toolbox"
+        else
+            launchctl start $label
+        fi
+    }
+}
+
 () {
     # see /etc/zsh/zshrc
     local -A key
