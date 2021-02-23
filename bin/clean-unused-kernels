@@ -57,7 +57,7 @@ def get_keep_remove_list(version, packages):
             keep.add(p)
         else:
             remove.add(p)
-    return keep, remove
+    return sorted(list(keep)), sorted(list(remove))
 
 
 def copy_to_system_clipboard(data):
