@@ -18,10 +18,10 @@ fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
     let mut data_stream = xz2::read::XzDecoder::new(&*data);
     let mut file = OpenOptions::new()
         .create(true)
+        .truncate(true)
         .write(true)
         .mode(0o755)
         .open(dst)?;
-    file.set_len(0)?;
     io::copy(&mut data_stream, &mut file)
 }
 
