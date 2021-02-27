@@ -1,9 +1,7 @@
 use std::path::Path;
 
-use structopt::StructOpt;
-
 use nmk::home::NmkHome;
-use nmk::platform::is_mac;
+use nmk::platform;
 
 mod backup;
 mod build;
@@ -24,24 +22,26 @@ async fn main_task(cmd_opt: cmdline::CmdOpt, _settings: config::Config) -> nmk::
         backup::backup_files(&nmk_home)?;
     }
     dotfiles::install_or_update(&cmd_opt, &nmk_home).await?;
-    if !is_mac() {
-        let entrypoint_updated = entrypoint::install_or_update(&cmd_opt, &nmk_home).await?;
-        updater::self_setup(&nmk_home, is_init(), entrypoint_updated).await?;
-        if cmd_opt.vendor {
-            vendor::install(&cmd_opt, &nmk_home).await?;
-        }
+    if platform::is_mac() {
+        log::error!("Not supporting os");
+        return Ok(());
+    }
+    let entrypoint_updated = entrypoint::install_or_update(&cmd_opt, &nmk_home).await?;
+    updater::self_setup(&nmk_home, is_init(), entrypoint_updated).await?;
+    if cmd_opt.vendor {
+        vendor::install(&cmd_opt, &nmk_home).await?;
     }
     Ok(())
 }
 
 fn main() -> nmk::Result<()> {
-    let cmd_opt = cmdline::CmdOpt::from_args();
-    let settings = config::Config::new();
+    let cmd_opt = cmdline::from_args();
+    let config = config::Config::new();
     logging::setup(cmd_opt.verbosity);
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()?;
-    rt.block_on(main_task(cmd_opt, settings))
+    rt.block_on(main_task(cmd_opt, config))
 }
 
 /// Check if this script is run from init script

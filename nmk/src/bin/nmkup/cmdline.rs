@@ -17,3 +17,7 @@ pub struct CmdOpt {
     #[structopt(short, parse(from_occurrences), help = "Request verbose logging")]
     pub verbosity: u8,
 }
+
+pub fn from_args() -> CmdOpt {
+    CmdOpt::from_args()
+}

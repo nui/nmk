@@ -29,7 +29,7 @@ const NMK_META: &str = ".nmk.meta";
 
 pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<bool> {
     let target = Target::detect().expect("Unsupported arch");
-    let tar_file = target.get_remote_binary_name("nmk");
+    let tar_file = target.remote_binary_name("nmk");
     let meta_path = nmk_home.join(NMK_META);
     let meta_url = get_object_meta_url(&tar_file);
 

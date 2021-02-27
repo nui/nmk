@@ -20,7 +20,7 @@ impl Target {
         FromStr::from_str(&arch)
     }
 
-    pub fn get_remote_binary_name(&self, bin: &str) -> String {
+    pub fn remote_binary_name(&self, bin: &str) -> String {
         let bin_suffix = match *self {
             Target::Amd64Linux => "x86_64-unknown-linux-musl.xz",
             Target::Arm64Linux => "aarch64-unknown-linux-musl.xz",
