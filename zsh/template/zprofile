@@ -2,7 +2,13 @@ export EDITOR=nvim
 export NMK_DEVELOPMENT=true
 
 # export LIBVIRT_DEFAULT_URI="qemu:///system"
-export ANDROID_SDK_ROOT=~/Android/Sdk
+
+# Android
+# Linux
+# export ANDROID_SDK_ROOT=~/Android/Sdk
+# MacOs
+# export ANDROID_SDK_ROOT=~/Library/Android/sdk
+# export NDK_HOME=$ANDROID_SDK_ROOT/ndk/22.0.7026061
 
 # Override gsutil python version
 export CLOUDSDK_PYTHON=/usr/bin/python3
