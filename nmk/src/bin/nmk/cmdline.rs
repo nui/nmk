@@ -9,8 +9,8 @@ use crate::version::get_verbose_version;
 
 static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().expect("Missing version info"));
 
-#[structopt(name = "nmk", version = VERSION.as_str())]
 #[derive(Debug, StructOpt)]
+#[structopt(name = "nmk", version = VERSION.as_str())]
 pub struct CmdOpt {
     #[structopt(
         short = "2",
