@@ -144,7 +144,7 @@ def list_ignored_files(repo):
 
 
 def create_final_archive(workdir):
-    mtime = datetime.now().timestamp()
+    mtime = int(datetime.now().timestamp())
 
     def tar_filter(tarinfo):
         tarinfo.uid = tarinfo.gid = 0
