@@ -55,6 +55,8 @@ pub struct CmdOpt {
 
 #[derive(Debug, StructOpt)]
 pub enum SubCommand {
+    #[structopt(about = "Backup files to do clean install")]
+    Backup,
     #[structopt(about = "Display entrypoint information")]
     Info,
     #[structopt(about = "Generate tab-completion scripts for your shell")]

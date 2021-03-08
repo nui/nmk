@@ -1,5 +1,4 @@
 use std::ffi::OsStr;
-use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::{env, fmt};
 
@@ -56,6 +55,10 @@ impl NmkHome {
     pub fn nmk_path(&self) -> NmkPath {
         NmkPath(self.0.as_path())
     }
+
+    pub fn as_path(&self) -> &Path {
+        self.0.as_path()
+    }
 }
 
 impl From<PathBuf> for NmkHome {
@@ -73,14 +76,6 @@ impl AsRef<Path> for NmkHome {
 impl AsRef<OsStr> for NmkHome {
     fn as_ref(&self) -> &OsStr {
         self.0.as_os_str()
-    }
-}
-
-impl Deref for NmkHome {
-    type Target = Path;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
 

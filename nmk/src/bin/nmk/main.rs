@@ -16,6 +16,7 @@ fn main() -> nmk::Result<()> {
     if let Some(cmd) = cmd_opt.cmd {
         use cmdline::SubCommand::*;
         match cmd {
+            Backup => commands::backup::backup()?,
             Info => commands::info::print_info()?,
             Completions(ref c) => commands::completion::gen_completion(c),
         }

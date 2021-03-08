@@ -47,14 +47,14 @@ pub fn backup_files(nmk_home: &NmkHome) -> io::Result<()> {
     let mut ar = tar::Builder::new(BufWriter::new(ar));
     ar.follow_symlinks(false);
     for dir in BACKUP_DIRS {
-        let dir_path = nmk_home.join(dir);
+        let dir_path = nmk_home.as_path().join(dir);
         if dir_path.exists() && should_backup_dir(&dir_path) {
             ar.append_dir_all(dir, &dir_path)?;
             log::debug!("{}: Added dir: {}", TAG, dir);
         }
     }
     for file in BACKUP_FILES {
-        let file_path = nmk_home.join(file);
+        let file_path = nmk_home.as_path().join(file);
         if file_path.exists() {
             ar.append_path_with_name(&file_path, file)?;
             log::debug!("{}: Added file: {}", TAG, file);

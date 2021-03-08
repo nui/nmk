@@ -41,15 +41,15 @@ fn is_dotfiles_up2date(meta_path: &Path, gcs_meta: &ObjectMeta) -> bool {
 }
 
 pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
-    if !nmk_home.exists() {
+    if !nmk_home.as_path().exists() {
         fs::create_dir_all(nmk_home)?;
         log::info!("Created {:?} directory", nmk_home);
     }
 
-    let meta_path = nmk_home.join(DOTFILES_META);
+    let meta_path = nmk_home.as_path().join(DOTFILES_META);
 
     // check if it is safe to install
-    let nmk_home_empty = nmk_home.read_dir()?.next().is_none();
+    let nmk_home_empty = nmk_home.as_path().read_dir()?.next().is_none();
     let meta_do_exist = meta_path.exists();
     if !cmd_opt.force && !nmk_home_empty {
         assert!(
