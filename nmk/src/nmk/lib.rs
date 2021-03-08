@@ -2,6 +2,7 @@
 #[path = "macros.rs"]
 mod _macros;
 pub mod arch;
+pub mod backup;
 pub mod bin_name;
 pub mod config;
 pub mod container;

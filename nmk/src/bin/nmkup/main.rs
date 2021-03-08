@@ -1,9 +1,11 @@
 use std::path::Path;
 
+use dirs::home_dir;
+
+use nmk::backup::backup_files;
 use nmk::home::NmkHome;
 use nmk::platform;
 
-mod backup;
 mod build;
 mod cmdline;
 mod config;
@@ -19,7 +21,9 @@ async fn main_task(cmd_opt: cmdline::CmdOpt, _settings: config::Config) -> nmk::
     let nmk_home = NmkHome::find_for_install().expect("Failed to locate NMK_HOME");
     assert!(!nmk_home.is_git(), "nmk is managed by git. Abort.");
     if cmd_opt.backup {
-        backup::backup_files(&nmk_home)?;
+        let home = home_dir().expect("Failed to find home directory");
+        let output_tar = home.join("nmk-backup.tar");
+        backup_files(&nmk_home, &output_tar)?;
     }
     dotfiles::install_or_update(&cmd_opt, &nmk_home).await?;
     if platform::is_mac() {
