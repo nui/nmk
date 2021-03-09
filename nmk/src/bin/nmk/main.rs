@@ -17,8 +17,8 @@ fn main() -> nmk::Result<()> {
         use cmdline::SubCommand::*;
         match cmd {
             Backup => commands::backup::backup()?,
-            Info => commands::info::print_info()?,
             Completions(ref c) => commands::completion::gen_completion(c),
+            Info => commands::info::print_info()?,
         }
     } else {
         entrypoint::main(cmd_opt)?;

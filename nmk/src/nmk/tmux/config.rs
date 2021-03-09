@@ -20,7 +20,7 @@ const NEXT_PANE: &str = r#"select-pane -t :.+ \; display-panes"#;
 const NO_ENTER_COPY_MODE: &str = r##"#{?pane_in_mode,1,}#{?alternate_on,1,}"##;
 
 pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
-    writeln!(w, "# Tmux {} configuration", v.as_str())?;
+    writeln!(w, "# Tmux {} configuration", v)?;
     section(w, c, "Tmux Options", render_options)?;
     section(w, c, "Prefix Keys", |w, _| {
         writeln!(w, "bind-key -r C-b send-prefix")

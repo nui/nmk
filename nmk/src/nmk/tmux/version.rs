@@ -1,3 +1,4 @@
+use std::fmt::{self, Display};
 use std::str::FromStr;
 
 use strum::AsStaticRef;
@@ -52,6 +53,12 @@ impl Version {
 
     pub fn as_str(&self) -> &'static str {
         AsStaticRef::as_static(self)
+    }
+}
+
+impl Display for Version {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
     }
 }
 

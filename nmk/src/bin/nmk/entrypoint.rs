@@ -4,7 +4,7 @@ use std::io::Write;
 use std::path::Path;
 use std::{env, io};
 
-use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, PATH, VIMINIT, ZDOTDIR};
+use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, NMK_TMUX_VERSION, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
 use nmk::time::{seconds_since_build, HumanTime};
 
@@ -118,7 +118,8 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
     } else {
         let tmux = Tmux::new();
         log::debug!("tmux path = {:?}", tmux.bin);
-        log::debug!("tmux version = {}", tmux.version.as_str());
+        log::debug!("tmux version = {}", tmux.version);
+        set_env(NMK_TMUX_VERSION, tmux.version.as_str());
         let use_8bit_color = cmd_opt.force_256_color || terminal::support_256_color();
         let tmp_config;
         let config = if let Some(ref conf) = cmd_opt.tmux_conf {
