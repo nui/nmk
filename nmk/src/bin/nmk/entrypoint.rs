@@ -120,12 +120,12 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
         log::debug!("tmux path = {:?}", tmux.bin);
         log::debug!("tmux version = {}", tmux.version);
         set_env(NMK_TMUX_VERSION, tmux.version.as_str());
-        let use_8bit_color = cmd_opt.force_256_color || terminal::support_256_color();
+        let support_256_color = cmd_opt.force_256_color || terminal::support_256_color();
         let tmp_config;
         let config = if let Some(ref conf) = cmd_opt.tmux_conf {
             conf
         } else {
-            let context = make_config_context(&cmd_opt, use_8bit_color);
+            let context = make_config_context(&cmd_opt, support_256_color);
             let mut buf = Vec::with_capacity(8192);
             nmk::tmux::config::render(&mut buf, &context, tmux.version)?;
             log::debug!("Config length: {}, capacity: {}", buf.len(), buf.capacity());
@@ -136,6 +136,6 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
                 &tmp_config
             }
         };
-        tmux.exec(&cmd_opt, config, use_8bit_color);
+        tmux.exec(&cmd_opt, config, support_256_color);
     }
 }
