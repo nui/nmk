@@ -9,6 +9,7 @@ use tar::Archive;
 use nmk::gcs::{download_file, ObjectMeta};
 use nmk::home::NmkHome;
 
+use crate::build::Target;
 use crate::cmdline::CmdOpt;
 use crate::os_release::OsReleaseId;
 
@@ -22,6 +23,7 @@ pub async fn install(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
     objects.retain(|obj| obj.name.ends_with(".tar.xz"));
     if !cmd_opt.no_filter {
         objects.retain(filter_by_os_release());
+        objects.retain(filter_by_arch());
     }
     let obj_meta = select_vendor_files(&objects)?;
     let download_url = obj_meta.media_link.as_str();
@@ -52,6 +54,19 @@ fn filter_by_os_release() -> impl FnMut(&ObjectMeta) -> bool {
         Ubuntu => "ubuntu",
     });
     move |item: &ObjectMeta| pattern.map_or(true, |pat| item.name.contains(pat))
+}
+
+fn filter_by_arch() -> impl FnMut(&ObjectMeta) -> bool {
+    let target = Target::detect().expect("Unsupported target");
+    const ARM64_TAG: &str = "arm64";
+    move |item| {
+        let found_tag = item.name.to_lowercase().contains(ARM64_TAG);
+        match target {
+            Target::Amd64Linux => !found_tag,
+            Target::Arm64Linux => found_tag,
+            _ => panic!("Unsupported arch"),
+        }
+    }
 }
 
 fn get_display_name(objects: &[ObjectMeta]) -> Vec<&str> {
