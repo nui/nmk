@@ -122,16 +122,13 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
 }
 
 fn display_some_os_info() -> io::Result<()> {
-    let mut stdout = io::stdout();
     // On CentOS, /etc/os-release doesn't show CentOS minor version
-    let infos = ["/etc/centos-release", "/etc/os-release"];
+    let infos = ["/etc/centos-release", "/etc/os-release"].iter();
     log::info!("Displaying os information..");
-    infos
-        .iter()
-        .map(Path::new)
-        .flat_map(File::open)
-        .take(1)
-        .try_for_each(|mut f| io::copy(&mut f, &mut stdout).map(drop))
+    if let Some(mut f) = infos.map(Path::new).flat_map(File::open).next() {
+        io::copy(&mut f, &mut io::stdout())?;
+    }
+    Ok(())
 }
 
 async fn extract_vendor_files<P: AsRef<Path>>(data: Bytes, dst: P) -> io::Result<()> {
