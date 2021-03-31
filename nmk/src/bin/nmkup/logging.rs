@@ -1,5 +1,5 @@
 use log::LevelFilter;
-use simplelog::{SimpleLogger, TermLogger, TerminalMode};
+use simplelog::{ColorChoice, SimpleLogger, TermLogger, TerminalMode};
 
 pub fn setup(verbosity: u8) {
     let mut config = simplelog::ConfigBuilder::new();
@@ -16,7 +16,14 @@ pub fn setup(verbosity: u8) {
         LevelFilter::Info
     };
 
-    if TermLogger::init(log_level, config.build(), TerminalMode::Stderr).is_err() {
+    if TermLogger::init(
+        log_level,
+        config.build(),
+        TerminalMode::Stderr,
+        ColorChoice::Always,
+    )
+    .is_err()
+    {
         SimpleLogger::init(log_level, config.build()).expect("Failed to setup logging");
     }
 }

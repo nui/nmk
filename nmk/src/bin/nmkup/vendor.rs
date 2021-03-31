@@ -5,6 +5,7 @@ use std::{fs, io};
 
 use bytes::Bytes;
 use tar::Archive;
+use xz2::read::XzDecoder;
 
 use nmk::gcs::{download_file, ObjectMeta};
 use nmk::home::NmkHome;
@@ -131,10 +132,9 @@ fn display_some_os_info() -> io::Result<()> {
     Ok(())
 }
 
-async fn extract_vendor_files<P: AsRef<Path>>(data: Bytes, dst: P) -> io::Result<()> {
-    let dst = dst.as_ref();
-    let tar_data_stream = xz2::bufread::XzDecoder::new(&*data);
-    let mut archive = Archive::new(tar_data_stream);
-    log::info!("{}: Installing to {:?}.", TAG, dst);
-    archive.unpack(dst)
+async fn extract_vendor_files<P: AsRef<Path>>(data: Bytes, destination: P) -> io::Result<()> {
+    let destination = destination.as_ref();
+    let mut archive = Archive::new(XzDecoder::new(&*data));
+    log::info!("{}: Installing to {:?}.", TAG, destination);
+    archive.unpack(destination)
 }

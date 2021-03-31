@@ -5,7 +5,7 @@ export CLOUDSDK_ACTIVE_CONFIG_NAME = nui
 
 define remove_releases =
 for target in aarch64-unknown-linux-musl arm-unknown-linux-musleabi armv7-unknown-linux-musleabihf x86_64-unknown-linux-musl; do
-	rm -rf target/$target
+	rm -rf target.cross/$target
 done
 endef
 

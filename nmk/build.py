@@ -10,26 +10,41 @@ import subprocess
 from pathlib import Path
 from shutil import copyfile
 
-AMD64_LINUX_MUSL = 'x86_64-unknown-linux-musl'
-ARM64_LINUX_MUSL = 'aarch64-unknown-linux-musl'
-# We build non hard-float to maximize compatibility in one binary
-ARM_LINUX_MUSL = 'arm-unknown-linux-musleabi'
-
-ARMV7_LINUX_MUSL = 'armv7-unknown-linux-musleabihf'
-
 SCRIPT_DIR = Path(os.path.realpath(__file__)).parent
 GIT_ROOT_DIR = SCRIPT_DIR
 DIST_DIR = GIT_ROOT_DIR / 'dist'
-TARGET_DIR = GIT_ROOT_DIR / 'target'
-
-CROSS = 'cross'
+# Incremental build won't work if we use same target directory
+TARGET_DIR = GIT_ROOT_DIR / 'target.cross'
 
 TARGET_TRIPLE = {
-    'amd64': AMD64_LINUX_MUSL,
-    'arm64': ARM64_LINUX_MUSL,
-    'arm': ARM_LINUX_MUSL,
-    'armv7': ARMV7_LINUX_MUSL,
+    'amd64': 'x86_64-unknown-linux-musl',
+    'arm64': 'aarch64-unknown-linux-musl',
+    # arm build use non hard-float to maximize compatibility in one binary
+    'arm': 'arm-unknown-linux-musleabi',
+    'armv7': 'armv7-unknown-linux-musleabihf',
 }
+
+
+class Opt:
+    def __init__(self):
+        self.args = []
+        self.dist = False
+        self.lto = False
+        self.strip = False
+        self.target = None
+        self.verbosity = 0
+
+    @classmethod
+    def from_args(cls):
+        args = build_parser().parse_args()
+        self = cls()
+        self.args = args.args
+        self.dist = args.dist
+        self.lto = args.lto
+        self.strip = args.strip
+        self.target = args.target
+        self.verbosity = args.verbosity
+        return self
 
 
 def build_parser():
@@ -69,7 +84,7 @@ def clean_package(target):
 
     We need to do this to get correct build time & commit id embedded in binary.
     """
-    args = [CROSS, 'clean', '--release', '--package', 'nmk', '--target', target]
+    args = ['cargo', 'clean', '--release', '--package', 'nmk', '--target', target, '--target-dir', str(TARGET_DIR)]
     logging.info("Cleaning packages")
     logging.debug("cmd: %s", " ".join(args))
     subprocess.call(args)
@@ -91,7 +106,7 @@ def build_release(target, strip=False, lto=False, commit_id=None):
         env['CARGO_PROFILE_RELEASE_LTO'] = 'true'
     if commit_id:
         env['GIT_SHORT_SHA'] = commit_id
-    args = [CROSS, 'build', '--release', '--target', target]
+    args = ['cross', 'build', '--release', '--target', target, '--target-dir', str(TARGET_DIR)]
     logging.info("Building %s target", target)
     logging.debug("env: %s", env)
     logging.debug("cmd: %s", " ".join(args))
@@ -111,7 +126,7 @@ def get_version_from_manifest(manifest_path):
 
 
 def get_release_dir(target_triple):
-    return GIT_ROOT_DIR / 'target' / target_triple / 'release'
+    return TARGET_DIR / target_triple / 'release'
 
 
 def get_build_commit_id():
@@ -136,15 +151,15 @@ def setup_logging(verbosity):
 
 
 def main():
-    cmd_opt = build_parser().parse_args()
-    setup_logging(cmd_opt.verbosity)
-    target = TARGET_TRIPLE.get(cmd_opt.target)
+    opt = Opt.from_args()
+    setup_logging(opt.verbosity)
+    target = TARGET_TRIPLE.get(opt.target)
     commit_id = get_build_commit_id()
     clean_package(target)
-    build_release(target, lto=cmd_opt.lto, commit_id=commit_id, strip=cmd_opt.strip)
+    build_release(target, lto=opt.lto, commit_id=commit_id, strip=opt.strip)
     release_dir = get_release_dir(target)
     DIST_DIR.mkdir(exist_ok=True)
-    if cmd_opt.dist:
+    if opt.dist:
         dist(target=target, release_dir=release_dir)
 
 

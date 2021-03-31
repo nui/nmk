@@ -4,6 +4,7 @@ use std::process::Command;
 
 use bytes::Bytes;
 use tar::Archive;
+use xz2::read::XzDecoder;
 
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url, ObjectMeta};
 use nmk::home::NmkHome;
@@ -13,17 +14,16 @@ use crate::cmdline::CmdOpt;
 const DOTFILES_META: &str = ".dotfiles.meta";
 const TAG: &str = "dotfiles";
 
-async fn extract_dotfiles<P: AsRef<Path>>(data: Bytes, dst: P) -> nmk::Result<()> {
-    let dst = dst.as_ref();
-    let tar_data_stream = xz2::bufread::XzDecoder::new(&*data);
-    let mut archive = Archive::new(tar_data_stream);
-    log::info!("{}: Installing to {:?}.", TAG, dst);
+async fn extract_dotfiles<P: AsRef<Path>>(data: Bytes, destination: P) -> nmk::Result<()> {
+    let destination = destination.as_ref();
+    let mut archive = Archive::new(XzDecoder::new(&*data));
+    log::info!("{}: Installing to {:?}.", TAG, destination);
     for entry in archive.entries()? {
         let mut entry = entry?;
         let path = entry.path()?;
         let mut entry_path = path.components();
         entry_path.next(); // Strip the first component (.nmk)
-        let full_path = dst.join(entry_path);
+        let full_path = destination.join(entry_path);
         entry.unpack(full_path)?;
     }
     Ok(())
