@@ -1,13 +1,6 @@
 .PHONY: docker
-.ONESHELL: clean
 
 export CLOUDSDK_ACTIVE_CONFIG_NAME = nui
-
-define remove_releases =
-for target in aarch64-unknown-linux-musl arm-unknown-linux-musleabi armv7-unknown-linux-musleabihf x86_64-unknown-linux-musl; do
-	rm -rf target.cross/$target
-done
-endef
 
 amd64:
 	python3 build.py --target amd64 --strip --dist
@@ -22,7 +15,7 @@ armv7:
 	python3 build.py --target armv7 --strip --dist
 
 clean:
-	$(value remove_releases)
+	rm -rf target.cross
 
 build-all: amd64 arm64 arm armv7
 
