@@ -15,7 +15,7 @@ armv7:
 	python3 build.py --target armv7 --strip --dist
 
 clean:
-	rm -rf target.cross
+	git clean -ffdx --exclude=.idea
 
 build-all: amd64 arm64 arm armv7
 
