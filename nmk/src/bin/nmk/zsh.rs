@@ -15,10 +15,14 @@ fn has_vendor_zsh(nmk_home: &NmkHome) -> bool {
     nmk_home.nmk_path().vendor_bin().join(ZSH).exists()
 }
 
+/// Determine if we should use global zsh resource files
+///
+/// The primary reason that we need to check this because PATH environment set by us is ignored
+/// on some platform.
+///
+///   - on MacOs, zprofile call /usr/libexec/path_helper which will change order in PATH
+///   - on Alpine, global zprofile source /etc/profile which overwrite PATH environment
 pub fn use_global_rcs(nmk_home: &NmkHome) -> bool {
-    // Disable global resource files on some platform
-    //   - Some linux distributions force sourcing /etc/profile, they do reset PATH set by nmk.
-    //   - MacOs doesn't respect PATH set by nmk, it changes the order.
     let not_friendly_global_rcs = is_mac() || is_alpine() || is_arch();
     has_vendor_zsh(nmk_home) || !not_friendly_global_rcs
 }
@@ -35,7 +39,7 @@ pub fn exec_login_shell(cmd_opt: &CmdOpt) -> ! {
     let zsh = which::which(ZSH).expect("Failed to locate zsh");
     let mut cmd = Command::new(&zsh);
     cmd.env("SHELL", zsh);
-    // Simulate a login shell
+    // Signal zsh that it is a login shell by prepend - to arg0
     cmd.arg0("-zsh");
     print_usage_time(&cmd_opt);
     let err = cmd.exec();
