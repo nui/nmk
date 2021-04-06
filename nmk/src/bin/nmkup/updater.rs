@@ -1,6 +1,6 @@
 use std::fs::OpenOptions;
 use std::os::unix::fs::OpenOptionsExt;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::{env, fs, io};
 
 use bytes::Bytes;
@@ -12,7 +12,7 @@ use crate::build::Target;
 
 const TAG: &str = "updater";
 
-fn is_same_location(a: &PathBuf, b: &PathBuf) -> bool {
+fn is_same_location(a: &Path, b: &Path) -> bool {
     match (fs::canonicalize(a), fs::canonicalize(b)) {
         (Ok(x), Ok(y)) => x == y,
         _ => false,
@@ -30,7 +30,7 @@ pub async fn self_setup(
         !is_init && target_bin.exists() && is_same_location(&current_exec, &target_bin);
     if is_self_update {
         if entrypoint_updated {
-            perform_self_update_from_remote(target_bin).await?;
+            perform_self_update_from_remote(&target_bin).await?;
             log::info!("{}: Done.", TAG);
         }
     } else {
@@ -40,7 +40,7 @@ pub async fn self_setup(
     Ok(())
 }
 
-pub async fn perform_self_update_from_remote(target_bin: PathBuf) -> nmk::Result<()> {
+pub async fn perform_self_update_from_remote(target_bin: &Path) -> nmk::Result<()> {
     let target = Target::detect().expect("Unsupported arch");
     let tar_file = target.remote_binary_name("nmkup");
     let client = reqwest::Client::new();
