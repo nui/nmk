@@ -22,7 +22,7 @@ pub struct Tmux {
 fn find_version() -> Result<Version, TmuxVersionError> {
     if let Ok(s) = std::env::var(NMK_TMUX_VERSION) {
         log::debug!("Using tmux version from environment variable");
-        Version::from_version_number(&s)
+        Version::from_version(&s)
     } else {
         let Output { status, stdout, .. } = Command::new(TMUX)
             .arg("-V")
@@ -32,9 +32,7 @@ fn find_version() -> Result<Version, TmuxVersionError> {
             let code = status.code().expect("tmux is terminated by signal");
             panic!("tmux exit with status: {}", code);
         }
-        let version_output =
-            std::str::from_utf8(&stdout).expect("tmux version output contain non utf-8");
-        Version::from_version_output(version_output)
+        Version::from_version_output(&stdout)
     }
 }
 

@@ -1,10 +1,15 @@
-use std::fmt::{self, Display};
-use std::str::FromStr;
-
-use strum::AsStaticRef;
-use strum_macros::{AsStaticStr, EnumString};
-
-#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, AsStaticStr, EnumString)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    strum::AsStaticStr,
+    strum::Display,
+    strum::EnumString,
+)]
 pub enum Version {
     #[strum(to_string = "2.6")]
     V26,
@@ -38,27 +43,21 @@ pub enum TmuxVersionError {
 
 impl Version {
     // Try parse `tmux -V` result
-    pub fn from_version_output(s: &str) -> Result<Self, TmuxVersionError> {
-        let version_number = s
-            .trim()
-            .split_ascii_whitespace()
-            .nth(1)
-            .ok_or_else(|| TmuxVersionError::BadOutput(s.to_string()))?;
-        Self::from_version_number(version_number)
+    pub fn from_version_output(output: &[u8]) -> Result<Self, TmuxVersionError> {
+        let output = String::from_utf8_lossy(output);
+        match output.trim().split_ascii_whitespace().nth(1) {
+            Some(version_number) => Self::from_version(version_number),
+            None => Err(TmuxVersionError::BadOutput(output.into_owned())),
+        }
     }
 
-    pub fn from_version_number(s: &str) -> Result<Self, TmuxVersionError> {
-        Self::from_str(s).map_err(|_| TmuxVersionError::Unsupported(s.to_string()))
+    pub fn from_version(s: &str) -> Result<Self, TmuxVersionError> {
+        s.parse()
+            .map_err(|_| TmuxVersionError::Unsupported(s.to_string()))
     }
 
     pub fn as_str(&self) -> &'static str {
-        AsStaticRef::as_static(self)
-    }
-}
-
-impl Display for Version {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(self.as_str())
+        strum::AsStaticRef::as_static(self)
     }
 }
 
@@ -68,7 +67,7 @@ mod tests {
 
     #[test]
     fn test_version() {
-        let tmux_output = "tmux 3.1b";
+        let tmux_output = b"tmux 3.1b";
 
         let actual = Version::from_version_output(tmux_output);
         assert!(matches!(actual, Ok(Version::V31b)));
