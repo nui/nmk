@@ -58,7 +58,7 @@ fn filter_by_os_release() -> impl FnMut(&ObjectMeta) -> bool {
 }
 
 fn filter_by_arch() -> impl FnMut(&ObjectMeta) -> bool {
-    let target = Target::detect().expect("Unsupported target");
+    let target = Target::detect().expect("unsupported target");
     const ARM64_TAG: &str = "arm64";
     move |item| {
         let found_tag = item.name.to_lowercase().contains(ARM64_TAG);

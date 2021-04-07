@@ -41,7 +41,7 @@ pub async fn self_setup(
 }
 
 pub async fn perform_self_update_from_remote(target_bin: &Path) -> nmk::Result<()> {
-    let target = Target::detect().expect("Unsupported arch");
+    let target = Target::detect().expect("unsupported arch");
     let tar_file = target.remote_binary_name("nmkup");
     let client = reqwest::Client::new();
     let meta_url = get_object_meta_url(&tar_file);

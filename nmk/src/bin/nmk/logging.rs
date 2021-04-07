@@ -18,5 +18,5 @@ pub fn setup(verbosity: u8) {
         ColorChoice::Always,
     )
     .or_else(|_| SimpleLogger::init(log_level, config))
-    .expect("Failed to setup logging");
+    .expect("failed to setup logging");
 }

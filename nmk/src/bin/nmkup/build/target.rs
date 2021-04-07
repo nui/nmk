@@ -16,7 +16,7 @@ pub enum Target {
 
 impl Target {
     pub fn detect() -> Result<Self, String> {
-        let arch = detect_current_architecture().expect("Unable to detect arch");
+        let arch = detect_current_architecture().expect("failed to detect architecture");
         FromStr::from_str(&arch)
     }
 

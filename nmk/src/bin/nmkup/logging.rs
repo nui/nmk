@@ -16,14 +16,12 @@ pub fn setup(verbosity: u8) {
         LevelFilter::Info
     };
 
-    if TermLogger::init(
+    TermLogger::init(
         log_level,
         config.build(),
         TerminalMode::Stderr,
         ColorChoice::Always,
     )
-    .is_err()
-    {
-        SimpleLogger::init(log_level, config.build()).expect("Failed to setup logging");
-    }
+    .or_else(|_| SimpleLogger::init(log_level, config.build()))
+    .expect("failed to setup logging");
 }

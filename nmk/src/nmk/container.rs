@@ -40,7 +40,7 @@ pub fn is_containerized() -> bool {
         return false;
     }
     let self_cgroup = format!("/proc/{}/cgroup", std::process::id());
-    let contents = fs::read_to_string(self_cgroup).expect("Cannot read self cgroup");
+    let contents = fs::read_to_string(self_cgroup).expect("cannot read self cgroup");
     is_container(&contents)
 }
 

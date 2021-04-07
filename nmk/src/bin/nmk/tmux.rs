@@ -27,7 +27,7 @@ fn find_version() -> Result<Version, TmuxVersionError> {
         let Output { status, stdout, .. } = Command::new(TMUX)
             .arg("-V")
             .output()
-            .expect("tmux not found");
+            .expect("failed to get tmux version output");
         if !status.success() {
             let code = status.code().expect("tmux is terminated by signal");
             panic!("tmux exit with status: {}", code);
@@ -38,8 +38,8 @@ fn find_version() -> Result<Version, TmuxVersionError> {
 
 impl Tmux {
     pub fn new() -> Tmux {
-        let bin = which::which(TMUX).expect("Cannot find tmux binary");
-        let version = find_version().expect("Find tmux version error");
+        let bin = which::which(TMUX).expect("cannot find tmux binary");
+        let version = find_version().expect("find tmux version error");
         Tmux { bin, version }
     }
 

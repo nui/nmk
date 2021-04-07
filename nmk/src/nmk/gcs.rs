@@ -30,13 +30,13 @@ pub struct ObjectMeta {
 impl ObjectMeta {
     pub fn write_to_file(&self, path: &Path) {
         let json_data =
-            serde_json::to_string_pretty(self).expect("Failed to serialize ObjectMeta to json");
-        fs::write(path, json_data).expect("Failed to write ObjectMeta to file");
+            serde_json::to_string_pretty(self).expect("failed to serialize ObjectMeta to json");
+        fs::write(path, json_data).expect("failed to write ObjectMeta to file");
     }
 
     pub fn read_from_file(path: &Path) -> Self {
-        let json_data = fs::read(path).expect("Failed to read ObjectMeta from file");
-        serde_json::from_slice(&json_data).expect("Failed to deserialize ObjectMeta")
+        let json_data = fs::read(path).expect("failed to read ObjectMeta from file");
+        serde_json::from_slice(&json_data).expect("failed to deserialize ObjectMeta")
     }
 }
 

@@ -7,7 +7,7 @@ use structopt::StructOpt;
 
 use crate::version::get_verbose_version;
 
-static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().expect("Missing version info"));
+static VERSION: Lazy<String> = Lazy::new(|| get_verbose_version().expect("missing version info"));
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "nmk", version = VERSION.as_str())]

@@ -18,10 +18,10 @@ mod vendor;
 
 async fn main_task(cmd_opt: cmdline::CmdOpt, _settings: config::Config) -> nmk::Result<()> {
     // Installation should be done in order
-    let nmk_home = NmkHome::find_for_install().expect("Failed to locate NMK_HOME");
+    let nmk_home = NmkHome::find_for_install().expect("failed to locate NMK_HOME");
     assert!(!nmk_home.is_git(), "nmk is managed by git. Abort.");
     if cmd_opt.backup {
-        let home = home_dir().expect("Failed to find home directory");
+        let home = home_dir().expect("failed to find home directory");
         let output_tar = home.join("nmk-backup.tar");
         backup_files(&nmk_home, &output_tar)?;
     }
@@ -57,7 +57,7 @@ fn is_init() -> bool {
         .ok()
         .as_deref()
         .and_then(Path::file_name)
-        .expect("Failed to find current executable file name")
+        .expect("failed to find current executable file name")
         .as_bytes()
         .starts_with(b"nmkup-init")
 }
