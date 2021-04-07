@@ -1,7 +1,6 @@
 use once_cell::sync::Lazy;
 
-#[allow(dead_code)]
-#[derive(PartialEq, Clone, Copy)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum PlatformType {
     Unknown,
     MacOs,
@@ -10,16 +9,14 @@ pub enum PlatformType {
     Alpine,
 }
 
-pub fn is_alpine() -> bool {
-    *PLATFORM == PlatformType::Alpine
-}
-
-pub fn is_arch() -> bool {
-    *PLATFORM == PlatformType::Arch
-}
-
 pub fn is_mac() -> bool {
     *PLATFORM == PlatformType::MacOs
+}
+
+impl PlatformType {
+    pub fn detect() -> PlatformType {
+        *PLATFORM
+    }
 }
 
 static PLATFORM: Lazy<PlatformType> = Lazy::new(what_platform);

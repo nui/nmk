@@ -3,20 +3,23 @@ use std::fs;
 use crate::platform;
 
 struct CGroup<'a> {
+    control_group: &'a str,
     #[allow(dead_code)]
     hierarchy_id: &'a str,
     #[allow(dead_code)]
     subsystems: &'a str,
-    control_group: &'a str,
 }
 
 impl<'a> CGroup<'a> {
+    pub const SEPARATOR: char = ':';
+
     pub fn parse(line: &'a str) -> Option<Self> {
-        let mut iter = line.split(':');
+        let mut iter = line.split(Self::SEPARATOR);
+        let (hierarchy_id, subsystems, control_group) = (iter.next()?, iter.next()?, iter.next()?);
         Some(Self {
-            hierarchy_id: iter.next()?,
-            subsystems: iter.next()?,
-            control_group: iter.next()?,
+            control_group,
+            hierarchy_id,
+            subsystems,
         })
     }
 
@@ -49,13 +52,13 @@ mod tests {
     fn test_cgroup_parse() {
         let actual = CGroup::parse("12:cpu,cpuacct:/").unwrap();
         let expect = CGroup {
+            control_group: "/",
             hierarchy_id: "12",
             subsystems: "cpu,cpuacct",
-            control_group: "/",
         };
+        assert_eq!(actual.control_group, expect.control_group);
         assert_eq!(actual.hierarchy_id, expect.hierarchy_id);
         assert_eq!(actual.subsystems, expect.subsystems);
-        assert_eq!(actual.control_group, expect.control_group);
     }
 
     #[test]

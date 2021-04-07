@@ -5,7 +5,6 @@ use nmk::bin_name::ZSH;
 use nmk::config::one_hot;
 use nmk::env_name::NMK_ZSH_GLOBAL_RCS;
 use nmk::home::NmkHome;
-use nmk::platform::{is_alpine, is_arch, is_mac};
 
 use crate::cmdline::CmdOpt;
 use crate::entrypoint::set_env;
@@ -23,7 +22,9 @@ fn has_vendor_zsh(nmk_home: &NmkHome) -> bool {
 ///   - on MacOs, zprofile call /usr/libexec/path_helper which will change order in PATH
 ///   - on Alpine, global zprofile source /etc/profile which overwrite PATH environment
 pub fn use_global_rcs(nmk_home: &NmkHome) -> bool {
-    let not_friendly_global_rcs = is_mac() || is_alpine() || is_arch();
+    use nmk::platform::PlatformType::{self, *};
+    let platform = PlatformType::detect();
+    let not_friendly_global_rcs = matches!(platform, MacOs | Alpine | Arch);
     has_vendor_zsh(nmk_home) || !not_friendly_global_rcs
 }
 
