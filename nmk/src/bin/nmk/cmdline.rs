@@ -65,7 +65,7 @@ pub enum SubCommand {
 
 #[derive(Debug, StructOpt)]
 pub struct Completion {
-    #[structopt(short, long, help = "output path, default to standard output")]
+    #[structopt(short, long, help = "write to file instead of stdout")]
     pub output: Option<PathBuf>,
     #[structopt(possible_values = Shell::variants().as_ref())]
     pub shell: Shell,

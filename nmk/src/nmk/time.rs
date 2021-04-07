@@ -1,6 +1,8 @@
 use std::fmt::{self, Display};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use smallvec::SmallVec;
+
 const MINUTE_SECONDS: u64 = 60;
 const HOUR_SECONDS: u64 = 60 * MINUTE_SECONDS;
 const DAY_SECONDS: u64 = 24 * HOUR_SECONDS;
@@ -51,8 +53,8 @@ impl HumanTime {
             .join(" ")
     }
 
-    pub fn to_parts(&self) -> Vec<HumanTimePart> {
-        let mut result = Vec::with_capacity(4);
+    pub fn to_parts(&self) -> SmallVec<[HumanTimePart; 4]> {
+        let mut result = SmallVec::new();
         if let Some(d) = self.days() {
             result.push(HumanTimePart::Days(d));
         }
