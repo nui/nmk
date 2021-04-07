@@ -44,28 +44,52 @@ impl HumanTime {
     pub fn to_human(&self, max_parts: usize) -> String {
         let mut parts = self.to_parts();
         parts.truncate(max_parts);
-        parts.join(" ")
+        parts
+            .iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 
-    pub fn to_parts(&self) -> Vec<String> {
+    pub fn to_parts(&self) -> Vec<HumanTimePart> {
         let mut result = Vec::with_capacity(4);
         if let Some(d) = self.days() {
-            result.push(format!("{}d", d));
+            result.push(HumanTimePart::Days(d));
         }
         if let Some(h) = self.hours() {
-            result.push(format!("{}h", h));
+            result.push(HumanTimePart::Hours(h));
         }
         if let Some(m) = self.minutes() {
-            result.push(format!("{}m", m));
+            result.push(HumanTimePart::Minutes(m));
         }
-        result.push(format!("{}s", self.secs()));
+        result.push(HumanTimePart::Seconds(self.secs()));
         result
+    }
+}
+
+#[derive(Clone, Copy)]
+pub enum HumanTimePart {
+    Days(u64),
+    Hours(u64),
+    Minutes(u64),
+    Seconds(u64),
+}
+
+impl Display for HumanTimePart {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use HumanTimePart::*;
+        match *self {
+            Days(d) => write!(f, "{}d", d),
+            Hours(h) => write!(f, "{}h", h),
+            Minutes(m) => write!(f, "{}m", m),
+            Seconds(s) => write!(f, "{}s", s),
+        }
     }
 }
 
 impl Display for HumanTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.to_parts().join(" "))
+        write!(f, "{}", self.to_human(usize::MAX))
     }
 }
 
