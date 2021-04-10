@@ -1,4 +1,4 @@
-use nmk::time::{seconds_since_build, HumanTime};
+use nmk::human_time::{seconds_since_build, HumanTime};
 
 pub fn get_verbose_version() -> Option<String> {
     let secs_since_build = seconds_since_build();

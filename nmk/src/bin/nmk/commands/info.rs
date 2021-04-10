@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use nmk::arch::detect_current_architecture;
-use nmk::time::{seconds_since_build, HumanTime};
+use nmk::human_time::{seconds_since_build, HumanTime};
 
 #[derive(Serialize)]
 struct Info {

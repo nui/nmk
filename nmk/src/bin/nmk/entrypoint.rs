@@ -6,7 +6,7 @@ use std::{env, io};
 
 use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, NMK_TMUX_VERSION, PATH, VIMINIT, ZDOTDIR};
 use nmk::home::NmkHome;
-use nmk::time::{seconds_since_build, HumanTime};
+use nmk::human_time::{seconds_since_build, HumanTime};
 
 use crate::cmdline::CmdOpt;
 use crate::path_vec::PathVec;

@@ -10,8 +10,8 @@ pub mod env_name;
 pub mod error;
 pub mod gcs;
 pub mod home;
+pub mod human_time;
 pub mod platform;
-pub mod time;
 pub mod tmux;
 
 pub type Result<T> = std::result::Result<T, error::Error>;
