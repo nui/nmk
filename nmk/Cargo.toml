@@ -28,6 +28,8 @@ xz2 = "0.1.6"
 
 [profile.release]
 lto = false
+# Faster compilation and small binaries, this doesn't effect entrypoint speed since we don't do much computation.
+opt-level = "z"
 
 [lib]
 name = "nmk"
