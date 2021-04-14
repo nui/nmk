@@ -133,7 +133,7 @@ def add_all_to_tar(archive, src, filter):
 
 
 def list_ignored_files(repo):
-    ignore_file = repo.joinpath('.archiveignore')
+    ignore_file = repo.joinpath('.dotfilesignore')
     lines = [line.strip() for line in open(ignore_file, 'rt').readlines()]
     files = []
     for line in lines:

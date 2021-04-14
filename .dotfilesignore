@@ -27,7 +27,7 @@ nmk
 src
 zsh/src
 # our files
-.archiveignore
+.dotfilesignore
 .firebaserc
 etc/build.py
 firebase.json
