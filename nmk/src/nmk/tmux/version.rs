@@ -33,6 +33,8 @@ pub enum Version {
     V31b,
     #[strum(to_string = "3.1c")]
     V31c,
+    #[strum(to_string = "3.2")]
+    V32,
 }
 
 #[derive(Debug)]
