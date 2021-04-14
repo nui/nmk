@@ -24,13 +24,20 @@ fn find_version() -> Result<Version, TmuxVersionError> {
         log::debug!("Using tmux version from environment variable");
         Version::from_version(&s)
     } else {
-        let Output { status, stdout, .. } = Command::new(TMUX)
+        let Output {
+            status,
+            stderr,
+            stdout,
+        } = Command::new(TMUX)
             .arg("-V")
             .output()
             .expect("failed to get tmux version output");
         if !status.success() {
-            let code = status.code().expect("tmux is terminated by signal");
-            panic!("tmux exit with status: {}", code);
+            panic!(
+                "tmux exit with status code: {:?}, error: {}",
+                status.code(),
+                String::from_utf8_lossy(&stderr)
+            );
         }
         Version::from_version_output(&stdout)
     }

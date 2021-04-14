@@ -44,7 +44,7 @@ pub enum TmuxVersionError {
 }
 
 impl Version {
-    // Try parse `tmux -V` result
+    // Parse `tmux -V` output
     pub fn from_version_output(output: &[u8]) -> Result<Self, TmuxVersionError> {
         let output = String::from_utf8_lossy(output);
         match output.trim().split_ascii_whitespace().nth(1) {
@@ -68,10 +68,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_version() {
-        let tmux_output = b"tmux 3.1b";
-
-        let actual = Version::from_version_output(tmux_output);
+    fn test_parse_version() {
+        let actual = Version::from_version_output(b"tmux 3.1b");
         assert!(matches!(actual, Ok(Version::V31b)));
+        let actual = Version::from_version_output(b"tmux 3.1c");
+        assert!(matches!(actual, Ok(Version::V31c)));
+        let actual = Version::from_version_output(b"tmux 3.2");
+        assert!(matches!(actual, Ok(Version::V32)));
     }
 }
