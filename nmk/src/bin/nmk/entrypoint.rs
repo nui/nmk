@@ -1,4 +1,4 @@
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsStr;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -26,10 +26,13 @@ fn setup_environment_variable(nmk_home: &NmkHome) {
 
     // Setup Vim
     let vim_dir = nmk_home.nmk_path().vim();
-    let mut vim_init = OsString::from(r"source\ ");
-    vim_init.push(vim_dir.join("init.vim"));
-    set_env(VIMINIT, vim_init);
+    set_env(VIMINIT, build_vim_init(&vim_dir));
     setup_preferred_editor();
+}
+
+fn build_vim_init(vim_dir: &Path) -> String {
+    let init_dot_vim = vim_dir.join("init.vim");
+    shell_words::join(&["source".into(), init_dot_vim.to_string_lossy()])
 }
 
 fn setup_preferred_editor() {
@@ -128,7 +131,12 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
             let context = make_config_context(&cmd_opt, support_256_color);
             let mut buf = Vec::with_capacity(8192);
             nmk::tmux::config::render(&mut buf, &context, tmux.version)?;
-            log::debug!("Config length: {}, capacity: {}", buf.len(), buf.capacity());
+            log::debug!(
+                "tmux configuration length: {}, capacity: {}, remaining bytes before re-alloc: {}",
+                buf.len(),
+                buf.capacity(),
+                buf.capacity() - buf.len(),
+            );
             if cmd_opt.render {
                 return io::stdout().write_all(&buf);
             } else {
@@ -137,5 +145,23 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
             }
         };
         tmux.exec(&cmd_opt, config, support_256_color);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_build_vim_init() {
+        let vim_dir = PathBuf::from("/home/user/.nmk/vim");
+        let actual = build_vim_init(&vim_dir);
+        assert_eq!(actual, "source /home/user/.nmk/vim/init.vim");
+
+        let vim_dir = PathBuf::from("/home/user with space/.nmk/vim");
+        let actual = build_vim_init(&vim_dir);
+        assert_eq!(actual, "source '/home/user with space/.nmk/vim/init.vim'");
     }
 }
