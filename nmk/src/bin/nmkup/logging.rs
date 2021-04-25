@@ -1,5 +1,5 @@
 use log::LevelFilter;
-use simplelog::{ColorChoice, SimpleLogger, TermLogger, TerminalMode};
+use simplelog::{ColorChoice, TermLogger, TerminalMode};
 
 pub fn setup(verbosity: u8) {
     let mut config = simplelog::ConfigBuilder::new();
@@ -9,6 +9,7 @@ pub fn setup(verbosity: u8) {
     if matches!(verbosity, 0..=1) {
         config.add_filter_allow_str("nmkup");
     }
+    let config = config.build();
 
     let log_level = if verbosity > 0 {
         LevelFilter::Debug
@@ -16,12 +17,6 @@ pub fn setup(verbosity: u8) {
         LevelFilter::Info
     };
 
-    TermLogger::init(
-        log_level,
-        config.build(),
-        TerminalMode::Stderr,
-        ColorChoice::Always,
-    )
-    .or_else(|_| SimpleLogger::init(log_level, config.build()))
-    .expect("failed to setup logging");
+    TermLogger::init(log_level, config, TerminalMode::Stderr, ColorChoice::Always)
+        .expect("failed to setup logging")
 }
