@@ -10,14 +10,14 @@ mod version;
 mod zsh;
 
 fn main() -> nmk::Result<()> {
-    let cmd_opt = cmdline::parse();
+    let mut cmd_opt = cmdline::parse();
     logging::setup(cmd_opt.verbosity);
     log::debug!("Command line options: {:#?}", cmd_opt);
-    if let Some(ref cmd) = cmd_opt.cmd {
+    if let Some(cmd) = cmd_opt.cmd.take() {
         use cmdline::SubCommand::*;
         match cmd {
             Backup => commands::backup::backup()?,
-            Completions(c) => commands::completion::gen_completion(c),
+            Completions(c) => commands::completion::generate_completion(c),
             Info => commands::info::print_info()?,
         }
     } else {

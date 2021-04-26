@@ -23,17 +23,15 @@ struct Rustup {
 
 #[derive(Serialize)]
 struct Nmk {
-    commit: &'static str,
+    version: Option<String>,
     build_on: Option<String>,
 }
 
 pub fn print_info() -> nmk::Result<()> {
+    let version = get_version();
     let build_on = seconds_since_build().map(|secs| format!("{} ago", HumanTime::new(secs)));
     let info = Info {
-        nmk: Nmk {
-            commit: option_env!("GIT_SHORT_SHA").unwrap_or("n/a"),
-            build_on,
-        },
+        nmk: Nmk { version, build_on },
         rustup: Rustup {
             get_architecture: detect_current_architecture()?,
         },
@@ -44,4 +42,14 @@ pub fn print_info() -> nmk::Result<()> {
     };
     println!("{}", toml::to_string_pretty(&info)?);
     Ok(())
+}
+
+fn get_version() -> Option<String> {
+    if let Some(hash) = option_env!("GIT_SHORT_SHA") {
+        Some(format!("#{}", hash))
+    } else if cfg!(debug_assertions) {
+        Some("development".to_owned())
+    } else {
+        None
+    }
 }

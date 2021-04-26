@@ -7,7 +7,7 @@ use nmk::bin_name::NMK;
 
 use crate::cmdline::{CmdOpt, Completion};
 
-pub fn gen_completion(completion: &Completion) {
+pub fn generate_completion(completion: Completion) {
     let mut output: Box<dyn Write> = match completion.output {
         Some(ref p) => Box::new(File::create(p).expect("cannot create completion file")),
         None => Box::new(std::io::stdout()),

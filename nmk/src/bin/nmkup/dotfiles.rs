@@ -54,8 +54,7 @@ pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Res
     if !cmd_opt.force && !nmk_home_empty {
         assert!(
             meta_do_exist,
-            "{:?} Missing dotfiles metadata or directory is not empty",
-            nmk_home_empty
+            "Missing dotfiles metadata or directory is not empty",
         );
     }
 
