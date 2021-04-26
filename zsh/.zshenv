@@ -19,6 +19,16 @@ fi
         # We have to change fpath at runtime to match actual installation directory.
         ${fpath:s|#/nmk-vendor|${NMK_HOME}/vendor|}
     )
+    typeset -a additional_fpath
+    additional_fpath=(
+        /usr/share/zsh/vendor-functions
+        /usr/share/zsh/vendor-completions
+    )
+    for dir in $additional_fpath; do
+        if [[ -d $dir && ${fpath[(r)$dir]} != $dir ]]; then
+            fpath+=$dir
+        fi
+    done
 }
 
 
