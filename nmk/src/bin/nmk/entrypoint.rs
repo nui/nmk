@@ -1,3 +1,4 @@
+use std::array::IntoIter;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::Write;
@@ -55,13 +56,12 @@ fn setup_preferred_editor() {
 fn setup_shell_search_path(nmk_home: &NmkHome) {
     let nmk_path = nmk_home.nmk_path();
     let mut search_path = PathVec::from(env::var_os(PATH).expect("$PATH not found"));
-    let nmk_search_path = vec![
+    let nmk_search_path = [
         nmk_path.bin(),
         // vendor directory
         nmk_path.vendor_bin(),
     ];
-    search_path = nmk_search_path
-        .into_iter()
+    search_path = IntoIter::new(nmk_search_path)
         .filter(|p| p.exists())
         .chain(search_path)
         .collect();

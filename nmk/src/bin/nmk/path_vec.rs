@@ -3,7 +3,7 @@ use std::env;
 use std::ffi::{OsStr, OsString};
 use std::fmt::{self, Debug, Formatter};
 use std::iter::FromIterator;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use indexmap::IndexSet;
 use nix::NixPath;
@@ -42,13 +42,17 @@ impl PathVec {
         env::join_paths(self.clone().unique()).expect("join path error")
     }
 
+    /// Return unique path and keeping iteration order
     pub fn unique(self) -> Self {
         Self::from_iter(IndexSet::<_>::from_iter(self.vec))
     }
 
     pub fn without_version_managers(mut self) -> Self {
-        self.vec
-            .retain(|p| !p.ends_with(".pyenv/shims") && !p.ends_with(".rbenv/shims"));
+        #[inline]
+        fn version_manager_path(p: &Path) -> bool {
+            p.ends_with(".pyenv/shims") || p.ends_with(".rbenv/shims")
+        }
+        self.vec.retain(|p| !version_manager_path(p));
         self
     }
 

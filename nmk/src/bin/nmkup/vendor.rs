@@ -54,7 +54,10 @@ fn filter_by_os_release() -> impl FnMut(&ObjectMeta) -> bool {
         Debian => "debian",
         Ubuntu => "ubuntu",
     });
-    move |item: &ObjectMeta| pattern.map_or(true, |pat| item.name.contains(pat))
+    move |item: &ObjectMeta| {
+        // Try to filter by os-release data, if we can't determine os-release, don't filter at all.
+        pattern.map_or(true, |pat| item.name.contains(pat))
+    }
 }
 
 fn filter_by_arch() -> impl FnMut(&ObjectMeta) -> bool {
@@ -65,7 +68,7 @@ fn filter_by_arch() -> impl FnMut(&ObjectMeta) -> bool {
         match target {
             Target::Amd64Linux => !found_tag,
             Target::Arm64Linux => found_tag,
-            _ => panic!("Unsupported arch"),
+            _ => panic!("unsupported arch"),
         }
     }
 }
@@ -79,8 +82,7 @@ fn get_display_name(objects: &[ObjectMeta]) -> Vec<&str> {
 
 fn remove_dir_contents(path: impl AsRef<Path>) -> io::Result<()> {
     fs::read_dir(path)?.try_for_each(|entry| {
-        let entry = entry?;
-        let p = entry.path();
+        let p = entry?.path();
         if p.is_dir() {
             fs::remove_dir_all(p)
         } else {
@@ -122,19 +124,20 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
     }
 }
 
+/// Show OS information to help select correct vendor files
+///
+/// On CentOS, /etc/os-release doesn't show CentOS minor version
 fn display_some_os_info() -> io::Result<()> {
-    // On CentOS, /etc/os-release doesn't show CentOS minor version
-    let infos = ["/etc/centos-release", "/etc/os-release"].iter();
     log::info!("Displaying os information..");
-    if let Some(mut f) = infos.map(Path::new).flat_map(File::open).next() {
+    let infos = ["/etc/centos-release", "/etc/os-release"].iter();
+    if let Some(mut f) = infos.flat_map(File::open).next() {
         io::copy(&mut f, &mut io::stdout())?;
     }
     Ok(())
 }
 
-async fn extract_vendor_files<P: AsRef<Path>>(data: Bytes, destination: P) -> io::Result<()> {
-    let destination = destination.as_ref();
+async fn extract_vendor_files(data: Bytes, destination: impl AsRef<Path>) -> io::Result<()> {
     let mut archive = Archive::new(XzDecoder::new(&*data));
-    log::info!("{}: Installing to {:?}.", TAG, destination);
+    log::info!("{}: Installing to {:?}.", TAG, destination.as_ref());
     archive.unpack(destination)
 }
