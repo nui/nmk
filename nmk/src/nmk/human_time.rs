@@ -46,13 +46,18 @@ impl HumanTime {
 
     pub fn to_human(self, num_components: u8) -> String {
         let mut components = self.components().take(num_components.into());
-        // We could also collect to Vec<String> then call .join(" ")
         // We code this way to show an alternative style which avoid String allocation.
-        let mut out = components.next().map(|c| c.to_string()).unwrap_or_default();
-        for c in components {
-            write!(&mut out, " {}", c).expect("Infallible string write");
+        // We could also collect to Vec<String> then call .join(" ")
+        let capacity = (num_components * 4).min(16).into();
+        let mut buf = String::with_capacity(capacity);
+        const DISPLAY_IMPL_ERROR: &str = "a Display implementation returned an error unexpectedly";
+        if let Some(c) = components.next() {
+            write!(&mut buf, "{}", c).expect(DISPLAY_IMPL_ERROR);
         }
-        out
+        for c in components {
+            write!(&mut buf, " {}", c).expect(DISPLAY_IMPL_ERROR);
+        }
+        buf
     }
 
     pub fn components(self) -> Components {
@@ -118,7 +123,9 @@ enum Unit {
 }
 
 impl Unit {
-    fn next(self) -> Option<Self> {
+    pub const BIGGEST: Self = Self::Day;
+
+    fn next_smaller(self) -> Option<Self> {
         use Unit::*;
         match self {
             Day => Some(Hour),
@@ -131,14 +138,14 @@ impl Unit {
 
 pub struct Components {
     time: HumanTime,
-    next_unit: Option<Unit>,
+    unit: Option<Unit>,
 }
 
 impl Components {
     fn new(time: HumanTime) -> Self {
         Components {
             time,
-            next_unit: Some(Unit::Day),
+            unit: Some(Unit::BIGGEST),
         }
     }
 }
@@ -148,8 +155,8 @@ impl Iterator for Components {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let unit = self.next_unit?;
-            self.next_unit = unit.next();
+            let unit = self.unit?;
+            self.unit = unit.next_smaller();
             let component = match unit {
                 Unit::Day => self.time.days().map(Component::days),
                 Unit::Hour => self.time.hours().map(Component::hours),
@@ -157,7 +164,7 @@ impl Iterator for Components {
                 Unit::Second => Some(self.time.secs()).map(Component::seconds),
             };
             if component.is_some() {
-                return component;
+                break component;
             }
         }
     }
