@@ -48,7 +48,7 @@ impl HumanTime {
         let mut components = self.components().take(num_components.into());
         // We code this way to show an alternative style which avoid String allocation.
         // We could also collect to Vec<String> then call .join(" ")
-        let capacity = (num_components * 4).min(16).into();
+        let capacity = (num_components.saturating_mul(4)).min(16).into();
         let mut buf = String::with_capacity(capacity);
         const DISPLAY_IMPL_ERROR: &str = "a Display implementation returned an error unexpectedly";
         if let Some(c) = components.next() {
