@@ -2,33 +2,30 @@ use std::path::Path;
 use std::{env, fs, io};
 
 use bytes::{Buf, Bytes};
+use same_file::is_same_file;
 
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url};
 use nmk::home::NmkHome;
 use nmk::setup::install;
 
 use crate::build::Target;
+use crate::entrypoint::EntrypointInstallation;
 
 const TAG: &str = "updater";
-
-fn is_same_location(a: &Path, b: &Path) -> bool {
-    match (fs::canonicalize(a), fs::canonicalize(b)) {
-        (Ok(x), Ok(y)) => x == y,
-        _ => false,
-    }
-}
 
 pub async fn self_setup(
     nmk_home: &NmkHome,
     is_init: bool,
-    entrypoint_updated: bool,
+    entrypoint_installation: EntrypointInstallation,
 ) -> nmk::Result<()> {
     let current_exec = env::current_exe()?;
     let target_bin = nmk_home.nmk_path().bin().join("nmkup");
     let is_self_update =
-        !is_init && target_bin.exists() && is_same_location(&current_exec, &target_bin);
+        !is_init && target_bin.exists() && is_same_file(&current_exec, &target_bin)?;
     if is_self_update {
-        if entrypoint_updated {
+        // Entrypoint and updater are built at the same time.
+        // So we update updater if entrypoint is updated.
+        if matches!(entrypoint_installation, EntrypointInstallation::Installed) {
             perform_self_update_from_remote(&target_bin).await?;
             log::info!("{}: Done.", TAG);
         }

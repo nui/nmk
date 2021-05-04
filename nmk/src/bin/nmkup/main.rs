@@ -30,8 +30,8 @@ async fn main_task(cmd_opt: cmdline::CmdOpt, _settings: config::Config) -> nmk::
         log::error!("Not supporting os");
         return Ok(());
     }
-    let entrypoint_updated = entrypoint::install_or_update(&cmd_opt, &nmk_home).await?;
-    updater::self_setup(&nmk_home, is_init(), entrypoint_updated).await?;
+    let entrypoint_installation = entrypoint::install_or_update(&cmd_opt, &nmk_home).await?;
+    updater::self_setup(&nmk_home, is_init(), entrypoint_installation).await?;
     if cmd_opt.vendor {
         vendor::install(&cmd_opt, &nmk_home).await?;
     }

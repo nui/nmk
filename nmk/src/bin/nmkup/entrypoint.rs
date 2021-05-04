@@ -20,7 +20,16 @@ fn install_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<()> {
 
 const NMK_META: &str = ".nmk.meta";
 
-pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<bool> {
+#[derive(Copy, Clone)]
+pub enum EntrypointInstallation {
+    Installed,
+    Up2Date,
+}
+
+pub async fn install_or_update(
+    cmd_opt: &CmdOpt,
+    nmk_home: &NmkHome,
+) -> nmk::Result<EntrypointInstallation> {
     let target = Target::detect().expect("unsupported arch");
     let tar_file = target.remote_binary_name("nmk");
     let meta_path = nmk_home.as_path().join(NMK_META);
@@ -34,7 +43,7 @@ pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Res
     let entrypoint_path = nmk_home.nmk_path().bin().join(NMK);
     if !cmd_opt.force && is_entrypoint_up2date(&meta_path, &meta, &entrypoint_path) {
         log::info!("{}: Already up to date.", TAG);
-        Ok(false)
+        Ok(EntrypointInstallation::Up2Date)
     } else {
         let data_url = &meta.media_link;
         log::debug!("{}: Getting data from {}.", TAG, data_url);
@@ -43,7 +52,7 @@ pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Res
         install_entrypoint(data, entrypoint_path)?;
         meta.write_to_file(&meta_path);
         log::info!("{}: Done.", TAG);
-        Ok(true)
+        Ok(EntrypointInstallation::Installed)
     }
 }
 
