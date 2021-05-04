@@ -1,12 +1,11 @@
-use std::fs::OpenOptions;
-use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 use std::{env, fs, io};
 
-use bytes::Bytes;
+use bytes::{Buf, Bytes};
 
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url};
 use nmk::home::NmkHome;
+use nmk::setup::install;
 
 use crate::build::Target;
 
@@ -57,18 +56,13 @@ pub async fn perform_self_update_from_remote(target_bin: &Path) -> nmk::Result<(
         .parent()
         .unwrap_or_else(|| panic!("{}: Failed to find parent directory.", TAG));
     let temp_target = parent_dir.join("nmkup.next");
-    unxz_nmkup(data, &temp_target).unwrap_or_else(|_| panic!("{}: Failed to extract data", TAG));
+    install_updater(data, &temp_target)
+        .unwrap_or_else(|_| panic!("{}: Failed to extract data", TAG));
     fs::rename(temp_target, target_bin)?;
     Ok(())
 }
 
-fn unxz_nmkup(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
-    let mut xz = xz2::read::XzDecoder::new(&*data);
-    let mut file = OpenOptions::new()
-        .create(true)
-        .truncate(true)
-        .write(true)
-        .mode(0o755)
-        .open(dst)?;
-    io::copy(&mut xz, &mut file)
+fn install_updater(data: Bytes, dst: impl AsRef<Path>) -> io::Result<()> {
+    let mut reader = xz2::read::XzDecoder::new(data.reader());
+    install(&mut reader, dst)
 }

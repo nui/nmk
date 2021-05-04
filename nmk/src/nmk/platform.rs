@@ -21,24 +21,25 @@ impl PlatformType {
 
 static PLATFORM: Lazy<PlatformType> = Lazy::new(what_platform);
 
-#[cfg(target_os = "macos")]
-fn what_platform() -> PlatformType {
-    PlatformType::MacOs
-}
-
-#[cfg(target_os = "linux")]
-fn what_platform() -> PlatformType {
-    let exists = |s: &str| std::path::Path::new(s).exists();
-    if exists("/etc/alpine-release") {
-        PlatformType::Alpine
-    } else if exists("/etc/arch-release") {
-        PlatformType::Arch
+cfg_if::cfg_if! {
+    if #[cfg(target_os = "macos")] {
+        fn what_platform() -> PlatformType {
+            PlatformType::MacOs
+        }
+    } else if #[cfg(target_os = "linux")] {
+        fn what_platform() -> PlatformType {
+            let exists = |s: &str| std::path::Path::new(s).exists();
+            if exists("/etc/alpine-release") {
+                PlatformType::Alpine
+            } else if exists("/etc/arch-release") {
+                PlatformType::Arch
+            } else {
+                PlatformType::Linux
+            }
+        }
     } else {
-        PlatformType::Linux
+        fn what_platform() -> PlatformType {
+            PlatformType::Unknown
+        }
     }
-}
-
-#[cfg(not(any(target_os = "linux", target_os = "macos")))]
-fn what_platform() -> PlatformType {
-    PlatformType::Unknown
 }

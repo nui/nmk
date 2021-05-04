@@ -1,28 +1,21 @@
-use std::fs::OpenOptions;
 use std::io;
-use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 
-use bytes::Bytes;
+use bytes::{Buf, Bytes};
 
 use nmk::bin_name::NMK;
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url, ObjectMeta};
 use nmk::home::NmkHome;
+use nmk::setup::install;
 
 use crate::build::Target;
 use crate::cmdline::CmdOpt;
 
 const TAG: &str = "entrypoint";
 
-fn unxz_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<u64> {
-    let mut data_stream = xz2::read::XzDecoder::new(&*data);
-    let mut file = OpenOptions::new()
-        .create(true)
-        .truncate(true)
-        .write(true)
-        .mode(0o755)
-        .open(dst)?;
-    io::copy(&mut data_stream, &mut file)
+fn install_entrypoint(data: Bytes, dst: impl AsRef<Path>) -> io::Result<()> {
+    let mut reader = xz2::read::XzDecoder::new(data.reader());
+    install(&mut reader, dst)
 }
 
 const NMK_META: &str = ".nmk.meta";
@@ -47,7 +40,7 @@ pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Res
         log::debug!("{}: Getting data from {}.", TAG, data_url);
         let data = download_file(&client, data_url).await?;
         log::debug!("{}: Received data.", TAG);
-        unxz_entrypoint(data, entrypoint_path)?;
+        install_entrypoint(data, entrypoint_path)?;
         meta.write_to_file(&meta_path);
         log::info!("{}: Done.", TAG);
         Ok(true)
