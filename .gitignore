@@ -4,8 +4,8 @@
 .firebase/
 .idea/
 .netrwhist
+.tmux_history
 /.cache/
-/.tmux_history
 /vendor
 /vim/NERDTreeBookmarks
 /vim/bundle/
@@ -15,6 +15,7 @@
 /zsh/.zcompcache/
 /zsh/.zcompdump
 /zsh/.zsh_history
+/zsh/.zsh_sessions/
 /zsh/completion/
 /zsh/zprofile
 /zsh/zshenv.extra
@@ -23,5 +24,5 @@
 firebase-debug.log*
 node_modules/
 npm-debug.log
-target/
 target.cross/
+target/
