@@ -22,7 +22,6 @@ docker
 docs
 etc/macos
 etc/ssh/docker
-etc/systemd
 nmk
 src
 zsh/src
