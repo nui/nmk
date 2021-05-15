@@ -20,10 +20,14 @@ async fn extract_dotfiles<P: AsRef<Path>>(data: Bytes, destination: P) -> nmk::R
     log::info!("{}: Installing to {:?}.", TAG, destination);
     for entry in archive.entries()? {
         let mut entry = entry?;
-        let path = entry.path()?;
-        let mut entry_path = path.components();
-        entry_path.next(); // Strip the first component (.nmk)
-        let full_path = destination.join(entry_path);
+        let full_path = {
+            let path = entry.path()?;
+            let mut components = path.components();
+            // Drop the first component (.nmk)
+            components.next();
+            // Join the rest to get absolute path
+            destination.join(components)
+        };
         entry.unpack(full_path)?;
     }
     Ok(())
