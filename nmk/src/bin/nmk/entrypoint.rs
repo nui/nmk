@@ -36,23 +36,25 @@ fn build_vim_init(vim_dir: &Path) -> String {
     shell_words::join(&["source".into(), init_dot_vim.to_string_lossy()])
 }
 
+/// Set EDITOR to preferred editor
+///
+/// - if set, check it value for existent, print warning if doesn't exist, do not fix it
+/// - otherwise, check hard coded list of preferred editor and set to the one that exist
 fn setup_preferred_editor() {
-    const PREFERRED_EDITORS: &[&str] = &["nvim", "vim"];
-
-    match env::var_os(EDITOR)
-        .as_deref()
-        .into_iter()
-        .chain(PREFERRED_EDITORS.iter().map(OsStr::new))
-        .find(|bin| which::which(bin).is_ok())
-    {
-        Some(editor) => {
-            log::debug!("Using {:?} as preferred editor", editor);
-            set_env(EDITOR, editor);
+    if let Some(editor) = env::var_os(EDITOR) {
+        if which::which(&editor).is_err() {
+            log::warn!("Invalid {} or value does not exist: {:?}", EDITOR, editor)
         }
-        None => env::remove_var(EDITOR),
+    } else {
+        let preferred_editor = ["nvim", "vim"];
+        if let Some(ed) = IntoIter::new(preferred_editor).find(|bin| which::which(bin).is_ok()) {
+            log::debug!("Using {:?} as preferred editor", ed);
+            set_env(EDITOR, ed);
+        }
     }
 }
 
+/// Modify PATH environment
 fn setup_shell_search_path(nmk_home: &NmkHome) {
     let nmk_path = nmk_home.nmk_path();
     let mut search_path = PathVec::from(env::var_os(PATH).expect("$PATH not found"));
