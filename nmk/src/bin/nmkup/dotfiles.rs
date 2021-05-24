@@ -20,17 +20,19 @@ async fn extract_dotfiles<P: AsRef<Path>>(data: Bytes, destination: P) -> nmk::R
     log::info!("{}: Installing to {:?}.", TAG, destination);
     for entry in archive.entries()? {
         let mut entry = entry?;
-        let full_path = {
-            let path = entry.path()?;
-            let mut components = path.components();
-            // Drop the first component (.nmk)
-            components.next();
-            // Join the rest to get absolute path
-            destination.join(components)
-        };
+        let path = entry.path()?;
+        // Strip .nmk
+        let new_path = strip_components(&path, 1);
+        let full_path = destination.join(new_path);
         entry.unpack(full_path)?;
     }
     Ok(())
+}
+
+fn strip_components(path: &Path, n: usize) -> &Path {
+    let mut components = path.components();
+    components.by_ref().take(n).for_each(drop);
+    components.as_path()
 }
 
 fn is_dotfiles_up2date(meta_path: &Path, gcs_meta: &ObjectMeta) -> bool {
@@ -88,4 +90,18 @@ pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Res
         log::info!("{}: Done.", TAG)
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_strip_first_component() {
+        let p = Path::new(".nmk/bin/nmk");
+        let actual = strip_components(&p, 1);
+        assert_eq!(actual, Path::new("bin/nmk"));
+        let actual = strip_components(&p, 2);
+        assert_eq!(actual, Path::new("nmk"));
+    }
 }
