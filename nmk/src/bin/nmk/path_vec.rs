@@ -49,10 +49,10 @@ impl PathVec {
 
     pub fn without_version_managers(mut self) -> Self {
         #[inline]
-        fn version_manager_path(p: &Path) -> bool {
+        fn is_version_manager(p: &Path) -> bool {
             p.ends_with(".pyenv/shims") || p.ends_with(".rbenv/shims")
         }
-        self.vec.retain(|p| !version_manager_path(p));
+        self.vec.retain(|p| !is_version_manager(p));
         self
     }
 

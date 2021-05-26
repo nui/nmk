@@ -57,12 +57,13 @@ fn setup_preferred_editor() {
 /// Modify PATH environment
 fn setup_shell_search_path(nmk_home: &NmkHome) {
     let nmk_path = nmk_home.nmk_path();
-    let mut search_path = PathVec::from(env::var_os(PATH).expect("$PATH not found"));
     let nmk_search_path = [
         nmk_path.bin(),
         // vendor directory
         nmk_path.vendor_bin(),
     ];
+    let search_path = env::var_os(PATH).unwrap_or_else(|| panic!("{} doesn't exist", PATH));
+    let mut search_path = PathVec::from(search_path);
     search_path = IntoIter::new(nmk_search_path)
         .filter(|p| p.exists())
         .chain(search_path)
