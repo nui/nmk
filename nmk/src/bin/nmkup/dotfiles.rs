@@ -17,7 +17,7 @@ const TAG: &str = "dotfiles";
 async fn extract_dotfiles<P: AsRef<Path>>(data: Bytes, destination: P) -> nmk::Result<()> {
     let destination = destination.as_ref();
     let mut archive = Archive::new(XzDecoder::new(&*data));
-    log::info!("{}: Installing to {:?}.", TAG, destination);
+    log::info!("{}: Installing to {}.", TAG, destination.display());
     for entry in archive.entries()? {
         let mut entry = entry?;
         let path = entry.path()?;
@@ -49,7 +49,7 @@ fn is_dotfiles_up2date(meta_path: &Path, gcs_meta: &ObjectMeta) -> bool {
 pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
     if !nmk_home.as_path().exists() {
         fs::create_dir_all(nmk_home)?;
-        log::info!("Created {:?} directory", nmk_home);
+        log::info!("Created {} directory", nmk_home.as_path().display());
     }
 
     let meta_path = nmk_home.as_path().join(DOTFILES_META);

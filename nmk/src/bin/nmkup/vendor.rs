@@ -35,7 +35,7 @@ pub async fn install(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
     log::debug!("{}: Received data.", TAG);
     let vendor_dir = nmk_home.nmk_path().vendor();
     if vendor_dir.exists() {
-        log::debug!("{}: Removing {:?} content.", TAG, vendor_dir);
+        log::debug!("{}: Removing {} content.", TAG, vendor_dir.display());
         remove_dir_contents(&vendor_dir)?;
     } else {
         fs::create_dir(&vendor_dir)?;
@@ -138,6 +138,6 @@ fn display_some_os_info() -> io::Result<()> {
 
 async fn extract_vendor_files(data: Bytes, destination: impl AsRef<Path>) -> io::Result<()> {
     let mut archive = Archive::new(XzDecoder::new(&*data));
-    log::info!("{}: Installing to {:?}.", TAG, destination.as_ref());
+    log::info!("{}: Installing to {}.", TAG, destination.as_ref().display());
     archive.unpack(destination)
 }

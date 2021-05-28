@@ -114,9 +114,9 @@ fn render_options(w: &mut dyn Write, c: &Context) -> io::Result<()> {
     )
 }
 
-fn section<F>(w: &mut dyn Write, c: &Context, name: &str, mut f: F) -> io::Result<()>
+fn section<F>(w: &mut dyn Write, c: &Context, name: &str, f: F) -> io::Result<()>
 where
-    F: FnMut(&mut dyn Write, &Context) -> io::Result<()>,
+    F: FnOnce(&mut dyn Write, &Context) -> io::Result<()>,
 {
     write_start_section(w, name)?;
     f(w, c)?;
@@ -124,13 +124,14 @@ where
 }
 
 fn write_start_section(c: &mut dyn Write, name: &str) -> io::Result<()> {
+    // we need to use format to get c
     let label = format!(" Start {} ", name);
-    writeln!(c, "# {:-^120}", label)
+    writeln!(c, "# {:-^118}", label)
 }
 
 fn write_end_section(c: &mut dyn Write, name: &str) -> io::Result<()> {
     let label = format!(" End {} ", name);
-    writeln!(c, "# {:-^120}", label)
+    writeln!(c, "# {:-^118}", label)
 }
 
 fn pane_current_path(w: &mut dyn Write, _: &Context) -> io::Result<()> {
@@ -139,7 +140,7 @@ fn pane_current_path(w: &mut dyn Write, _: &Context) -> io::Result<()> {
         ("|", "split-window -h "),
         ("_", "split-window"),
         ("c", "new-window"),
-        ("'\"'", "split-window"),
+        (r#"'"'"#, "split-window"),
     ];
     for (key, binding) in key_binding {
         writeln!(w, "bind-key {} {} -c '{}'", key, binding, CWD)?;

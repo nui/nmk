@@ -48,7 +48,7 @@ fn setup_preferred_editor() {
     } else {
         let preferred_editor = ["nvim", "vim"];
         if let Some(ed) = IntoIter::new(preferred_editor).find(|bin| which::which(bin).is_ok()) {
-            log::debug!("Using {:?} as preferred editor", ed);
+            log::debug!("Using {} as preferred editor", ed);
             set_env(EDITOR, ed);
         }
     }
@@ -113,7 +113,7 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
     }
 
     let nmk_home = NmkHome::locate().expect("failed to locate dotfiles directory");
-    log::debug!("dotfiles directory: {:?}", nmk_home);
+    log::debug!("dotfiles directory: {}", nmk_home.as_path().display());
 
     setup_shell_library_path(&nmk_home);
     setup_shell_search_path(&nmk_home);
@@ -123,7 +123,7 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
         crate::zsh::exec_login_shell(&cmd_opt);
     } else {
         let tmux = Tmux::new();
-        log::debug!("tmux path = {:?}", tmux.bin);
+        log::debug!("tmux path = {}", tmux.bin.display());
         log::debug!("tmux version = {}", tmux.version);
         set_env(NMK_TMUX_VERSION, tmux.version.as_str());
         let support_256_color = cmd_opt.force_256_color || terminal::support_256_color();
