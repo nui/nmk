@@ -325,8 +325,10 @@ add-zsh-hook preexec _nmk_preexec
             [[ ${pyenv_commands[(r)virtualenv]} == virtualenv ]] \
                 && ((has_virtualenv = 1))
             if (( ${+PYENV_SHELL} )); then
+                eval "$(pyenv init --path --no-rehash zsh)"
                 eval "$(pyenv init - --no-rehash zsh)"
             else
+                eval "$(pyenv init --path zsh)"
                 eval "$(pyenv init - zsh)"
             fi
             if (( has_virtualenv )); then
