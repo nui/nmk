@@ -124,12 +124,13 @@ where
 }
 
 fn write_start_section(c: &mut dyn Write, name: &str) -> io::Result<()> {
-    // we need to use format to get c
+    // we need string here to get correct length
     let label = format!(" Start {} ", name);
     writeln!(c, "# {:-^118}", label)
 }
 
 fn write_end_section(c: &mut dyn Write, name: &str) -> io::Result<()> {
+    // we need string here to get correct length
     let label = format!(" End {} ", name);
     writeln!(c, "# {:-^118}", label)
 }
