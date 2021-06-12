@@ -93,20 +93,15 @@ fn remove_dir_contents(path: impl AsRef<Path>) -> io::Result<()> {
 
 fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
     let stdin = io::stdin();
-    let max_index = objects.len();
-    assert!(max_index > 0, "Not found any vendor data to select");
+    assert!(!objects.is_empty(), "Not found any vendor data to select");
     let display_names = get_display_name(objects);
     display_some_os_info()?;
     let mut input = String::new();
     loop {
         println!("Pick vendor files to use?");
         for (index, name) in display_names.iter().enumerate() {
-            let numeric_choice = index + 1;
-            if max_index < 10 {
-                println!(" [{}] {}", numeric_choice, name);
-            } else {
-                println!(" [{:2}] {}", numeric_choice, name);
-            }
+            let choice = index + 1;
+            println!(" {:2}) {}", choice, name);
         }
         print!("Enter numeric choice:  ");
         io::stdout().flush()?;
