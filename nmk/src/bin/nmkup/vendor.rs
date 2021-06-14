@@ -41,7 +41,7 @@ pub async fn install(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
         fs::create_dir(&vendor_dir)?;
     }
     log::debug!("{}: Extracting data.", TAG);
-    extract_vendor_files(tar_xz_data, &vendor_dir).await?;
+    extract_vendor_files(tar_xz_data, &vendor_dir)?;
     log::info!("{}: Done.", TAG);
     Ok(())
 }
@@ -131,7 +131,7 @@ fn display_some_os_info() -> io::Result<()> {
     Ok(())
 }
 
-async fn extract_vendor_files(data: Bytes, destination: impl AsRef<Path>) -> io::Result<()> {
+fn extract_vendor_files(data: Bytes, destination: impl AsRef<Path>) -> io::Result<()> {
     let mut archive = Archive::new(XzDecoder::new(&*data));
     log::info!("{}: Installing to {}.", TAG, destination.as_ref().display());
     archive.unpack(destination)

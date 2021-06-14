@@ -14,7 +14,7 @@ use crate::cmdline::CmdOpt;
 const DOTFILES_META: &str = ".dotfiles.meta";
 const TAG: &str = "dotfiles";
 
-async fn extract_dotfiles<P: AsRef<Path>>(data: Bytes, destination: P) -> nmk::Result<()> {
+fn extract_dotfiles<P: AsRef<Path>>(data: Bytes, destination: P) -> nmk::Result<()> {
     let destination = destination.as_ref();
     let mut archive = Archive::new(XzDecoder::new(&*data));
     log::info!("{}: Installing to {}.", TAG, destination.display());
@@ -85,7 +85,7 @@ pub async fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Res
         log::debug!("{}: Getting data.", TAG);
         let tar_xz_data = download_file(&client, &meta.media_link).await?;
         log::debug!("{}: Received data.", TAG);
-        extract_dotfiles(tar_xz_data, nmk_home).await?;
+        extract_dotfiles(tar_xz_data, nmk_home)?;
         meta.write_to_file(&meta_path);
         log::info!("{}: Done.", TAG)
     }
