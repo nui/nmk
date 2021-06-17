@@ -3,14 +3,14 @@ use std::env;
 use nmk::container;
 
 fn is_term_256_color(term: impl AsRef<str>) -> bool {
-    [
+    let terms = [
         "cygwin",
         "gnome-256color",
         "putty",
         "screen-256color",
         "xterm-256color",
-    ]
-    .contains(&term.as_ref())
+    ];
+    terms.contains(&term.as_ref())
 }
 
 fn is_colorterm_256_color(term: impl AsRef<str>) -> bool {
@@ -18,9 +18,12 @@ fn is_colorterm_256_color(term: impl AsRef<str>) -> bool {
 }
 
 pub fn support_256_color() -> bool {
-    env::var("TERM").map_or(false, is_term_256_color)
-        || env::var("COLORTERM").map_or(false, is_colorterm_256_color)
-        || container::is_containerized()
+    let arr = [
+        || env::var("TERM").map_or(false, is_term_256_color),
+        || env::var("COLORTERM").map_or(false, is_colorterm_256_color),
+        || container::is_containerized(),
+    ];
+    arr.iter().any(|f| f())
 }
 
 #[cfg(test)]
