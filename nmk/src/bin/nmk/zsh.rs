@@ -1,9 +1,9 @@
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
-use nmk::bin_name::ZSH;
 use nmk::config::one_hot;
-use nmk::env_name::NMK_ZSH_GLOBAL_RCS;
+use nmk::consts::bin::ZSH;
+use nmk::consts::env::NMK_ZSH_GLOBAL_RCS;
 use nmk::home::NmkHome;
 
 use crate::cmdline::CmdOpt;

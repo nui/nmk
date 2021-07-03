@@ -3,7 +3,7 @@ use std::path::Path;
 
 use bytes::{Buf, Bytes};
 
-use nmk::bin_name::NMK;
+use nmk::consts::bin::NMK;
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url, ObjectMeta};
 use nmk::home::NmkHome;
 use nmk::setup::install;

@@ -6,8 +6,8 @@ use std::{env, fs, io};
 
 use nix::unistd::Uid;
 
-use nmk::bin_name::{TMUX, ZSH};
-use nmk::env_name::NMK_TMUX_VERSION;
+use nmk::consts::bin::{TMUX, ZSH};
+use nmk::consts::env::NMK_TMUX_VERSION;
 use nmk::tmux::config::Context;
 use nmk::tmux::version::{TmuxVersionError, Version};
 

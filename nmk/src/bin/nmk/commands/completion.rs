@@ -3,7 +3,7 @@ use std::io::Write;
 
 use structopt::StructOpt;
 
-use nmk::bin_name::NMK;
+use nmk::consts::bin::NMK;
 
 use crate::cmdline::{CmdOpt, Completion};
 

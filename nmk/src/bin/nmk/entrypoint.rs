@@ -5,7 +5,9 @@ use std::io::Write;
 use std::path::Path;
 use std::{env, io};
 
-use nmk::env_name::{EDITOR, LD_LIBRARY_PATH, NMK_HOME, NMK_TMUX_VERSION, PATH, VIMINIT, ZDOTDIR};
+use nmk::consts::env::{
+    EDITOR, LD_LIBRARY_PATH, NMK_HOME, NMK_TMUX_VERSION, PATH, VIMINIT, ZDOTDIR,
+};
 use nmk::home::NmkHome;
 use nmk::human_time::{seconds_since_build, HumanTime};
 

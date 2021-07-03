@@ -3,10 +3,9 @@
 mod _macros;
 pub mod arch;
 pub mod backup;
-pub mod bin_name;
 pub mod config;
+pub mod consts;
 pub mod container;
-pub mod env_name;
 pub mod error;
 pub mod gcs;
 pub mod home;

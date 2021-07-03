@@ -4,7 +4,7 @@ use std::{env, fmt};
 
 use dirs::home_dir;
 
-use crate::env_name::NMK_HOME;
+use crate::consts::env::NMK_HOME;
 
 /// Home directory of dotfiles
 #[derive(Clone)]

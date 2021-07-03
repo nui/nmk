@@ -33,3 +33,14 @@ fn generate_get_architecture_script() -> String {
         .collect::<Vec<_>>()
         .join("\n")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[ignore]
+    #[test]
+    fn print_generate_get_architecture_script() {
+        println!("{}", generate_get_architecture_script());
+    }
+}

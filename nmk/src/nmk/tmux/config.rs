@@ -6,7 +6,7 @@ use std::process::{Command, Stdio};
 use indoc::indoc;
 
 use crate::config::on_off;
-use crate::env_name::NMK_HOME;
+use crate::consts::env::NMK_HOME;
 use crate::platform::is_mac;
 
 use super::version::Version;
