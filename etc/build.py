@@ -87,6 +87,10 @@ def generate_buildinfo(repo):
         out.write('\n'.join(lines) + '\n')
 
 
+def generate_nmk_completion(workdir):
+    subprocess.run(['nmk', 'completions', '--output', workdir.joinpath('zsh', 'completion', '_nmk'), 'zsh'])
+
+
 def generate_more_files(workdir):
     # create a list of bundled files
     create_list_files = 'find . ! -type d -print0 | sort --reverse --zero-terminated > .installed-files'
@@ -197,6 +201,7 @@ def main():
 
     tmp_dir = delete_unwanted_files(repo)
     shutil.rmtree(repo)
+    generate_nmk_completion(tmp_dir)
     generate_more_files(tmp_dir)
     tmp_archive = create_final_archive(tmp_dir)
     shutil.rmtree(tmp_dir)
