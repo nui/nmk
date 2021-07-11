@@ -1,7 +1,8 @@
+use std::io::Read;
 use std::path::Path;
 use std::{env, fs, io};
 
-use bytes::{Buf, Bytes};
+use log::{debug, info};
 use same_file::is_same_file;
 
 use nmk::gcs::{download_file, get_object_meta, get_object_meta_url};
@@ -13,40 +14,39 @@ use crate::entrypoint::EntrypointInstallation;
 
 const TAG: &str = "updater";
 
-pub async fn self_setup(
+pub fn self_setup(
     nmk_home: &NmkHome,
     is_init: bool,
     entrypoint_installation: EntrypointInstallation,
 ) -> nmk::Result<()> {
     let current_exec = env::current_exe()?;
-    let target_bin = nmk_home.nmk_path().bin().join("nmkup");
+    let target_bin = nmk_home.path().bin().join("nmkup");
     let is_self_update =
         !is_init && target_bin.exists() && is_same_file(&current_exec, &target_bin)?;
     if is_self_update {
         // Entrypoint and updater are built at the same time.
         // So we update updater if entrypoint is updated.
         if matches!(entrypoint_installation, EntrypointInstallation::Installed) {
-            perform_self_update_from_remote(&target_bin).await?;
-            log::info!("{}: Done.", TAG);
+            perform_self_update_from_remote(&target_bin)?;
+            info!("{}: Done.", TAG);
         }
     } else {
         fs::copy(current_exec, target_bin)?;
-        log::info!("{}: Done.", TAG);
+        info!("{}: Done.", TAG);
     }
     Ok(())
 }
 
-pub async fn perform_self_update_from_remote(target_bin: &Path) -> nmk::Result<()> {
+pub fn perform_self_update_from_remote(target_bin: &Path) -> nmk::Result<()> {
     let target = Target::detect().expect("unsupported arch");
     let tar_file = target.remote_binary_name("nmkup");
-    let client = reqwest::Client::new();
     let meta_url = get_object_meta_url(&tar_file);
-    log::debug!("{}: Getting metadata.", TAG);
-    let meta = get_object_meta(&client, &meta_url).await?;
-    log::debug!("{}: Received metadata.", TAG);
+    debug!("{}: Getting metadata.", TAG);
+    let meta = get_object_meta(&meta_url)?;
+    debug!("{}: Received metadata.", TAG);
     let data_url = &meta.media_link;
-    log::debug!("{}: Getting data from {}.", TAG, data_url);
-    let data = download_file(&client, data_url).await?;
+    debug!("{}: Getting data from {}.", TAG, data_url);
+    let data = download_file(data_url)?;
 
     let target_bin = fs::canonicalize(target_bin)?;
     let parent_dir = target_bin
@@ -59,7 +59,7 @@ pub async fn perform_self_update_from_remote(target_bin: &Path) -> nmk::Result<(
     Ok(())
 }
 
-fn install_updater(data: Bytes, dst: impl AsRef<Path>) -> io::Result<()> {
-    let mut reader = xz2::read::XzDecoder::new(data.reader());
+fn install_updater(data: impl Read, dst: impl AsRef<Path>) -> io::Result<()> {
+    let mut reader = xz2::read::XzDecoder::new(data);
     install(&mut reader, dst)
 }

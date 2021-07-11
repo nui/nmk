@@ -5,6 +5,8 @@ use std::io::Write;
 use std::path::Path;
 use std::{env, io};
 
+use log::debug;
+
 use nmk::consts::env::{
     EDITOR, LD_LIBRARY_PATH, NMK_HOME, NMK_TMUX_VERSION, PATH, VIMINIT, ZDOTDIR,
 };
@@ -20,15 +22,15 @@ pub fn set_env<K: AsRef<str>, V: AsRef<OsStr>>(key: K, value: V) {
     let key = key.as_ref();
     let value = value.as_ref();
     env::set_var(key, value);
-    log::debug!("export {}={:?}", key, value);
+    debug!("export {}={:?}", key, value);
 }
 
 fn setup_environment_variable(nmk_home: &NmkHome) {
-    set_env(NMK_HOME, nmk_home);
-    set_env(ZDOTDIR, nmk_home.nmk_path().zsh());
+    set_env(NMK_HOME, nmk_home.path());
+    set_env(ZDOTDIR, nmk_home.path().zsh());
 
     // Setup Vim
-    let vim_dir = nmk_home.nmk_path().vim();
+    let vim_dir = nmk_home.path().vim();
     set_env(VIMINIT, build_vim_init(&vim_dir));
     setup_preferred_editor();
 }
@@ -50,7 +52,7 @@ fn setup_preferred_editor() {
     } else {
         let preferred_editor = ["nvim", "vim"];
         if let Some(ed) = IntoIter::new(preferred_editor).find(|bin| which::which(bin).is_ok()) {
-            log::debug!("Using {} as preferred editor", ed);
+            debug!("Using {} as preferred editor", ed);
             set_env(EDITOR, ed);
         }
     }
@@ -58,7 +60,7 @@ fn setup_preferred_editor() {
 
 /// Modify PATH environment
 fn setup_shell_search_path(nmk_home: &NmkHome) {
-    let nmk_path = nmk_home.nmk_path();
+    let nmk_path = nmk_home.path();
     let nmk_search_path = [
         nmk_path.bin(),
         // vendor directory
@@ -76,7 +78,7 @@ fn setup_shell_search_path(nmk_home: &NmkHome) {
 
 /// Setup custom library path for precompiled tmux and zsh
 fn setup_shell_library_path(nmk_home: &NmkHome) {
-    let vendor_lib = nmk_home.nmk_path().vendor_lib();
+    let vendor_lib = nmk_home.path().vendor_lib();
     if vendor_lib.exists() {
         let mut path = env::var_os(LD_LIBRARY_PATH)
             .map(PathVec::from)
@@ -115,7 +117,7 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
     }
 
     let nmk_home = NmkHome::locate().expect("failed to locate dotfiles directory");
-    log::debug!("dotfiles directory: {}", nmk_home.as_path().display());
+    debug!("dotfiles directory: {}", nmk_home);
 
     setup_shell_library_path(&nmk_home);
     setup_shell_search_path(&nmk_home);
@@ -125,8 +127,8 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
         crate::zsh::exec_login_shell(&cmd_opt);
     } else {
         let tmux = Tmux::new();
-        log::debug!("tmux path = {}", tmux.bin.display());
-        log::debug!("tmux version = {}", tmux.version);
+        debug!("tmux path = {}", tmux.bin.display());
+        debug!("tmux version = {}", tmux.version);
         set_env(NMK_TMUX_VERSION, tmux.version.as_str());
         let support_256_color = cmd_opt.force_256_color || terminal::support_256_color();
         let tmp_config;
@@ -136,7 +138,7 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
             let context = make_config_context(&cmd_opt, support_256_color);
             let mut buf = Vec::with_capacity(8192);
             nmk::tmux::config::render(&mut buf, &context, tmux.version)?;
-            log::debug!(
+            debug!(
                 "tmux configuration length: {}, capacity: {}, remaining bytes before re-alloc: {}",
                 buf.len(),
                 buf.capacity(),

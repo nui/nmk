@@ -57,10 +57,12 @@ pub struct CmdOpt {
 pub enum SubCommand {
     #[structopt(about = "Backup files to do clean install")]
     Backup,
-    #[structopt(about = "Display entrypoint information")]
-    Info,
     #[structopt(about = "Generate tab-completion scripts for your shell")]
     Completions(Completion),
+    #[structopt(about = "Display entrypoint information")]
+    Info,
+    #[structopt(about = "Update from local files")]
+    Update(Update),
 }
 
 #[derive(Debug, StructOpt)]
@@ -69,6 +71,16 @@ pub struct Completion {
     pub output: Option<PathBuf>,
     #[structopt(possible_values = Shell::variants().as_ref())]
     pub shell: Shell,
+}
+
+#[derive(Debug, StructOpt)]
+pub struct Update {
+    #[structopt(short)]
+    pub dotfiles: Option<PathBuf>,
+    #[structopt(short)]
+    pub entrypoint: Option<PathBuf>,
+    #[structopt(short)]
+    pub vendor: Option<PathBuf>,
 }
 
 pub fn parse() -> CmdOpt {

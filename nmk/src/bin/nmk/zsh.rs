@@ -1,6 +1,8 @@
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
+use log::debug;
+
 use nmk::config::one_hot;
 use nmk::consts::bin::ZSH;
 use nmk::consts::env::NMK_ZSH_GLOBAL_RCS;
@@ -11,7 +13,7 @@ use crate::entrypoint::set_env;
 use crate::utils::print_usage_time;
 
 fn has_vendor_zsh(nmk_home: &NmkHome) -> bool {
-    nmk_home.nmk_path().vendor_bin().join(ZSH).exists()
+    nmk_home.path().vendor_bin().join(ZSH).exists()
 }
 
 /// Determine if we should use global zsh resource files
@@ -31,7 +33,7 @@ pub fn use_global_rcs(nmk_home: &NmkHome) -> bool {
 pub fn init(nmk_home: &NmkHome) {
     let global_rcs = use_global_rcs(nmk_home);
     if !global_rcs {
-        log::debug!("Ignored zsh global resource files");
+        debug!("Ignored zsh global resource files");
     }
     set_env(NMK_ZSH_GLOBAL_RCS, one_hot(global_rcs));
 }

@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::{env, fs, io};
 
+use log::debug;
 use nix::unistd::Uid;
 
 use nmk::consts::bin::{TMUX, ZSH};
@@ -21,7 +22,7 @@ pub struct Tmux {
 
 fn find_version() -> Result<Version, TmuxVersionError> {
     if let Ok(s) = std::env::var(NMK_TMUX_VERSION) {
-        log::debug!("Using tmux version from environment variable");
+        debug!("Using tmux version from environment variable");
         Version::from_version(&s)
     } else {
         let Output {
@@ -68,10 +69,10 @@ impl Tmux {
                 cmd.args(&["-s", "0"]);
             }
         } else {
-            log::debug!("Positional arguments: {:?}", cmd_opt.args);
+            debug!("Positional arguments: {:?}", cmd_opt.args);
             cmd.args(cmd_opt.args.iter());
         }
-        log::debug!("exec command: {:?}", cmd);
+        debug!("exec command: {:?}", cmd);
         print_usage_time(&cmd_opt);
         let err = cmd.exec();
         panic!("exec {:?} fail with {:?}", cmd, err);

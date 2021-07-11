@@ -81,7 +81,8 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
             include_str!("8color.conf")
         };
         writeln!(w, "{}", color_config)
-    })
+    })?;
+    w.flush()
 }
 
 fn render_options(w: &mut dyn Write, c: &Context) -> io::Result<()> {

@@ -19,6 +19,7 @@ fn main() -> nmk::Result<()> {
             Backup => commands::backup::backup()?,
             Completions(c) => commands::completion::generate_completion(c),
             Info => commands::info::print_info()?,
+            Update(v) => commands::update::file_update(v)?,
         }
     } else {
         entrypoint::main(cmd_opt)?;

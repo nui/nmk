@@ -55,8 +55,8 @@ impl Error {
     }
 }
 
-impl_from_error!(reqwest::Error);
 impl_from_error!(serde_json::Error);
 impl_from_error!(std::io::Error);
 impl_from_error!(std::str::Utf8Error);
 impl_from_error!(toml::ser::Error);
+impl_from_error!(ureq::Error);

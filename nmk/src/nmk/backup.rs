@@ -3,6 +3,8 @@ use std::io::BufWriter;
 use std::path::Path;
 use std::{fs, io};
 
+use log::{debug, info};
+
 use crate::home::NmkHome;
 
 const BACKUP_PATHS: &[&str] = &[
@@ -24,12 +26,12 @@ fn should_backup_dir(dir: &Path) -> bool {
 
 pub fn backup_files(nmk_home: &NmkHome, ar_path: &Path) -> io::Result<()> {
     let mut ar = tar::Builder::new(BufWriter::new(File::create(&ar_path)?));
-    let base_dir = nmk_home.as_path();
     ar.follow_symlinks(false);
     let mut dirs = vec![];
     let mut files = vec![];
+    let nmk_home_path = nmk_home.path().as_path();
     for name in BACKUP_PATHS {
-        let path = base_dir.join(name);
+        let path = nmk_home_path.join(name);
         if path.is_dir() {
             if should_backup_dir(&path) {
                 dirs.push((name, path));
@@ -42,13 +44,13 @@ pub fn backup_files(nmk_home: &NmkHome, ar_path: &Path) -> io::Result<()> {
     }
     for (name, d) in dirs {
         ar.append_dir_all(name, d)?;
-        log::debug!("Added dir: {}", name);
+        debug!("Added dir: {}", name);
     }
     for (name, mut f) in files {
         ar.append_file(name, &mut f)?;
-        log::debug!("Added file: {}", name);
+        debug!("Added file: {}", name);
     }
     ar.finish()?;
-    log::info!("Important files are backup to {}", ar_path.display());
+    info!("Important files are backup to {}", ar_path.display());
     Ok(())
 }

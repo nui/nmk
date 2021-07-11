@@ -87,18 +87,7 @@ def generate_buildinfo(repo):
         out.write('\n'.join(lines) + '\n')
 
 
-delete_cache_files = r"""#!/bin/sh
-set -e
-find . -name '*.pyc' -exec rm -f {} +
-find . -name __pycache__ -exec rmdir {} +
-<.installed-files xargs -0 rm
-"""
-
-
 def generate_more_files(workdir):
-    # add uninstaller script
-    with open(workdir.joinpath('uninstall.sh'), 'wt') as f:
-        f.write(delete_cache_files)
     # create a list of bundled files
     create_list_files = 'find . ! -type d -print0 | sort --reverse --zero-terminated > .installed-files'
     subprocess.run(create_list_files, shell=True, cwd=workdir)

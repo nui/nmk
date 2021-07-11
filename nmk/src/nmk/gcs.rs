@@ -1,9 +1,7 @@
-use std::fmt::{self, Debug, Display};
 use std::fs;
+use std::io::Read;
 use std::path::Path;
 
-use bytes::Bytes;
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 const GET_OBJECT_BASE_URL: &str = "https://www.googleapis.com/storage/v1/b/nmk.nuimk.com/o";
@@ -40,65 +38,21 @@ impl ObjectMeta {
     }
 }
 
-#[derive(Debug)]
-enum GcsError {
-    HttpError { status: u16, url: String },
+pub fn download_file(media_link: &str) -> Result<impl Read + Send, ureq::Error> {
+    Ok(ureq::get(media_link).call()?.into_reader())
 }
 
-impl Display for GcsError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // This Debug is intentional
-        Debug::fmt(self, f)
-    }
-}
-
-impl std::error::Error for GcsError {}
-
-impl_from_error!(GcsError);
-
-pub async fn download_file(client: &Client, media_link: &str) -> crate::Result<Bytes> {
-    let response = client.get(media_link).send().await?;
-    let status = response.status();
-    if !status.is_success() {
-        return Err(GcsError::HttpError {
-            status: status.as_u16(),
-            url: media_link.to_string(),
-        }
-        .into());
-    }
-    Ok(response.bytes().await?)
-}
-
-pub async fn get_object_meta(client: &Client, url: &str) -> crate::Result<ObjectMeta> {
-    let response = client.get(url).send().await?;
-    let status = response.status();
-    if !status.is_success() {
-        return Err(GcsError::HttpError {
-            status: status.as_u16(),
-            url: url.to_string(),
-        }
-        .into());
-    }
-    let data = response.bytes().await?;
-    let meta = serde_json::from_slice(&data)?;
-    Ok(meta)
+pub fn get_object_meta(url: &str) -> crate::Result<ObjectMeta> {
+    let response = ureq::get(url).call()?;
+    Ok(response.into_json()?)
 }
 
 pub fn get_object_meta_url(path: &str) -> String {
     format!("{}/{}", GET_OBJECT_BASE_URL, path)
 }
 
-pub async fn list_objects(client: &Client, url: &str) -> crate::Result<Vec<ObjectMeta>> {
-    let response = client.get(url).send().await?;
-    let status = response.status();
-    if !status.is_success() {
-        let err = GcsError::HttpError {
-            status: status.as_u16(),
-            url: url.to_string(),
-        };
-        return Err(err.into());
-    }
-    let data = response.bytes().await?;
-    let list_result = serde_json::from_slice::<ListObjectResponse>(&data)?;
+pub fn list_objects(url: &str) -> crate::Result<Vec<ObjectMeta>> {
+    let response = ureq::get(url).call()?;
+    let list_result: ListObjectResponse = response.into_json()?;
     Ok(list_result.items)
 }

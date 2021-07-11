@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use dirs::home_dir;
+use log::error;
 
 use nmk::backup::backup_files;
 use nmk::home::NmkHome;
@@ -8,7 +9,6 @@ use nmk::platform;
 
 mod build;
 mod cmdline;
-mod config;
 mod dotfiles;
 mod entrypoint;
 mod logging;
@@ -16,7 +16,9 @@ mod os_release;
 mod updater;
 mod vendor;
 
-async fn main_task(cmd_opt: cmdline::CmdOpt, _settings: config::Config) -> nmk::Result<()> {
+fn main() -> nmk::Result<()> {
+    let cmd_opt = cmdline::from_args();
+    logging::setup(cmd_opt.verbosity);
     // Installation should be done in order
     let nmk_home = NmkHome::find_for_install().expect("failed to locate NMK_HOME");
     assert!(!nmk_home.is_git(), "nmk is managed by git. Abort.");
@@ -25,27 +27,17 @@ async fn main_task(cmd_opt: cmdline::CmdOpt, _settings: config::Config) -> nmk::
         let output_tar = home.join("nmk-backup.tar");
         backup_files(&nmk_home, &output_tar)?;
     }
-    dotfiles::install_or_update(&cmd_opt, &nmk_home).await?;
+    dotfiles::install_or_update(&cmd_opt, &nmk_home)?;
     if platform::is_mac() {
-        log::error!("Not supporting os");
+        error!("Not supporting os");
         return Ok(());
     }
-    let entrypoint_installation = entrypoint::install_or_update(&cmd_opt, &nmk_home).await?;
-    updater::self_setup(&nmk_home, is_init(), entrypoint_installation).await?;
+    let entrypoint_installation = entrypoint::install_or_update(&cmd_opt, &nmk_home)?;
+    updater::self_setup(&nmk_home, is_init(), entrypoint_installation)?;
     if cmd_opt.vendor {
-        vendor::install(&cmd_opt, &nmk_home).await?;
+        vendor::install(&cmd_opt, &nmk_home)?;
     }
     Ok(())
-}
-
-fn main() -> nmk::Result<()> {
-    let cmd_opt = cmdline::from_args();
-    let config = config::Config::new();
-    logging::setup(cmd_opt.verbosity);
-    let rt = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()?;
-    rt.block_on(main_task(cmd_opt, config))
 }
 
 /// Check if this script is run from init script

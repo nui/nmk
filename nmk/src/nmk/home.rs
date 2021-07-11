@@ -1,6 +1,7 @@
+use std::env;
 use std::ffi::OsStr;
+use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
-use std::{env, fmt};
 
 use dirs::home_dir;
 
@@ -43,51 +44,60 @@ impl NmkHome {
             .and_then(|p| p.canonicalize().ok())
             .or_else(find_path_from_homedir)
             .filter(|p| p.exists())
-            .map(Self::from)
+            .map(Self)
     }
 
     pub fn find_for_install() -> Option<Self> {
         find_path_from_env()
             .or_else(find_path_from_homedir)
-            .map(Self::from)
+            .map(Self)
     }
 
-    pub fn nmk_path(&self) -> NmkPath {
-        NmkPath(self.0.as_path())
+    pub fn path(&self) -> &NmkPath {
+        NmkPath::new(self.0.as_path())
+    }
+}
+
+#[repr(transparent)]
+// NOTE:
+// `NmkPath::new` current implementation relies
+// on `NmkPath` being layout-compatible with `Path`
+pub struct NmkPath {
+    inner: Path,
+}
+
+impl NmkPath {
+    fn new<P: AsRef<Path> + ?Sized>(p: &P) -> &Self {
+        // SAFETY: Self is new type struct with same layout and representation as inner Path
+        unsafe { &*(p.as_ref() as *const Path as *const NmkPath) }
     }
 
     pub fn as_path(&self) -> &Path {
-        self.0.as_path()
+        &self.inner
     }
-}
 
-impl From<PathBuf> for NmkHome {
-    fn from(inner: PathBuf) -> Self {
-        Self(inner)
-    }
-}
-
-impl AsRef<Path> for NmkHome {
-    fn as_ref(&self) -> &Path {
-        self.0.as_ref()
-    }
-}
-
-impl AsRef<OsStr> for NmkHome {
-    fn as_ref(&self) -> &OsStr {
-        self.0.as_os_str()
-    }
-}
-
-pub struct NmkPath<'a>(&'a Path);
-
-impl<'a> NmkPath<'a> {
     pub fn bin(&self) -> PathBuf {
-        self.0.join("bin")
+        self.inner.join("bin")
+    }
+
+    pub fn dotfiles_file_list(&self) -> PathBuf {
+        self.inner.join(".installed-files")
+    }
+
+    pub fn dotfiles_meta(&self) -> PathBuf {
+        self.inner.join(".dotfiles.meta")
+    }
+
+    pub fn entrypoint(&self) -> PathBuf {
+        self.bin().join("nmk")
+    }
+
+    pub fn entrypoint_meta(&self) -> PathBuf {
+        self.inner.join(".nmk.meta")
     }
 
     pub fn vendor(&self) -> PathBuf {
-        self.0.join("vendor")
+        self.inner.join("vendor")
     }
 
     pub fn vendor_bin(&self) -> PathBuf {
@@ -98,11 +108,29 @@ impl<'a> NmkPath<'a> {
         self.vendor().join("lib")
     }
 
-    pub fn zsh(&self) -> PathBuf {
-        self.0.join("zsh")
+    pub fn vim(&self) -> PathBuf {
+        self.inner.join("vim")
     }
 
-    pub fn vim(&self) -> PathBuf {
-        self.0.join("vim")
+    pub fn zsh(&self) -> PathBuf {
+        self.inner.join("zsh")
+    }
+}
+
+impl AsRef<Path> for NmkPath {
+    fn as_ref(&self) -> &Path {
+        &self.inner
+    }
+}
+
+impl AsRef<OsStr> for NmkPath {
+    fn as_ref(&self) -> &OsStr {
+        self.inner.as_os_str()
+    }
+}
+
+impl Display for NmkHome {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        Display::fmt(&self.0.display(), f)
     }
 }

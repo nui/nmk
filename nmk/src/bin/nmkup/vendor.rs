@@ -1,14 +1,11 @@
 use std::fs::File;
-use std::io::Write;
-use std::path::Path;
-use std::{fs, io};
+use std::io::{self, BufReader, Write};
 
-use bytes::Bytes;
-use tar::Archive;
-use xz2::read::XzDecoder;
+use log::{debug, info};
 
 use nmk::gcs::{download_file, ObjectMeta};
 use nmk::home::NmkHome;
+use nmk::vendor::{extract_vendor_files, prepare_vendor_dir};
 
 use crate::build::Target;
 use crate::cmdline::CmdOpt;
@@ -18,9 +15,8 @@ const LIST_OBJECTS_URL: &str =
     "https://storage.googleapis.com/storage/v1/b/nmk.nuimk.com/o?delimiter=/&prefix=nmk-vendor/";
 const TAG: &str = "vendor";
 
-pub async fn install(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
-    let client = reqwest::Client::new();
-    let mut objects: Vec<_> = nmk::gcs::list_objects(&client, LIST_OBJECTS_URL).await?;
+pub fn install(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
+    let mut objects: Vec<_> = nmk::gcs::list_objects(LIST_OBJECTS_URL)?;
     objects.retain(|obj| obj.name.ends_with(".tar.xz"));
     if !cmd_opt.no_filter {
         objects.retain(filter_by_os_release());
@@ -28,21 +24,15 @@ pub async fn install(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()> {
     }
     let obj_meta = select_vendor_files(&objects)?;
     let download_url = obj_meta.media_link.as_str();
-    log::info!("{}: Download url {}", TAG, download_url);
-    let client = reqwest::Client::new();
-    log::debug!("{}: Getting data.", TAG);
-    let tar_xz_data = download_file(&client, download_url).await?;
-    log::debug!("{}: Received data.", TAG);
-    let vendor_dir = nmk_home.nmk_path().vendor();
-    if vendor_dir.exists() {
-        log::debug!("{}: Removing {} content.", TAG, vendor_dir.display());
-        remove_dir_contents(&vendor_dir)?;
-    } else {
-        fs::create_dir(&vendor_dir)?;
-    }
-    log::debug!("{}: Extracting data.", TAG);
+    info!("{}: Download url {}", TAG, download_url);
+    debug!("{}: Getting data.", TAG);
+    let tar_xz_data = BufReader::new(download_file(download_url)?);
+    debug!("{}: Received data.", TAG);
+    let vendor_dir = nmk_home.path().vendor();
+    prepare_vendor_dir(&vendor_dir)?;
+    debug!("{}: Extracting data.", TAG);
     extract_vendor_files(tar_xz_data, &vendor_dir)?;
-    log::info!("{}: Done.", TAG);
+    info!("{}: Done.", TAG);
     Ok(())
 }
 
@@ -80,17 +70,6 @@ fn get_display_name(objects: &[ObjectMeta]) -> Vec<&str> {
         .collect()
 }
 
-fn remove_dir_contents(path: impl AsRef<Path>) -> io::Result<()> {
-    fs::read_dir(path)?.try_for_each(|entry| {
-        let p = entry?.path();
-        if p.is_dir() {
-            fs::remove_dir_all(p)
-        } else {
-            fs::remove_file(p)
-        }
-    })
-}
-
 fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
     let stdin = io::stdin();
     assert!(!objects.is_empty(), "Not found any vendor data to select");
@@ -106,7 +85,7 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
         print!("Enter numeric choice:  ");
         io::stdout().flush()?;
         if stdin.read_line(&mut input).is_ok() {
-            log::debug!("Input value: {:?}", input);
+            debug!("Input value: {:?}", input);
             if let Ok(choice) = input.trim().parse::<usize>() {
                 let index = choice.wrapping_sub(1);
                 if let Some(v) = objects.get(index) {
@@ -123,16 +102,10 @@ fn select_vendor_files(objects: &[ObjectMeta]) -> nmk::Result<&ObjectMeta> {
 ///
 /// On CentOS, /etc/os-release doesn't show CentOS minor version
 fn display_some_os_info() -> io::Result<()> {
-    log::info!("Displaying os information..");
+    info!("Displaying os information..");
     let infos = ["/etc/centos-release", "/etc/os-release"].iter();
     if let Some(mut f) = infos.flat_map(File::open).next() {
         io::copy(&mut f, &mut io::stdout())?;
     }
     Ok(())
-}
-
-fn extract_vendor_files(data: Bytes, destination: impl AsRef<Path>) -> io::Result<()> {
-    let mut archive = Archive::new(XzDecoder::new(&*data));
-    log::info!("{}: Installing to {}.", TAG, destination.as_ref().display());
-    archive.unpack(destination)
 }

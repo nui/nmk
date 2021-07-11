@@ -1,3 +1,5 @@
+use log::debug;
+
 use crate::cmdline::CmdOpt;
 
 pub fn print_usage_time(cmd_opt: &CmdOpt) {
@@ -5,6 +7,6 @@ pub fn print_usage_time(cmd_opt: &CmdOpt) {
     if cmd_opt.usage {
         println!("{} ms.", elapsed);
     } else {
-        log::debug!("Usage time: {} ms.", elapsed);
+        debug!("Usage time: {} ms.", elapsed);
     }
 }
