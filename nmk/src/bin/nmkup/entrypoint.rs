@@ -13,7 +13,7 @@ use crate::cmdline::CmdOpt;
 
 const TAG: &str = "entrypoint";
 
-fn install_entrypoint(data: impl Read, dst: impl AsRef<Path>) -> io::Result<()> {
+fn install_entrypoint(data: impl Read, dst: &Path) -> io::Result<()> {
     let mut reader = xz2::read::XzDecoder::new(data);
     install(&mut reader, dst)
 }
@@ -45,7 +45,7 @@ pub fn install_or_update(
         debug!("{}: Getting data from {}.", TAG, data_url);
         let data = download_file(data_url)?;
         debug!("{}: Received data.", TAG);
-        install_entrypoint(data, entrypoint_path)?;
+        install_entrypoint(data, &entrypoint_path)?;
         meta.write_to_file(&meta_path);
         info!("{}: Done.", TAG);
         Ok(EntrypointInstallation::Installed)

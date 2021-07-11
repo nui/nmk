@@ -59,7 +59,7 @@ pub fn perform_self_update_from_remote(target_bin: &Path) -> nmk::Result<()> {
     Ok(())
 }
 
-fn install_updater(data: impl Read, dst: impl AsRef<Path>) -> io::Result<()> {
+fn install_updater(data: impl Read, dst: &Path) -> io::Result<()> {
     let mut reader = xz2::read::XzDecoder::new(data);
     install(&mut reader, dst)
 }

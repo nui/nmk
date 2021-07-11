@@ -7,12 +7,11 @@ use log::{debug, info, warn};
 use tar::Archive;
 use xz2::bufread::XzDecoder;
 
-use crate::home::NmkHome;
+use crate::home::NmkPath;
 
 const TAG: &str = "dotfiles";
 
-pub fn extract_dotfiles(data: impl BufRead, destination: impl AsRef<Path>) -> crate::Result<()> {
-    let destination = destination.as_ref();
+pub fn extract_dotfiles(data: impl BufRead, destination: &Path) -> crate::Result<()> {
     let mut archive = Archive::new(XzDecoder::new(data));
     info!("{}: Installing to {}", TAG, destination.display());
     for entry in archive.entries()? {
@@ -32,8 +31,8 @@ fn strip_components(path: &Path, n: usize) -> &Path {
     components.as_path()
 }
 
-pub fn uninstall(nmk_home: &NmkHome) -> crate::Result<()> {
-    let installed_files_db = nmk_home.path().dotfiles_file_list();
+pub fn uninstall(nmk_path: &NmkPath) -> crate::Result<()> {
+    let installed_files_db = nmk_path.dotfiles_file_list();
     // It is easier to read the whole file as string.
     // But we use this low level algorithm to show how rust can handle it.
     let mut installed_files_data = BufReader::new(File::open(installed_files_db)?);
@@ -52,7 +51,7 @@ pub fn uninstall(nmk_home: &NmkHome) -> crate::Result<()> {
             continue;
         }
         path_buf.clear();
-        path_buf.push(nmk_home.path().as_path());
+        path_buf.push(nmk_path.as_path());
         path_buf.push(file_path);
         match fs::remove_file(&path_buf) {
             Ok(_) => {

@@ -61,8 +61,8 @@ pub enum SubCommand {
     Completions(Completion),
     #[structopt(about = "Display entrypoint information")]
     Info,
-    #[structopt(about = "Update from local files")]
-    Update(Update),
+    #[structopt(about = "Setup from local files")]
+    Setup(Setup),
 }
 
 #[derive(Debug, StructOpt)]
@@ -74,7 +74,7 @@ pub struct Completion {
 }
 
 #[derive(Debug, StructOpt)]
-pub struct Update {
+pub struct Setup {
     #[structopt(short)]
     pub dotfiles: Option<PathBuf>,
     #[structopt(short)]

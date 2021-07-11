@@ -52,7 +52,7 @@ pub fn install_or_update(cmd_opt: &CmdOpt, nmk_home: &NmkHome) -> nmk::Result<()
     } else {
         if meta_do_exist {
             // uninstall old version, we don't care if it success or not
-            uninstall(nmk_home)?;
+            uninstall(nmk_home.path())?;
         }
 
         debug!("{}: Getting data.", TAG);

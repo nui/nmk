@@ -4,7 +4,7 @@ use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 use std::{fs, io};
 
-pub fn install(reader: &mut impl Read, dst: impl AsRef<Path>) -> io::Result<()> {
+pub fn install(reader: &mut impl Read, dst: &Path) -> io::Result<()> {
     let mut file = open_for_install(dst)?;
     io::copy(reader, &mut file)?;
     file.flush()
@@ -13,11 +13,10 @@ pub fn install(reader: &mut impl Read, dst: impl AsRef<Path>) -> io::Result<()> 
 /// Install to tmp location first to avoid text busy
 ///
 /// This is done by install to a temporary file next to `dst` then `fs::rename`
-pub fn install_busy(reader: &mut impl Read, dst: impl AsRef<Path>) -> io::Result<()> {
-    let dst = dst.as_ref();
+pub fn install_busy(reader: &mut impl Read, dst: &Path) -> io::Result<()> {
     let mut tmp_dst = dst.to_path_buf().into_os_string();
     tmp_dst.push(".temporary-next-version");
-    install(reader, &tmp_dst)?;
+    install(reader, tmp_dst.as_ref())?;
     fs::rename(&tmp_dst, dst)
 }
 
