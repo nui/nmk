@@ -61,7 +61,7 @@ pub enum SubCommand {
     Info,
     #[structopt(about = "Setup from local files")]
     Setup(Setup),
-    #[structopt(about = "Passthrough tmux commands")]
+    #[structopt(about = "Run tmux command on running tmux server")]
     Tmux(Tmux),
 }
 

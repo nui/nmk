@@ -9,6 +9,7 @@ declare!(EDITOR);
 declare!(LD_LIBRARY_PATH);
 declare!(NMK_BIN);
 declare!(NMK_HOME);
+declare!(NMK_INITIALIZED);
 declare!(NMK_TMUX_VERSION);
 declare!(NMK_ZSH_GLOBAL_RCS);
 declare!(PATH);
