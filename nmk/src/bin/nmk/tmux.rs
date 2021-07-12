@@ -62,15 +62,10 @@ impl Tmux {
         }
         cmd.arg("-f");
         cmd.arg(config);
-        if cmd_opt.args.is_empty() {
-            // Attach to tmux or create new session
-            cmd.args(&["new-session", "-A"]);
-            if self.version < Version::V31 {
-                cmd.args(&["-s", "0"]);
-            }
-        } else {
-            debug!("Positional arguments: {:?}", cmd_opt.args);
-            cmd.args(cmd_opt.args.iter());
+        // Attach to tmux or create new session
+        cmd.args(&["new-session", "-A"]);
+        if self.version < Version::V31 {
+            cmd.args(&["-s", "0"]);
         }
         debug!("exec command: {:?}", cmd);
         print_usage_time(&cmd_opt);

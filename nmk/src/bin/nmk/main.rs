@@ -20,6 +20,7 @@ fn main() -> nmk::Result<()> {
             Completions(c) => commands::completion::generate_completion(c),
             Info => commands::info::print_info()?,
             Setup(v) => commands::setup::setup(v)?,
+            Tmux(opt) => commands::tmux::command(&cmd_opt, opt),
         }
     } else {
         entrypoint::main(cmd_opt)?;

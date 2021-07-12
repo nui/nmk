@@ -47,8 +47,6 @@ pub struct CmdOpt {
     pub render: bool,
     #[structopt(subcommand)]
     pub cmd: Option<SubCommand>,
-    #[structopt(value_name = "command", help = "Tmux command")]
-    pub args: Vec<String>,
     #[structopt(skip = Instant::now())]
     pub start_time: Instant,
 }
@@ -63,6 +61,8 @@ pub enum SubCommand {
     Info,
     #[structopt(about = "Setup from local files")]
     Setup(Setup),
+    #[structopt(about = "Passthrough tmux commands")]
+    Tmux(Tmux),
 }
 
 #[derive(Debug, StructOpt)]
@@ -75,12 +75,18 @@ pub struct Completion {
 
 #[derive(Debug, StructOpt)]
 pub struct Setup {
-    #[structopt(short)]
+    #[structopt(short, long)]
     pub dotfiles: Option<PathBuf>,
-    #[structopt(short)]
+    #[structopt(short, long)]
     pub entrypoint: Option<PathBuf>,
-    #[structopt(short)]
+    #[structopt(short, long)]
     pub vendor: Option<PathBuf>,
+}
+
+#[derive(Debug, StructOpt)]
+pub struct Tmux {
+    #[structopt(value_name = "command", help = "Tmux command")]
+    pub args: Vec<String>,
 }
 
 pub fn parse() -> CmdOpt {
