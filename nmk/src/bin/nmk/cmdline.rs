@@ -59,7 +59,7 @@ pub enum SubCommand {
     Completions(Completion),
     #[structopt(about = "Display entrypoint information")]
     Info,
-    #[structopt(about = "Setup from local files")]
+    #[structopt(about = "Setup components from files")]
     Setup(Setup),
     #[structopt(about = "Run tmux command on running tmux server")]
     Tmux(Tmux),
@@ -75,11 +75,11 @@ pub struct Completion {
 
 #[derive(Debug, StructOpt)]
 pub struct Setup {
-    #[structopt(short, long)]
+    #[structopt(short, long, value_name = "file", help = "Setup dotfiles")]
     pub dotfiles: Option<PathBuf>,
-    #[structopt(short, long)]
+    #[structopt(short, long, value_name = "file", help = "Setup entrypoint")]
     pub entrypoint: Option<PathBuf>,
-    #[structopt(short, long)]
+    #[structopt(short, long, value_name = "file", help = "Setup vendor files")]
     pub vendor: Option<PathBuf>,
 }
 
