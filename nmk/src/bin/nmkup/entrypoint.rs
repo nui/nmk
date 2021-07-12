@@ -29,9 +29,9 @@ pub fn install_or_update(
     nmk_home: &NmkHome,
 ) -> nmk::Result<EntrypointInstallation> {
     let target = Target::detect().expect("unsupported arch");
-    let tar_file = target.remote_binary_name("nmk");
+    let entrypoint_file = target.remote_binary_name("nmk");
     let meta_path = nmk_home.path().entrypoint_meta();
-    let meta_url = get_object_meta_url(&tar_file);
+    let meta_url = get_object_meta_url(&entrypoint_file);
 
     debug!("{}: Getting metadata.", TAG);
     let meta = get_object_meta(&meta_url)?;
@@ -65,4 +65,24 @@ fn is_entrypoint_up2date(meta_path: &Path, gcs_meta: &ObjectMeta, entrypoint_pat
     debug!("{}: gcs generation {}.", TAG, gcs_meta.generation);
     debug!("{}: cached generation {}.", TAG, cached_meta.generation);
     cached_meta.generation == gcs_meta.generation
+}
+
+pub fn download_and_install_to_file(dst: &Path) -> nmk::Result<()> {
+    let target = Target::detect().expect("unsupported arch");
+    let entrypoint_file = target.remote_binary_name("nmk");
+    let meta_url = get_object_meta_url(&entrypoint_file);
+    debug!("{}: Getting metadata.", TAG);
+    let meta = get_object_meta(&meta_url)?;
+    debug!("{}: Received metadata.", TAG);
+    let data_url = &meta.media_link;
+    debug!("{}: Getting data from {}.", TAG, data_url);
+    let data = download_file(data_url)?;
+    debug!("{}: Received data.", TAG);
+    install_entrypoint(data, dst)?;
+    debug!(
+        "{}: Saved entrypoint to {} with executable bit set.",
+        TAG,
+        dst.display()
+    );
+    Ok(())
 }

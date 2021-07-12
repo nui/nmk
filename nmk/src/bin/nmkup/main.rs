@@ -21,6 +21,10 @@ fn main() -> nmk::Result<()> {
     logging::setup(cmd_opt.verbosity);
     // Installation should be done in order
     let nmk_home = NmkHome::find_for_install().expect("failed to locate NMK_HOME");
+    if let Some(ref destination) = cmd_opt.download_and_install_entrypoint_to {
+        entrypoint::download_and_install_to_file(destination)?;
+        return Ok(());
+    }
     assert!(!nmk_home.is_git(), "nmk is managed by git. Abort.");
     if cmd_opt.backup {
         let home = home_dir().expect("failed to find home directory");

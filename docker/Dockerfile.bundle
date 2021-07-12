@@ -6,11 +6,13 @@ WORKDIR /root
 
 RUN curl -sSL -o /root/build.py https://raw.githubusercontent.com/nui/nmk/master/etc/build.py
 
-ARG ENTRYPOINT=https://storage.googleapis.com/nmk.nuimk.com/nmk-x86_64-unknown-linux-musl.xz
+ARG UPDATER=https://storage.googleapis.com/nmk.nuimk.com/nmkup-x86_64-unknown-linux-musl.xz
 
 RUN tmp_file=$(mktemp) \
-        && curl -sSL $ENTRYPOINT | xz -d > $tmp_file \
-        && install $tmp_file /usr/local/bin/nmk
+        && curl -sSL $UPDATER | xz -d > $tmp_file \
+        && install $tmp_file /usr/local/bin/nmkup \
+        && rm $tmp_file \
+        && nmkup -v --download-and-install-entrypoint-to /usr/local/bin/nmk
 
 ENTRYPOINT ["python3", "/root/build.py", "--no-upload", "--branch", "master"]
 
