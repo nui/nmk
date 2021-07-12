@@ -4,14 +4,14 @@ use std::process::{exit, Command};
 use log::{debug, error};
 
 use nmk::consts::bin::TMUX;
-use nmk::consts::env::NMK_INITIALIZED;
+use nmk::consts::env::NMK_START_MODE;
 
 use crate::cmdline::{CmdOpt, Tmux};
 use crate::terminal;
 
 pub fn command(cmd_opt: &CmdOpt, options: Tmux) -> ! {
-    if std::env::var(NMK_INITIALIZED).is_err() {
-        error!("This program must be run under nmk environment");
+    if std::env::var(NMK_START_MODE).is_err() {
+        error!("nmk tmux subcommand need shell started from entrypoint");
         exit(1);
     }
     let mut cmd = Command::new(TMUX);

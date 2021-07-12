@@ -8,7 +8,7 @@ use std::{env, io};
 use log::debug;
 
 use nmk::consts::env::{
-    EDITOR, LD_LIBRARY_PATH, NMK_HOME, NMK_INITIALIZED, NMK_TMUX_VERSION, PATH, VIMINIT, ZDOTDIR,
+    EDITOR, LD_LIBRARY_PATH, NMK_HOME, NMK_START_MODE, NMK_TMUX_VERSION, PATH, VIMINIT, ZDOTDIR,
 };
 use nmk::home::NmkHome;
 use nmk::human_time::{seconds_since_build, HumanTime};
@@ -123,7 +123,12 @@ pub fn main(cmd_opt: CmdOpt) -> io::Result<()> {
     setup_shell_search_path(&nmk_home);
     setup_environment_variable(&nmk_home);
     crate::zsh::init(&nmk_home);
-    set_env(NMK_INITIALIZED, "1");
+    {
+        let start_mode = if cmd_opt.login { "login" } else { "tmux" };
+        // Environment variables necessary to use vendored tmux and zsh have been set.
+        // We export this variable to be used in `nmk tmux` subcommand
+        set_env(NMK_START_MODE, start_mode);
+    }
     if cmd_opt.login {
         crate::zsh::exec_login_shell(&cmd_opt);
     } else {
