@@ -29,7 +29,8 @@ pub fn render(w: &mut dyn Write, c: &Context, v: Version) -> io::Result<()> {
     writeln!(w, "bind-key -r C-o rotate-window")?;
     writeln!(w, "bind-key C-c command-prompt")?;
     writeln!(w, "bind-key C-l {}", LAST_SESSION)?;
-    w.write_all("bind-key C-t display-message '#{pane_tty}'\n".as_bytes())?;
+    writeln!(w, "{}", r##"bind-key C-t display-message '#{pane_tty}'"##)?;
+    writeln!(w, "bind-key -r Space next-layout")?;
     section(w, c, "Function Key Binding", |w, _| {
         for n in 1..=12 {
             writeln!(w, "bind-key -n S-F{n} send-keys F{n}", n = n)?;

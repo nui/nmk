@@ -80,8 +80,9 @@ fn setup_shell_search_path(nmk_home: &NmkHome) {
 fn setup_shell_library_path(nmk_home: &NmkHome) {
     let vendor_lib = nmk_home.path().vendor_lib();
     if vendor_lib.exists() {
-        match env::var_os(LD_LIBRARY_PATH).map(PathVec::from) {
-            Some(mut path) => {
+        match env::var_os(LD_LIBRARY_PATH).filter(|v| !v.is_empty()) {
+            Some(value) => {
+                let mut path = PathVec::from(value);
                 path.prepend(vendor_lib);
                 set_env(LD_LIBRARY_PATH, path.join());
             }
