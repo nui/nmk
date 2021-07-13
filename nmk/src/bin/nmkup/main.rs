@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::process::exit;
 
 use dirs::home_dir;
 use log::error;
@@ -25,17 +26,20 @@ fn main() -> nmk::Result<()> {
         entrypoint::download_and_install_to_file(destination)?;
         return Ok(());
     }
-    assert!(!nmk_home.is_git(), "nmk is managed by git. Abort.");
+    if nmk_home.is_git() {
+        error!("nmk is managed by git.");
+        exit(1);
+    }
+    if platform::is_mac() {
+        error!("Update on mac os is not supported");
+        exit(1);
+    }
     if cmd_opt.backup {
         let home = home_dir().expect("failed to find home directory");
         let output_tar = home.join("nmk-backup.tar");
         backup_files(&nmk_home, &output_tar)?;
     }
     dotfiles::install_or_update(&cmd_opt, &nmk_home)?;
-    if platform::is_mac() {
-        error!("Not supporting os");
-        return Ok(());
-    }
     let entrypoint_installation = entrypoint::install_or_update(&cmd_opt, &nmk_home)?;
     updater::self_setup(&nmk_home, is_init(), entrypoint_installation)?;
     if cmd_opt.vendor {
