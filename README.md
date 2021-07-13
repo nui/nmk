@@ -1,6 +1,26 @@
 # nmk
 This repository contains my dot files and some scripts that I use everyday.
 
+It is named `nmk` because it is three letters that easy to type on dvorak keyboard layout. When setup correctly, type `nmk` will start tmux session using configuration from this repository. When use on server it will not conflict with user tmux configuration.
+
+You will not find tmux configuration file in this repository because it is rendered on the fly from `nmk` command. I do it this way because I need to support multiple tmux versions.
+
+
+## How does it works?
+`nmk` setup environment variable then run `exec()` system call to start tmux or zsh.
+- `nmk -l` start a new zsh login shell
+- `nmk` start a new tmux session or attach if it is already running.
+
+
+## Demo
+You can try it in docker container using following commands
+
+```sh
+docker run -it --rm --workdir /root alpine
+apk add --update curl tmux zsh
+curl --proto '=https' --tlsv1.2 -sSf https://nmkup.nuimk.com | sh
+.nmk/bin/nmk
+```
 
 ## System dependencies
 ```sh
@@ -8,12 +28,11 @@ This repository contains my dot files and some scripts that I use everyday.
 sudo apt install tmux zsh neovim
 ```
 
-
 ## Installation
 ```sh
 # Run the following in your terminal
 curl --proto '=https' --tlsv1.2 -sSf https://nmkup.nuimk.com | sh
-
+.nmk/bin/nmk
 
 # Or full Github checkout with following steps
 
@@ -29,6 +48,14 @@ sudo install ~/.nmk/nmk/target/release/nmk /usr/local/bin/nmk
 # Step 3. Run nmk and update vim plugins
 nmk
 ~/.nmk/vim/update-plugins
+```
+
+## Directory structure
+```
+- bin    # Utility shell scripts
+- nmk    # Rust source code of `nmk` and `nmkup` command
+- vim    # Vim configuration
+- zsh    # Zsh configuration
 ```
 
 ## Tmux navigation
