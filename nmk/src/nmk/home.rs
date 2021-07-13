@@ -17,7 +17,7 @@ impl fmt::Debug for NmkHome {
     }
 }
 
-fn find_path_from_homedir() -> Option<PathBuf> {
+fn default_nmk_home() -> Option<PathBuf> {
     home_dir().map(|p| p.join(".nmk"))
 }
 
@@ -33,28 +33,31 @@ impl NmkHome {
     }
 
     /// Attempt to locate correct NMK_HOME candidate
-    /// - if NMK_HOME is set, canonicalize it
+    /// - if NMK_HOME is set, find it absolute path
     /// - otherwise default to $HOME/.nmk
     ///
-    /// Canonicalization is necessary because we use this value in vendored zsh which required
-    /// absolute path.
     /// If path doesn't exist, return None
     pub fn locate() -> Option<Self> {
         find_path_from_env()
-            .and_then(|p| p.canonicalize().ok())
-            .or_else(find_path_from_homedir)
+            .and_then(|p| {
+                // We need absolute path because because we use this value in vendored zsh
+                if p.is_absolute() {
+                    Some(p)
+                } else {
+                    p.canonicalize().ok()
+                }
+            })
+            .or_else(default_nmk_home)
             .filter(|p| p.exists())
             .map(Self)
     }
 
     pub fn find_for_install() -> Option<Self> {
-        find_path_from_env()
-            .or_else(find_path_from_homedir)
-            .map(Self)
+        find_path_from_env().or_else(default_nmk_home).map(Self)
     }
 
     pub fn path(&self) -> &NmkPath {
-        NmkPath::new(self.0.as_path())
+        NmkPath::new(&self.0)
     }
 }
 
